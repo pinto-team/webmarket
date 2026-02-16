@@ -1,0 +1,118 @@
+"use client";
+
+import Container from "@mui/material/Container";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Pagination from "@mui/material/Pagination";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import Chip from "@mui/material/Chip";
+import Link from "next/link";
+import UniversalSearchBar from "@/components/search/UniversalSearchBar";
+import KeywordHighlight from "@/components/search/KeywordHighlight";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
+import { usePostSearch } from "@/hooks/usePostSearch";
+import { getProductThumbnail } from "@/utils/imageHelper";
+
+interface Props {
+  searchQuery: string;
+}
+
+export default function BlogSearchPageView({ searchQuery }: Props) {
+  const { results, loading, error, updateFilters } = usePostSearch({
+    keyword: searchQuery,
+    count: 12,
+    paged: 1
+  });
+
+  const handlePageChange = (page: number) => {
+    updateFilters({ paged: page });
+  };
+
+  if (loading && results.items.length === 0) {
+    return (
+      <Container sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  return (
+    <Container sx={{ py: 4 }}>
+      <Breadcrumbs items={[
+        { label: "بلاگ", href: "/blog" },
+        { label: `جستجو: ${searchQuery}` }
+      ]} />
+
+      <Box mb={4}>
+        <UniversalSearchBar />
+      </Box>
+
+      <Typography variant="h5" mb={3}>
+        نتایج جستجو در مقالات برای: <KeywordHighlight text={searchQuery} keyword={searchQuery} />
+        <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 2 }}>
+          ({results.pagination.total} مقاله)
+        </Typography>
+      </Typography>
+
+      {error && (
+        <Typography color="error" textAlign="center" mb={3}>
+          خطا در جستجو: {error}
+        </Typography>
+      )}
+
+      {results.items.length === 0 ? (
+        <Typography variant="body1" textAlign="center" py={8}>
+          مقاله‌ای یافت نشد
+        </Typography>
+      ) : (
+        <>
+          <Grid container spacing={3}>
+            {results.items.map((post) => (
+              <Grid key={post.code} size={{ xs: 12, md: 6 }}>
+                <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={getProductThumbnail(post.upload)}
+                    alt={post.title}
+                  />
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" component={Link} href={`/blog/${post.code}`} sx={{ textDecoration: "none", color: "inherit" }}>
+                      <KeywordHighlight text={post.title} keyword={searchQuery} />
+                    </Typography>
+                    
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+                      <KeywordHighlight text={post.excerpt || post.description} keyword={searchQuery} />
+                    </Typography>
+
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(post.created_at).toLocaleDateString('fa-IR')}
+                      </Typography>
+                      <Chip label="مقاله" size="small" variant="outlined" />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+
+          {results.pagination.last_page > 1 && (
+            <Box display="flex" justifyContent="center" mt={4}>
+              <Pagination
+                count={results.pagination.last_page}
+                page={results.pagination.current_page}
+                onChange={(_, value) => handlePageChange(value)}
+                color="primary"
+              />
+            </Box>
+          )}
+        </>
+      )}
+    </Container>
+  );
+}

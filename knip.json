@@ -1,0 +1,18 @@
+{
+  "entry": [
+    "src/app/**/page.tsx",
+    "src/app/**/layout.tsx",
+    "src/app/**/loading.tsx",
+    "src/app/**/error.tsx",
+    "src/app/**/not-found.tsx",
+    "src/app/**/template.tsx",
+    "src/app/**/route.ts",
+    "src/middleware.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "src/**/*.test.*",
+    "src/**/__tests__/**",
+    "src/**/__mocks__/**"
+  ]
+}

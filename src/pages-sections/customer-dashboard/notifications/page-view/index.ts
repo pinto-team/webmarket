@@ -1,0 +1,1 @@
+export { NotificationsPageView } from "./notifications";

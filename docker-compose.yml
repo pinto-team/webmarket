@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  taavoni-front:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taavoni-front
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_BASE_URL=https://api.taavoni.online
+      - NEXT_PUBLIC_USE_MOCK=false
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    restart: unless-stopped
+    networks:
+      - taavoni-network
+
+networks:
+  taavoni-network:
+    driver: bridge
