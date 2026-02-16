@@ -1,72 +1,99 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+
 // MUI
 import Tooltip from "@mui/material/Tooltip";
+
 // GLOBAL CUSTOM COMPONENTS
-import SearchInput from "components/SearchInput";
 import IconComponent from "components/IconComponent";
 import OverlayScrollbar from "components/overlay-scrollbar";
-import { MobileNavigationBar } from "components/mobile-navigation";
-import { HeaderCart, HeaderLogin, MobileHeader, HeaderSearch } from "components/header";
-import { MobileMenu } from "components/mobile-navbar/mobile-menu";
+
+// LOCAL
 import renderChild from "./render-child";
+
 // STYLES
 import { CategoryListItem, StyledRoot } from "./styles";
+
 // TYPES
 import LayoutModel from "models/Layout.model";
+import { CategoryMenuItem } from "models/Category.model";
+import { useShopData } from "@/contexts/ShopDataContext";
+import type { ProductCategory } from "@/types/shopData.types";
 
 // ==============================================================
 type Props = { data: LayoutModel };
 // ==============================================================
 
-export default function MobileCategoriesPageView({ data }: Props) {
-  const { header, mobileNavigation } = data;
+// تبدیل دیتای واقعی API به مدل قالب (CategoryMenuItem)
+function toCategoryMenuItem(cat: ProductCategory): CategoryMenuItem {
+    return {
+        title: cat.name,
+        href: `/category/${cat.slug}`,
+        icon: "Category",
+        children: (cat.children ?? []).map(toCategoryMenuItem)
+    };
+}
 
-  const router = useRouter();
-  const [selected, setSelected] = useState(header.categoryMenus[0]);
+export default function MobileCategoriesPageView({ }: Props) {
+    const router = useRouter();
+    const { shopData } = useShopData();
 
-  return (
-    <StyledRoot>
-      <div className="header">
-        <MobileHeader>
-          <MobileHeader.Left>
-            <MobileMenu navigation={header.navigation} />
-          </MobileHeader.Left>
+    // ✅ دسته‌بندی‌های واقعی از shopData
+    const categoryMenus: CategoryMenuItem[] = useMemo(() => {
+        const cats = (shopData?.product_categories ?? []) as ProductCategory[];
+        return cats.map(toCategoryMenuItem);
+    }, [shopData?.product_categories]);
 
-          <MobileHeader.Logo logoUrl={mobileNavigation.logo} />
+    // ✅ انتخاب اولیه: اولین موردی که children دارد (یا اولین آیتم)
+    const initialSelected = useMemo(() => {
+        if (!categoryMenus.length) return undefined;
+        return categoryMenus.find((x) => x.children?.length) ?? categoryMenus[0];
+    }, [categoryMenus]);
 
-          <MobileHeader.Right>
-            <HeaderSearch>
-              <SearchInput />
-            </HeaderSearch>
+    const [selected, setSelected] = useState<CategoryMenuItem | undefined>(initialSelected);
 
-            <HeaderLogin />
-            <HeaderCart />
-          </MobileHeader.Right>
-        </MobileHeader>
-      </div>
+    // وقتی دیتا بعداً رسید، selected را تنظیم کن
+    useEffect(() => {
+        if (!selected && initialSelected) setSelected(initialSelected);
+    }, [initialSelected, selected]);
 
-      <OverlayScrollbar className="category-list">
-        {header.categoryMenus.map((item, i) => (
-          <Tooltip key={i} title={item.title} placement="right" arrow>
-            <CategoryListItem
-              isActive={selected.title === item.title}
-              onClick={() => {
-                if (item.children) setSelected(item);
-                else router.push(item.href);
-              }}>
-              <IconComponent icon={item.icon!} className="icon" />
-              <p className="title">{item.title}</p>
-            </CategoryListItem>
-          </Tooltip>
-        ))}
-      </OverlayScrollbar>
+    return (
+        <StyledRoot>
+            {/* ✅ مهم: هدر و bottom nav اینجا نباید باشد چون در ShopLayout1 رندر می‌شوند */}
 
-      <div className="container">{renderChild(selected.children!)}</div>
+            <OverlayScrollbar className="category-list">
+                {categoryMenus.map((item, i) => (
+                    <Tooltip key={item.href ?? i} title={item.title} placement="right" arrow>
+                        <CategoryListItem
+                            isActive={selected?.href === item.href}
+                            onClick={() => {
+                                // اگر زیر دسته دارد، همانجا نمایش بده
+                                if (item.children?.length) {
+                                    setSelected(item);
+                                    return;
+                                }
+                                // اگر زیر دسته ندارد، برو صفحه دسته
+                                if (item.href) router.push(item.href);
+                            }}
+                        >
+                            <IconComponent icon={(item.icon ?? "Category") as any} className="icon" />
+                            <p className="title">{item.title}</p>
+                        </CategoryListItem>
+                    </Tooltip>
+                ))}
+            </OverlayScrollbar>
 
-      <MobileNavigationBar navigation={mobileNavigation.version1} />
-    </StyledRoot>
-  );
+            <div className="container">
+                {selected?.children?.length ? (
+                    renderChild(selected.children)
+                ) : categoryMenus.length ? (
+                    <div style={{ padding: 16 }}>زیر‌دسته‌ای برای نمایش وجود ندارد</div>
+                ) : (
+                    <div style={{ padding: 16 }}>دسته‌بندی‌ها در حال بارگذاری است…</div>
+                )}
+            </div>
+        </StyledRoot>
+    );
 }
