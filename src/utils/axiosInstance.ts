@@ -1,7 +1,5 @@
 import axios from "axios";
 import https from "https";
-import MockAdapter from "axios-mock-adapter";
-import { MockEndPoints } from "__server__";
 import { tokenStorage } from "./token";
 
 const axiosInstance = axios.create({
@@ -75,7 +73,7 @@ axiosInstance.interceptors.response.use(
       if (apiError.data?.errors) {
         // Format validation errors from Laravel format
         const errors: string[] = [];
-        Object.entries(apiError.data.errors).forEach(([field, messages]) => {
+        Object.entries(apiError.data.errors).forEach(([, messages]) => {
           if (Array.isArray(messages)) {
             errors.push(...messages);
           }
@@ -95,10 +93,5 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-// Mock adapter for development
-if (process.env.NEXT_PUBLIC_USE_MOCK === "true") {
-  const Mock = new MockAdapter(axiosInstance, { delayResponse: 300, onNoMatch: "passthrough" });
-  MockEndPoints(Mock);
-}
 
 export default axiosInstance;
