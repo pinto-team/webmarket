@@ -323,7 +323,6 @@ Successfully transformed a template-based e-commerce project into a fully functi
 - `src/services/ticket.service.ts`
 - `src/services/notification.service.ts`
 - `src/services/transaction.service.ts`
-- `src/services/websocket.service.ts`
 - `src/types/upload.types.ts`
 - `src/types/ticket.types.ts`
 - `src/types/notification.types.ts`
@@ -437,7 +436,6 @@ All API calls abstracted in dedicated services:
 - `ticket.service.ts` - Support
 - `notification.service.ts` - Notifications
 - `transaction.service.ts` - Wallet
-- `websocket.service.ts` - Real-time
 
 ### Context API State Management
 - **AuthContext** - User authentication

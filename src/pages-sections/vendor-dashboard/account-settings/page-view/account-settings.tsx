@@ -10,7 +10,11 @@ import Button from "@mui/material/Button";
 // GLOBAL CUSTOM COMPONENTS
 import { Autocomplete, FormProvider, TextField } from "components/form-hook";
 // DATA
-import countryList from "data/countryList";
+const countryList = [
+    { label: "Iran", value: "IR" },
+    { label: "United States", value: "US" },
+    { label: "United Arab Emirates", value: "AE" }
+];
 // LOCAL CUSTOM COMPONENT
 import PageWrapper from "../../page-wrapper";
 import CoverPicSection from "../cover-pic-section";

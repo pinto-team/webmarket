@@ -73,13 +73,14 @@ const StyledStatusAvatar = styled(Avatar)(({ theme }) => ({
 }));
 
 const DeliveryDateBox = styled("div")(({ theme }) => ({
-  textAlign: "center",
-  padding: "0.5rem 1rem",
-  transition: "all 0.3s ease",
-  color: theme.palette.primary.main,
-  borderRadius: theme.shape.borderRadius * 3,
-  backgroundColor: theme.palette.primary.light
+    textAlign: "center",
+    padding: "0.5rem 1rem",
+    transition: "all 0.3s ease",
+    color: theme.palette.primary.main,
+    borderRadius: Number(theme.shape.borderRadius) * 3,
+    backgroundColor: theme.palette.primary.light
 }));
+
 
 interface Props {
   order: OrderResource;

@@ -31,7 +31,7 @@ import LayoutModel from "models/Layout.model";
 
 // ==============================================================
 interface Props extends PropsWithChildren {
-    data: LayoutModel;
+    data?: LayoutModel;
 }
 // ==============================================================
 
@@ -44,7 +44,8 @@ const STATIC_MOBILE_NAV = [
 
 export default function ShopLayout1({ children, data }: Props) {
     const { shopData } = useShopData();
-    const { footer, header, topbar, mobileNavigation } = data;
+    const { footer, header, topbar, mobileNavigation } = (data as LayoutModel) ?? (shopData as unknown as LayoutModel);
+
 
     const headerLogo = shopData?.header_logo?.main_url || header.logo;
     const mobileLogo = shopData?.mobile_logo?.main_url || mobileNavigation.logo;

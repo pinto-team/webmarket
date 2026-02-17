@@ -1,10 +1,9 @@
 import MobileCategoriesPageView from "./page-view";
-// API FUNCTIONS
-import api from "utils/__api__/layout";
+import { getShopDataServer } from "@/utils/shopDataCache";
 
 export const dynamic = "force-dynamic";
 
-export default async function MobileCategories() {
-  const data = await api.getLayoutData();
-  return <MobileCategoriesPageView data={data} />;
+export default async function Page() {
+    const data = await getShopDataServer();
+    return <MobileCategoriesPageView data={data as any} />;
 }

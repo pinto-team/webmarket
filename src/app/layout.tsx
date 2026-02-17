@@ -1,14 +1,8 @@
-import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { getShopDataServer } from "@/utils/shopDataCache";
+import type { ReactNode } from "react";
 
-const vazirmatn = localFont({
-  src: "../../node_modules/vazirmatn/fonts/variable/Vazirmatn[wght].ttf",
-  variable: "--font-vazirmatn",
-  display: "swap"
-});
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { Vazirmatn } from "next/font/google";
 
 import "overlayscrollbars/overlayscrollbars.css";
 
@@ -36,64 +30,65 @@ import ProgressBar from "components/progress";
 import LayoutWrapper from "components/layouts/LayoutWrapper";
 import ShopDataLoader from "components/layouts/ShopDataLoader";
 
-// API FUNCTIONS
-import api from "utils/__api__/layout";
+// ✅ Use Next font instead of node_modules path
+const vazirmatn = Vazirmatn({
+    subsets: ["arabic"],
+    weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+    display: "swap",
+    variable: "--font-vazirmatn",
+});
 
-// IMPORT i18n SUPPORT FILE
-import "i18n";
-
-// ==============================================================
 interface RootLayoutProps {
-  children: ReactNode;
-  modal: ReactNode;
+    children: ReactNode;
+    modal: ReactNode;
 }
-// ==============================================================
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+
+// ✅ Metadata from your real server cache util
+import { getShopDataServer } from "@/utils/shopDataCache";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const shopData = await getShopDataServer();
-  const title = shopData?.title || "فروشگاه آنلاین";
-  
-  return {
-    title: {
-      default: title,
-      template: `%s - ${title}`
-    },
-    description: shopData?.footer_description || "فروشگاه آنلاین با بهترین محصولات",
-    keywords: ["فروشگاه آنلاین", "خرید اینترنتی", title]
-  };
+    const shopData = await getShopDataServer();
+    const title = shopData?.title || "فروشگاه آنلاین";
+
+    return {
+        title: {
+            default: title,
+            template: `%s - ${title}`,
+        },
+        description: shopData?.footer_description || "فروشگاه آنلاین با بهترین محصولات",
+        keywords: ["فروشگاه آنلاین", "خرید اینترنتی", title],
+    };
 }
 
 export default async function RootLayout({ children, modal }: RootLayoutProps) {
-  const data = await api.getLayoutData();
-  
-  return (
-    <html lang="fa" dir="rtl" suppressHydrationWarning>
-      <body id="body" className={vazirmatn.className} suppressHydrationWarning>
+    return (
+        <html lang="fa" dir="rtl" suppressHydrationWarning className={vazirmatn.variable}>
+        <body id="body" className={vazirmatn.className} suppressHydrationWarning>
         <QueryProvider>
-          <AuthProvider>
-            <CartProvider>
-              <SettingsProvider>
-                <ShopDataProvider>
-                  <ThemeProvider>
-                    <RTL>
-                      <ShopDataLoader>
-                        {modal}
-                        <LayoutWrapper data={data}>{children}</LayoutWrapper>
-                      </ShopDataLoader>
-                    </RTL>
+            <AuthProvider>
+                <CartProvider>
+                    <SettingsProvider>
+                        <ShopDataProvider>
+                            <ThemeProvider>
+                                <RTL>
+                                    <ShopDataLoader>
+                                        {modal}
+                                        <LayoutWrapper>{children}</LayoutWrapper>
+                                    </ShopDataLoader>
+                                </RTL>
 
-                    <ProgressBar />
-                  </ThemeProvider>
-                </ShopDataProvider>
-              </SettingsProvider>
-            </CartProvider>
-          </AuthProvider>
+                                <ProgressBar />
+                            </ThemeProvider>
+                        </ShopDataProvider>
+                    </SettingsProvider>
+                </CartProvider>
+            </AuthProvider>
         </QueryProvider>
 
         <GoogleAnalytics gaId="G-XKPD36JXY0" />
-      </body>
-    </html>
-  );
+        </body>
+        </html>
+    );
 }

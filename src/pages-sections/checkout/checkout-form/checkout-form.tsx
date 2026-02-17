@@ -12,7 +12,12 @@ import Typography from "@mui/material/Typography";
 // GLOBAL CUSTOM COMPONENTS
 import { FormProvider, TextField, Autocomplete, Checkbox } from "components/form-hook";
 // DUMMY CUSTOM DATA
-import countryList from "data/countryList";
+const countryList = [
+    { label: "Iran", value: "IR" },
+    { label: "United States", value: "US" },
+    { label: "United Arab Emirates", value: "AE" }
+];
+
 // STYLED COMPONENT
 import { ButtonWrapper, CardRoot, FormWrapper } from "./styles";
 

@@ -1,26 +1,29 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getShopDataServer } from "@/utils/shopDataCache";
-import { generatePageMetadata } from "@/utils/metadata";
-import api from "utils/__api__/shop";
 import { ShopsPageView } from "pages-sections/shops/page-view";
+import { shopDataService } from "@/services/shopData.service";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const shopData = await getShopDataServer();
-  return generatePageMetadata("فروشندگان", shopData);
+    return { title: "فروشگاه‌ها" };
 }
 
-export default async function Shops() {
-  const { shops, meta } = await api.getShopList();
-  if (!shops) return notFound();
+export default async function Page() {
+    const shops = await shopDataService.getShops();
 
-  return (
-    <ShopsPageView
-      shops={shops}
-      lastIndex={meta.lastIndex}
-      totalPages={meta.totalPages}
-      firstIndex={meta.firstIndex}
-      totalShops={meta.totalShops}
-    />
-  );
+    // چون ShopsPageView props بیشتری می‌خواد، فعلاً ساده‌ترین:
+    const totalShops = shops.length;
+    const totalPages = 1;
+    const firstIndex = totalShops ? 1 : 0;
+    const lastIndex = totalShops;
+
+    return (
+        <ShopsPageView
+            shops={shops as any}
+            totalShops={totalShops}
+            totalPages={totalPages}
+            firstIndex={firstIndex}
+            lastIndex={lastIndex}
+        />
+    );
 }
