@@ -2,43 +2,63 @@ import Link from "next/link";
 import Image from "next/image";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-// LOCAL CUSTOM COMPONENTS
-import { FooterApps } from "./footer-apps";
-import { FooterSocialLinks } from "./footer-social-links";
-// STYLED COMPONENTS
+
 import { StyledFooter, StyledLink } from "./styles";
-// CUSTOM DATA
-import { footerSocialLinks, footerCustomerCareLinks, footerDescription } from "data/layout-data";
+import { FooterApps } from "@/components/footer/footer-apps";
+import { FooterSocialLinks } from "@/components/footer/footer-social-links";
 
-export function Footer2() {
-  return (
-    <StyledFooter>
-      <Grid container spacing={6}>
-        <Grid size={{ xs: 12, sm: 6 }}>
-            <span className="logo">LOGO</span>
-          <Link href="/">
-            <Image alt="logo" width={50} height={50} src="/assets/images/logo.svg" />
-          </Link>
+type FooterLink = { title: string; url: string };
 
-          <Typography variant="body1" sx={{ mt: 3, mb: 2.5, maxWidth: 370 }}>
-            {footerDescription}
-          </Typography>
+type SocialLinksMap = {
+    google?: string;
+    twitter?: string;
+    youtube?: string;
+    facebook?: string;
+    instagram?: string;
+};
 
-          <FooterApps appleStoreUrl="#" playStoreUrl="#" />
-        </Grid>
+type Footer2Props = {
+    description: string;
+    customerCareLinks: FooterLink[];
+    socialLinks: SocialLinksMap;
+    appleStoreUrl?: string;
+    playStoreUrl?: string;
+};
 
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <div className="links">
-            {footerCustomerCareLinks.map(({ title, url }) => (
-              <StyledLink href={url} key={title}>
-                {title}
-              </StyledLink>
-            ))}
-          </div>
+export function Footer2({
+                            description,
+                            customerCareLinks,
+                            socialLinks,
+                            appleStoreUrl = "#",
+                            playStoreUrl = "#",
+                        }: Footer2Props) {
+    return (
+        <StyledFooter>
+            <Grid container spacing={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                    <Link href="/">
+                        <Image alt="logo" width={50} height={50} src="/assets/images/logo.svg" />
+                    </Link>
 
-          <FooterSocialLinks links={footerSocialLinks} />
-        </Grid>
-      </Grid>
-    </StyledFooter>
-  );
+                    <Typography variant="body1" sx={{ mt: 3, mb: 2.5, maxWidth: 370 }}>
+                        {description}
+                    </Typography>
+
+                    <FooterApps appleStoreUrl={appleStoreUrl} playStoreUrl={playStoreUrl} />
+                </Grid>
+
+                <Grid size={{ xs: 12, sm: 6 }}>
+                    <div className="links">
+                        {customerCareLinks.map(({ title, url }) => (
+                            <StyledLink href={url} key={title}>
+                                {title}
+                            </StyledLink>
+                        ))}
+                    </div>
+
+                    <FooterSocialLinks links={socialLinks} />
+                </Grid>
+            </Grid>
+        </StyledFooter>
+    );
 }
