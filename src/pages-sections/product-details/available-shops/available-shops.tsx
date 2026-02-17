@@ -7,12 +7,12 @@ import { StyledCard } from "./styles";
 import { SkuResource } from "@/types/product.types";
 import { groupSkusByShop } from "@/utils/product";
 import { currency } from "lib";
-import { t } from "@/utils/translate";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { toPersianNumber } from "@/utils/numberFormatter";
 import AddToCartDialog from "@/components/AddToCartDialog";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
+import {t} from "i18next";
 
 interface Props {
   skus: SkuResource[];

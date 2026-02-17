@@ -1,6 +1,6 @@
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import { t } from "@/utils/translate";
+import {t} from "i18next";
 
 interface Props {
   description?: string;

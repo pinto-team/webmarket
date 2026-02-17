@@ -5,7 +5,7 @@ import { Fragment, ReactNode, SyntheticEvent, useState } from "react";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import { styled } from "@mui/material/styles";
-import { t } from "@/utils/translate";
+import {t} from "i18next";
 
 // STYLED COMPONENT
 const StyledTabs = styled(Tabs)(({ theme }) => ({

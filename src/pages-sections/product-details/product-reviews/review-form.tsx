@@ -14,7 +14,7 @@ import { FormProvider, TextField } from "components/form-hook";
 import { RatingGroup } from "./styles";
 // HOOKS
 import { useComments } from "@/hooks/useComments";
-import { t } from "@/utils/translate";
+import {t} from "i18next";
 
 const validationSchema = yup.object().shape({
   rating: yup.number().required(t("Rating is required!")),

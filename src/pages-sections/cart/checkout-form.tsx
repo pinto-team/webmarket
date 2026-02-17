@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import { useCart } from "@/contexts/CartContext";
 import { FlexBetween } from "components/flex-box";
 import { currency } from "lib";
-import { t } from "@/utils/translate";
+import {t} from "i18next";
 
 export default function CheckoutForm() {
   const router = useRouter();

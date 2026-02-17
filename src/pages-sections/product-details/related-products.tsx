@@ -2,7 +2,7 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 // GLOBAL CUSTOM COMPONENTS
 import ProductCard1 from "components/product-cards/product-card-1";
-import { t } from "@/utils/translate";
+import {t} from "i18next";
 
 // ==============================================================
 type Props = { products: any[] };

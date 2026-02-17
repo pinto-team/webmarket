@@ -8,7 +8,7 @@ import ReviewForm from "./review-form";
 import { CommentResource } from "@/types/product.types";
 // STYLED COMPONENTS
 import { ReviewRoot } from "./styles";
-import { t } from "@/utils/translate";
+import {t} from "i18next";
 import { formatPersianDate } from "@/utils/persian";
 
 interface Props {

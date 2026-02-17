@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { SkuResource } from "@/types/product.types";
 import { useAddToCart } from "@/hooks/useAddToCart";
-import { t } from "@/utils/translate";
+import {t} from "i18next";
 import AddToCartDialog from "@/components/AddToCartDialog";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";

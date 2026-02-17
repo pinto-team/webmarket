@@ -20,7 +20,7 @@ import { ProductResource, SkuResource } from "@/types/product.types";
 import { VariantGroup } from "@/utils/product";
 // UTILS
 import { calculateAverageRating, getStockStatus, getMinPrice, groupSkusByShop } from "@/utils/product";
-import { t } from "@/utils/translate";
+import {t} from "i18next";
 import { toPersianNumber } from "@/utils/numberFormatter";
 
 // ================================================================
