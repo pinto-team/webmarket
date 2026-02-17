@@ -8,11 +8,11 @@ import { SkuResource } from "@/types/product.types";
 import { groupSkusByShop } from "@/utils/product";
 import { currency } from "lib";
 import { useAddToCart } from "@/hooks/useAddToCart";
-import { toPersianNumber } from "@/utils/numberFormatter";
 import AddToCartDialog from "@/components/AddToCartDialog";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
 import {t} from "i18next";
+import {toPersianNumber} from "@/utils/persian";
 
 interface Props {
   skus: SkuResource[];

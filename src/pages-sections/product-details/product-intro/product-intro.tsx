@@ -21,7 +21,7 @@ import { VariantGroup } from "@/utils/product";
 // UTILS
 import { calculateAverageRating, getStockStatus, getMinPrice, groupSkusByShop } from "@/utils/product";
 import {t} from "i18next";
-import { toPersianNumber } from "@/utils/numberFormatter";
+import {toPersianNumber} from "@/utils/persian";
 
 // ================================================================
 type Props = { 

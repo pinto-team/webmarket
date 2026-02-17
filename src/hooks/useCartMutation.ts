@@ -1,55 +1,69 @@
 import { useState } from "react";
 import { useCart } from "./useCart";
+import { t } from "@/i18n/t";
 
 export const useCartMutation = () => {
-  const { addToCart, updateQuantity, removeItem } = useCart();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const { addToCart, updateQuantity, removeItem } = useCart();
 
-  const addItem = async (skuId: number, quantity: number = 1) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await addToCart(skuId, quantity);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "خطا در افزودن به سبد خرید");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  const updateItem = async (id: number, quantity: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await updateQuantity(id, quantity);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "خطا در بروزرسانی سبد خرید");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+    const addItem = async (skuId: number, quantity: number = 1) => {
+        setLoading(true);
+        setError(null);
 
-  const deleteItem = async (id: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await removeItem(id);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "خطا در حذف از سبد خرید");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+        try {
+            await addToCart(skuId, quantity);
+        } catch (err: any) {
+            setError(
+                err?.response?.data?.message ||
+                t("cart.errors.addFailed")
+            );
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return {
-    addItem,
-    updateItem,
-    deleteItem,
-    loading,
-    error
-  };
+    const updateItem = async (id: number, quantity: number) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            await updateQuantity(id, quantity);
+        } catch (err: any) {
+            setError(
+                err?.response?.data?.message ||
+                t("cart.errors.updateFailed")
+            );
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteItem = async (id: number) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            await removeItem(id);
+        } catch (err: any) {
+            setError(
+                err?.response?.data?.message ||
+                t("cart.errors.deleteFailed")
+            );
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return {
+        addItem,
+        updateItem,
+        deleteItem,
+        loading,
+        error,
+    };
 };

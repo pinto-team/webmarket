@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import GadgetTwoPageView from "pages-sections/gadget-2/page-view";
+import { getShopDataServer } from "@/utils/shopDataCache";
+import { generatePageMetadata } from "@/utils/metadata";
+import { tServer } from "@/i18n/serverT";
 
-export const metadata: Metadata = {
-  title: "فروشگاه آنلاین تاوونی",
-  description: "خرید آنلاین محصولات با بهترین قیمت و کیفیت",
-  authors: [{ name: "Taavoni", url: "https://taavoni.online" }],
-  keywords: ["فروشگاه آنلاین", "خرید اینترنتی", "تاوونی"]
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const shopData = await getShopDataServer();
 
-export default function HomePage() {
-  return <GadgetTwoPageView />;
+    // no hardcoded strings ✅
+    const pageName = tServer<string>("meta.pageName.shop", "فروشگاه");
+
+    return generatePageMetadata(pageName, shopData);
+}
+
+export default function GadgetShopTwo() {
+    return <GadgetTwoPageView />;
 }

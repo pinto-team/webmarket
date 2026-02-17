@@ -1,57 +1,60 @@
-import { formatDistanceStrict } from "date-fns/formatDistanceStrict";
+import { formatPersianNumber } from "@/utils/persian";
 
-/**
- * GET THE DIFFERENCE DATE FORMAT
- * @param  DATE | NUMBER | STRING
- * @returns FORMATTED DATE STRING
- */
+export type TFn = (key: string, options?: any) => string;
 
-export function getDateDifference(date: string | number | Date) {
-  const distance = formatDistanceStrict(new Date(), new Date(date));
-  return distance + " ago";
+export function getDateDifference(date: string | number | Date): string {
+    const rtf = new Intl.RelativeTimeFormat("fa", { numeric: "auto" });
+
+    const now = Date.now();
+    const then = new Date(date).getTime();
+
+    if (!Number.isFinite(then)) return "";
+
+    const diffSec = Math.round((then - now) / 1000);
+    const absSec = Math.abs(diffSec);
+
+    if (absSec < 60) return rtf.format(diffSec, "second");
+
+    const diffMin = Math.round(diffSec / 60);
+    if (Math.abs(diffMin) < 60) return rtf.format(diffMin, "minute");
+
+    const diffHour = Math.round(diffMin / 60);
+    if (Math.abs(diffHour) < 24) return rtf.format(diffHour, "hour");
+
+    const diffDay = Math.round(diffHour / 24);
+    if (Math.abs(diffDay) < 30) return rtf.format(diffDay, "day");
+
+    const diffMonth = Math.round(diffDay / 30);
+    if (Math.abs(diffMonth) < 12) return rtf.format(diffMonth, "month");
+
+    const diffYear = Math.round(diffMonth / 12);
+    return rtf.format(diffYear, "year");
 }
 
-/**
- * RENDER THE PRODUCT PAGINATION INFO
- * @param page - CURRENT PAGE NUMBER
- * @param perPageProduct - PER PAGE PRODUCT LIST
- * @param totalProduct - TOTAL PRODUCT NUMBER
- * @returns
- */
+export function renderProductCount(
+    t: TFn,
+    page: number,
+    perPageProduct: number,
+    totalProduct: number
+): string {
+    const startNumber = (page - 1) * perPageProduct + 1;
+    const endNumber = Math.min(page * perPageProduct, totalProduct);
 
-export function renderProductCount(page: number, perPageProduct: number, totalProduct: number) {
-  let startNumber = (page - 1) * perPageProduct;
-  let endNumber = page * perPageProduct;
+    const start = formatPersianNumber(startNumber);
+    const end = formatPersianNumber(endNumber);
+    const total = formatPersianNumber(totalProduct);
 
-  if (endNumber > totalProduct) {
-    endNumber = totalProduct;
-  }
-
-  return `Showing ${startNumber + 1}-${endNumber} of ${totalProduct} products`;
+    return `${t("pagination.showing")} ${start}-${end} ${t("pagination.of")} ${total} ${t("common.productsLabel")}`;
 }
 
-/**
- * CALCULATE PRICE WITH PRODUCT DISCOUNT THEN RETURN NEW PRODUCT PRICES
- * @param  price - PRODUCT PRICE
- * @param  discount - DISCOUNT PERCENT
- * @returns - RETURN NEW PRICE
- */
-
-export function calculateDiscount(price: number, discount: number) {
-  const afterDiscount = Number((price - price * (discount / 100)).toFixed(2));
-  return currency(afterDiscount);
+export function calculateDiscount(price: number, discount: number): number {
+    return Number((price - price * (discount / 100)).toFixed(2));
 }
 
-/**
- * CHANGE THE CURRENCY FORMAT
- * @param  price - PRODUCT PRICE
- * @param  fraction - HOW MANY FRACTION WANT TO SHOW
- * @returns - RETURN PRICE WITH CURRENCY
- */
+export function currency(price: number, fraction: number = 0, unitLabel?: string): string {
+    const formatted = new Intl.NumberFormat("fa-IR", {
+        maximumFractionDigits: fraction,
+    }).format(price);
 
-export function currency(price: number, fraction: number = 0) {
-  const formatted = Intl.NumberFormat("fa-IR", {
-    maximumFractionDigits: fraction
-  }).format(price);
-  return `${formatted} تومان`;
+    return unitLabel ? `${formatted} ${unitLabel}` : formatted;
 }

@@ -1,76 +1,108 @@
-import { Box, Card, Typography, Divider, Button, CircularProgress } from '@mui/material';
+"use client";
+
+import { Box, Card, Typography, Divider, Button, CircularProgress } from "@mui/material";
+import { t } from "@/i18n/t";
+import { currency } from "@/lib";
+import { toPersianNumber } from "@/utils/persian";
 
 interface OrderSummaryProps {
-  orderCode: string;
-  subtotal: number;
-  shipping: number;
-  discount: number;
-  total: number;
-  onProceed?: () => void;
-  loading?: boolean;
-  disabled?: boolean;
+    orderCode: string;
+    subtotal: number;
+    shipping: number;
+    discount: number;
+    total: number;
+    onProceed?: () => void;
+    loading?: boolean;
+    disabled?: boolean;
 }
 
-export const OrderSummary = ({ orderCode, subtotal, shipping, discount, total, onProceed, loading, disabled }: OrderSummaryProps) => {
-  const formatPrice = (price: number | null | undefined) => (price || 0).toLocaleString('fa-IR');
+const safeNumber = (v: number | null | undefined) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
 
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        p: 3,
-        border: "1px solid",
-        borderColor: "divider",
-        backgroundColor: "grey.50"
-      }}>
-      <Typography variant="h6" gutterBottom>
-        خلاصه سفارش
-      </Typography>
-      <Typography variant="body2" color="text.secondary" gutterBottom>
-        کد سفارش: {orderCode}
-      </Typography>
+export const OrderSummary = ({
+                                 orderCode,
+                                 subtotal,
+                                 shipping,
+                                 discount,
+                                 total,
+                                 onProceed,
+                                 loading = false,
+                                 disabled = false
+                             }: OrderSummaryProps) => {
+    const code = orderCode?.trim() || "-";
 
-      <Divider sx={{ my: 2 }} />
+    const subtotalSafe = safeNumber(subtotal);
+    const shippingSafe = safeNumber(shipping);
+    const discountSafe = safeNumber(discount);
+    const totalSafe = safeNumber(total);
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2">مبلغ کالاها</Typography>
-          <Typography variant="body2">{formatPrice(subtotal)} تومان</Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2">هزینه ارسال</Typography>
-          <Typography variant="body2">{formatPrice(shipping)} تومان</Typography>
-        </Box>
-
-        {discount > 0 && (
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', color: 'success.main' }}>
-            <Typography variant="body2">تخفیف</Typography>
-            <Typography variant="body2">-{formatPrice(discount)} تومان</Typography>
-          </Box>
-        )}
-
-        <Divider />
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="h6">مبلغ قابل پرداخت</Typography>
-          <Typography variant="h6" color="primary">
-            {formatPrice(total)} تومان
-          </Typography>
-        </Box>
-      </Box>
-
-      {onProceed && (
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={onProceed}
-          disabled={disabled || loading}
-          sx={{ mt: 3 }}
+    return (
+        <Card
+            elevation={0}
+            sx={{
+                p: 3,
+                border: "1px solid",
+                borderColor: "divider",
+                backgroundColor: "grey.50"
+            }}
         >
-          {loading ? <CircularProgress size={24} /> : 'پرداخت'}
-        </Button>
-      )}
-    </Card>
-  );
+            <Typography variant="h6" gutterBottom>
+                {t("Order Summary")}
+            </Typography>
+
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+                {t("Order Code")}: {toPersianNumber(code)}
+            </Typography>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                    <Typography variant="body2">{t("Subtotal")}</Typography>
+                    <Typography variant="body2">{currency(subtotalSafe)}</Typography>
+                </Box>
+
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                    <Typography variant="body2">{t("Shipping")}</Typography>
+                    <Typography variant="body2">{shippingSafe === 0 ? t("Free") : currency(shippingSafe)}</Typography>
+                </Box>
+
+                {discountSafe > 0 && (
+                    <Box sx={{ display: "flex", justifyContent: "space-between", color: "success.main" }}>
+                        <Typography variant="body2">{t("Discount")}</Typography>
+                        <Typography variant="body2">-{currency(discountSafe)}</Typography>
+                    </Box>
+                )}
+
+                <Divider />
+
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                    <Typography variant="h6">{t("Total")}</Typography>
+                    <Typography variant="h6" color="primary">
+                        {currency(totalSafe)}
+                    </Typography>
+                </Box>
+            </Box>
+
+            {!!onProceed && (
+                <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={onProceed}
+                    disabled={disabled || loading}
+                    sx={{ mt: 3, height: 40 }}
+                >
+                    {loading ? (
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            <CircularProgress size={20} />
+                            <Typography variant="body2" sx={{ color: "inherit" }}>
+                                {t("loading")}
+                            </Typography>
+                        </Box>
+                    ) : (
+                        t("Proceed to Checkout")
+                    )}
+                </Button>
+            )}
+        </Card>
+    );
 };

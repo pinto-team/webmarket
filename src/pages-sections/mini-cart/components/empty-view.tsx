@@ -1,16 +1,14 @@
 "use client";
-
+import { t } from "@/i18n/t";
 import Link from "next/link";
 import Image from "next/image";
-import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 // GLOBAL CUSTOM COMPONENTS
 import FlexBox from "components/flex-box/flex-box";
 
 export default function EmptyCartView() {
-  const { t } = useTranslation();
-  
+
   return (
     <FlexBox
       alignItems="center"

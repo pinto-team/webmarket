@@ -1,22 +1,24 @@
 "use client";
 
-import { Fragment, PropsWithChildren, useEffect, useRef } from "react";
+import { Fragment, PropsWithChildren, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
+
 import { useShopData } from "@/contexts/ShopDataContext";
 import SnackbarProvider from "components/SnackbarProvider";
 import ErrorHandler from "components/ErrorHandler";
 
-// GLOBAL CUSTOM COMPONENTS
 import {
     Footer1,
     FooterApps,
     FooterContact,
     FooterLinksWidget,
-    FooterSocialLinks
+    FooterSocialLinks,
 } from "components/footer";
+
 import { NavigationList } from "components/navbar";
 import CategoryMenu from "components/navigation/CategoryMenu";
 import { MobileMenu } from "components/mobile-navbar";
@@ -26,33 +28,26 @@ import UniversalSearchBar from "components/search/UniversalSearchBar";
 import { Topbar, TopbarSocialLinks } from "components/topbar";
 import { Header, HeaderCart, HeaderLogin, MobileHeader, HeaderSearch } from "components/header";
 
-// CUSTOM DATA MODEL
 import LayoutModel from "models/Layout.model";
 
-// ==============================================================
+import { t } from "@/i18n/t";
+import { toPersianNumber } from "@/utils/persian";
+
 interface Props extends PropsWithChildren {
     data?: LayoutModel;
 }
-// ==============================================================
-
-const STATIC_MOBILE_NAV = [
-    { title: "خانه", href: "/", icon: "Home", badge: false },
-    { title: "محصولات", href: "/products", icon: "CategoryOutlined", badge: false },
-    { title: "سبد", href: "/cart", icon: "CartBag", badge: true },
-    { title: "پروفایل", href: "/profile", icon: "User", badge: false }
-];
 
 export default function ShopLayout1({ children, data }: Props) {
     const { shopData } = useShopData();
-    const { footer, header, topbar, mobileNavigation } = (data as LayoutModel) ?? (shopData as unknown as LayoutModel);
 
+    const { footer, header, topbar, mobileNavigation } =
+    (data as LayoutModel) ?? (shopData as unknown as LayoutModel);
 
     const headerLogo = shopData?.header_logo?.main_url || header.logo;
     const mobileLogo = shopData?.mobile_logo?.main_url || mobileNavigation.logo;
     const footerLogo = shopData?.footer_logo?.main_url || footer.logo;
     const topbarData = shopData?.topbar || topbar;
 
-    // Convert MenuItem[] to Menu[] format
     const navigation = shopData?.main_navigation
         ? shopData.main_navigation.map((item) => ({
             title: item.title,
@@ -64,13 +59,12 @@ export default function ShopLayout1({ children, data }: Props) {
                 url: child.url,
                 child: child.children?.map((subChild) => ({
                     title: subChild.title,
-                    url: subChild.url
-                }))
-            }))
+                    url: subChild.url,
+                })),
+            })),
         }))
         : header.navigation;
 
-    // Convert SocialLink[] to footer social links format
     const socialLinks = shopData?.social_links
         ? shopData.social_links.reduce((acc, link) => {
             acc[link.platform as keyof typeof acc] = link.url;
@@ -78,13 +72,22 @@ export default function ShopLayout1({ children, data }: Props) {
         }, {} as { google?: string; twitter?: string; youtube?: string; facebook?: string; instagram?: string })
         : footer.socials;
 
-    // Convert SocialLink[] to topbar social links format
     const topbarSocialLinks = shopData?.social_links
         ? shopData.social_links.reduce((acc, link) => {
             acc[link.platform as keyof typeof acc] = link.url;
             return acc;
         }, {} as { twitter?: string; facebook?: string; instagram?: string; telegram?: string; whatsapp?: string; linkedin?: string })
         : topbar.socials;
+
+    const mobileNav = useMemo(
+        () => [
+            { title: t("nav.home"), href: "/", icon: "Home", badge: false },
+            { title: t("nav.products"), href: "/products", icon: "CategoryOutlined", badge: false },
+            { title: t("nav.cart"), href: "/cart", icon: "CartBag", badge: true },
+            { title: t("nav.profile", t("dashboard.profile")), href: "/profile", icon: "User", badge: false },
+        ],
+        []
+    );
 
     const MOBILE_VERSION_HEADER = (
         <MobileHeader>
@@ -105,12 +108,6 @@ export default function ShopLayout1({ children, data }: Props) {
         </MobileHeader>
     );
 
-    /**
-     * ✅ Compute actual "top chrome" height (Topbar + Header + SecondaryHeader)
-     * and expose it as a CSS variable used by fixed pages like /mobile-categories.
-     *
-     * This prevents hardcoded magic numbers like 64/112/etc.
-     */
     const chromeRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -134,15 +131,16 @@ export default function ShopLayout1({ children, data }: Props) {
         };
     }, []);
 
+    const yearFa = toPersianNumber(new Date().getFullYear());
+    const fallbackCopyright = `© ${t("footer.copyright")} ${yearFa} ${t("footer.brandName")}, ${t("footer.allRightsReserved")}`;
+
     return (
         <SnackbarProvider>
             <ErrorHandler />
             <Fragment>
-                {/* ✅ everything that sits on top (and affects fixed pages) goes inside this wrapper */}
                 <div ref={chromeRef}>
                     <Topbar>
                         <Topbar.Left label={topbarData.label} title={topbarData.title} />
-
                         <Topbar.Right>
                             <TopbarSocialLinks links={topbarSocialLinks} />
                         </Topbar.Right>
@@ -176,21 +174,24 @@ export default function ShopLayout1({ children, data }: Props) {
 
                 {children}
 
-                <MobileNavigationBar navigation={STATIC_MOBILE_NAV} />
+                <MobileNavigationBar navigation={mobileNav} />
 
                 <Footer1>
                     <Footer1.Brand>
                         <Link href="/">
                             <Image
                                 src={footerLogo}
-                                alt="logo"
+                                alt={t("common.logoAlt")}
                                 width={105}
                                 height={50}
                                 style={{ objectFit: "contain", maxHeight: "50px", width: "auto" }}
                             />
                         </Link>
 
-                        <Typography variant="body1" sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}>
+                        <Typography
+                            variant="body1"
+                            sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}
+                        >
                             {shopData?.footer_description || footer.description}
                         </Typography>
 
@@ -202,23 +203,30 @@ export default function ShopLayout1({ children, data }: Props) {
 
                     {shopData?.footer_sections?.[0] && (
                         <Footer1.Widget1>
-                            <FooterLinksWidget title={shopData.footer_sections[0].title} links={shopData.footer_sections[0].links} />
+                            <FooterLinksWidget
+                                title={shopData.footer_sections[0].title}
+                                links={shopData.footer_sections[0].links}
+                            />
                         </Footer1.Widget1>
                     )}
 
                     {shopData?.footer_sections?.[1] && (
                         <Footer1.Widget2>
-                            <FooterLinksWidget title={shopData.footer_sections[1].title} links={shopData.footer_sections[1].links} />
+                            <FooterLinksWidget
+                                title={shopData.footer_sections[1].title}
+                                links={shopData.footer_sections[1].links}
+                            />
                         </Footer1.Widget2>
                     )}
 
                     {!shopData?.footer_sections && (
                         <>
                             <Footer1.Widget1>
-                                <FooterLinksWidget title="درباره ما" links={footer.about} />
+                                <FooterLinksWidget title={t("footer.aboutTitle")} links={footer.about} />
                             </Footer1.Widget1>
+
                             <Footer1.Widget2>
-                                <FooterLinksWidget title="خدمات مشتریان" links={footer.customers} />
+                                <FooterLinksWidget title={t("footer.customerServicesTitle")} links={footer.customers} />
                             </Footer1.Widget2>
                         </>
                     )}
@@ -237,7 +245,7 @@ export default function ShopLayout1({ children, data }: Props) {
                         <Divider sx={{ borderColor: "grey.800" }} />
 
                         <Typography variant="body2" sx={{ py: 3, textAlign: "center", span: { fontWeight: 500 } }}>
-                            {shopData?.footer_copyright || `© کلیه حقوق محفوظ است ${new Date().getFullYear()} تاوونی`}
+                            {shopData?.footer_copyright || fallbackCopyright}
                         </Typography>
                     </Footer1.Copyright>
                 </Footer1>
