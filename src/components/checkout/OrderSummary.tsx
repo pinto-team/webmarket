@@ -1,6 +1,14 @@
 "use client";
 
-import { Box, Card, Typography, Divider, Button, CircularProgress } from "@mui/material";
+import {
+    Box,
+    Button,
+    Card,
+    CircularProgress,
+    Divider,
+    Typography,
+} from "@mui/material";
+
 import { t } from "@/i18n/t";
 import { currency } from "@/lib";
 import { toPersianNumber } from "@/utils/persian";
@@ -16,7 +24,8 @@ interface OrderSummaryProps {
     disabled?: boolean;
 }
 
-const safeNumber = (v: number | null | undefined) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+const safeNumber = (v: number | null | undefined) =>
+    typeof v === "number" && Number.isFinite(v) ? v : 0;
 
 export const OrderSummary = ({
                                  orderCode,
@@ -26,7 +35,7 @@ export const OrderSummary = ({
                                  total,
                                  onProceed,
                                  loading = false,
-                                 disabled = false
+                                 disabled = false,
                              }: OrderSummaryProps) => {
     const code = orderCode?.trim() || "-";
 
@@ -42,33 +51,43 @@ export const OrderSummary = ({
                 p: 3,
                 border: "1px solid",
                 borderColor: "divider",
-                backgroundColor: "grey.50"
+                backgroundColor: "grey.50",
             }}
         >
             <Typography variant="h6" gutterBottom>
-                {t("Order Summary")}
+                {t("checkout.orderSummary")}
             </Typography>
 
             <Typography variant="body2" color="text.secondary" gutterBottom>
-                {t("Order Code")}: {toPersianNumber(code)}
+                {t("checkout.orderNumber")}: {toPersianNumber(code)}
             </Typography>
 
             <Divider sx={{ my: 2 }} />
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <Typography variant="body2">{t("Subtotal")}</Typography>
+                    <Typography variant="body2">{t("checkout.subtotal")}</Typography>
                     <Typography variant="body2">{currency(subtotalSafe)}</Typography>
                 </Box>
 
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <Typography variant="body2">{t("Shipping")}</Typography>
-                    <Typography variant="body2">{shippingSafe === 0 ? t("Free") : currency(shippingSafe)}</Typography>
+                    <Typography variant="body2">{t("checkout.shipping")}</Typography>
+                    <Typography variant="body2">
+                        {shippingSafe === 0
+                            ? t("checkout.freeShipping")
+                            : currency(shippingSafe)}
+                    </Typography>
                 </Box>
 
                 {discountSafe > 0 && (
-                    <Box sx={{ display: "flex", justifyContent: "space-between", color: "success.main" }}>
-                        <Typography variant="body2">{t("Discount")}</Typography>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            color: "success.main",
+                        }}
+                    >
+                        <Typography variant="body2">{t("checkout.discount")}</Typography>
                         <Typography variant="body2">-{currency(discountSafe)}</Typography>
                     </Box>
                 )}
@@ -76,7 +95,7 @@ export const OrderSummary = ({
                 <Divider />
 
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <Typography variant="h6">{t("Total")}</Typography>
+                    <Typography variant="h6">{t("checkout.total")}</Typography>
                     <Typography variant="h6" color="primary">
                         {currency(totalSafe)}
                     </Typography>
@@ -95,11 +114,11 @@ export const OrderSummary = ({
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                             <CircularProgress size={20} />
                             <Typography variant="body2" sx={{ color: "inherit" }}>
-                                {t("loading")}
+                                {t("common.loading")}
                             </Typography>
                         </Box>
                     ) : (
-                        t("Proceed to Checkout")
+                        t("checkout.proceedToCheckout")
                     )}
                 </Button>
             )}

@@ -55,8 +55,10 @@
     "@types/react-dom": "19.1.5",
     "@types/stylis": "^4.2.7",
     "bazaar-tools": "^2.0.0",
+    "i18next-cli": "^1.42.9",
     "knip": "^5.83.1",
     "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   }
 }
