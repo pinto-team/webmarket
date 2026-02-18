@@ -73,7 +73,7 @@ export default function DashboardHeader({ title, href, Icon, buttonText, buttonI
         )}
 
         {href && (
-          <IconButton color="primary" href={href} LinkComponent={Link}>
+            <IconButton color="primary" component={Link} href={href}>
             <ChevronLeft />
           </IconButton>
         )}

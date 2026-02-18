@@ -69,7 +69,7 @@ export default function MiniCart() {
                         variant="contained"
                         size="medium"
                         LinkComponent={Link}
-                        href="/checkout"
+                        component={Link}
                         sx={{ mb: 1 }}
                     >
                         {t("cart.proceedToCheckout")}
@@ -80,7 +80,7 @@ export default function MiniCart() {
                         color="primary"
                         variant="outlined"
                         size="medium"
-                        LinkComponent={Link}
+                        component={Link}
                         href="/cart"
                     >
                         {t("cart.viewCart")}

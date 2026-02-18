@@ -10,15 +10,11 @@ import { formatPersianNumber } from "@/utils/persian";
 
 export function HeaderCart() {
     const { cart } = useCart();
-
     const itemCount = cart?.length ?? 0;
 
     return (
-        <Badge
-            badgeContent={itemCount > 0 ? formatPersianNumber(itemCount) : null}
-            color="primary"
-        >
-            <IconButton LinkComponent={Link} href="/mini-cart">
+        <Badge badgeContent={itemCount > 0 ? formatPersianNumber(itemCount) : null} color="primary">
+            <IconButton component={Link} href="/mini-cart">
                 <SvgIcon fontSize="small">
                     <svg viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor" strokeWidth="1.5">

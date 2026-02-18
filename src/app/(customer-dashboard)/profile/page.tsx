@@ -6,16 +6,15 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Profile() {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
+    const { user, isAuthenticated, isLoading } = useAuth();
+    const router = useRouter();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
-    }
-  }, [isLoading, isAuthenticated, router]);
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            router.replace("/");
+        }
+    }, [isLoading, isAuthenticated]);
+    if (isLoading || !user) return null;
 
-  if (isLoading || !user) return null;
-
-  return <ProfilePageView user={user} />;
+    return <ProfilePageView user={user} />;
 }

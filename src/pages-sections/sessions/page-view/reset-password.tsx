@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Alert from "@mui/material/Alert";
@@ -34,6 +34,13 @@ export default function ResetPasswordPageView() {
     const [step, setStep] = useState<Step>("request");
     const [success, setSuccess] = useState<string | null>(null);
     const [username, setUsername] = useState("");
+
+    const [redirectTimer, setRedirectTimer] = useState<number | null>(null);
+    useEffect(() => {
+        return () => {
+            if (redirectTimer) window.clearTimeout(redirectTimer);
+        };
+    }, [redirectTimer]);
 
     const requestSchema = yup.object({
         mobile: yup
@@ -73,9 +80,7 @@ export default function ResetPasswordPageView() {
     });
 
     const inputProps = {
-        endAdornment: (
-            <EyeToggleButton show={visiblePassword} click={togglePasswordVisible} />
-        ),
+        endAdornment: <EyeToggleButton show={visiblePassword} click={togglePasswordVisible} />,
     };
 
     const handleRequestOTP = requestMethods.handleSubmit(async (values) => {
@@ -95,11 +100,7 @@ export default function ResetPasswordPageView() {
             setSuccess(t("messages.otpSent"));
             setStep("reset");
         } catch (err: any) {
-            const errorMsg =
-                err?.validationMessage ||
-                err?.response?.data?.message ||
-                t("errors.general");
-
+            const errorMsg = err?.validationMessage || err?.response?.data?.message || t("errors.general");
             setError(errorMsg);
         }
     });
@@ -116,24 +117,19 @@ export default function ResetPasswordPageView() {
             } as any);
 
             setSuccess(t("messages.passwordResetSuccess"));
-            setTimeout(() => router.push("/login"), 2000);
-        } catch (err: any) {
-            const errorMsg =
-                err?.validationMessage ||
-                err?.response?.data?.message ||
-                t("errors.general");
 
+            // ✅ بعد از ریست موفق: برو صفحه لاگین (بدون history اضافی)
+            const tId = window.setTimeout(() => router.replace("/login"), 2000);
+            setRedirectTimer(tId);
+        } catch (err: any) {
+            const errorMsg = err?.validationMessage || err?.response?.data?.message || t("errors.general");
             setError(errorMsg);
         }
     });
 
     return (
         <Fragment>
-            <Typography
-                variant="h3"
-                fontWeight={700}
-                sx={{ mb: 4, textAlign: "center" }}
-            >
+            <Typography variant="h3" fontWeight={700} sx={{ mb: 4, textAlign: "center" }}>
                 {t("auth.resetPassword")}
             </Typography>
 
@@ -150,11 +146,7 @@ export default function ResetPasswordPageView() {
             )}
 
             {step === "request" ? (
-                <FormProvider
-                    key="request-form"
-                    methods={requestMethods}
-                    onSubmit={handleRequestOTP}
-                >
+                <FormProvider key="request-form" methods={requestMethods} onSubmit={handleRequestOTP}>
                     <Stack spacing={3}>
                         <TextField
                             fullWidth
@@ -162,12 +154,7 @@ export default function ResetPasswordPageView() {
                             label={t("auth.usernameOrEmail")}
                             placeholder={t("auth.usernameOrEmail")}
                             size="medium"
-                            onChange={(e) =>
-                                requestMethods.setValue(
-                                    "username",
-                                    toEnglishNumber(e.target.value) as any
-                                )
-                            }
+                            onChange={(e) => requestMethods.setValue("username", toEnglishNumber(e.target.value) as any)}
                         />
 
                         <TextField
@@ -178,10 +165,7 @@ export default function ResetPasswordPageView() {
                             size="medium"
                             onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9۰-۹]/g, "");
-                                requestMethods.setValue(
-                                    "mobile",
-                                    toEnglishNumber(value) as any
-                                );
+                                requestMethods.setValue("mobile", toEnglishNumber(value) as any);
                             }}
                             slotProps={{
                                 htmlInput: { inputMode: "numeric", maxLength: 11 },
@@ -201,11 +185,7 @@ export default function ResetPasswordPageView() {
                     </Stack>
                 </FormProvider>
             ) : (
-                <FormProvider
-                    key="reset-form"
-                    methods={resetMethods}
-                    onSubmit={handleResetPassword}
-                >
+                <FormProvider key="reset-form" methods={resetMethods} onSubmit={handleResetPassword}>
                     <Stack spacing={3}>
                         <Alert severity="info">
                             {t("messages.otpSentToMobile")} {toPersianNumber(mobile)}
@@ -219,10 +199,7 @@ export default function ResetPasswordPageView() {
                             size="medium"
                             onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9۰-۹]/g, "");
-                                resetMethods.setValue(
-                                    "confirmCode",
-                                    toEnglishNumber(value) as any
-                                );
+                                resetMethods.setValue("confirmCode", toEnglishNumber(value) as any);
                             }}
                             slotProps={{
                                 htmlInput: { inputMode: "numeric", maxLength: 5 },

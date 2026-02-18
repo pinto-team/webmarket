@@ -36,7 +36,7 @@ export function Navigation() {
 
     const handleLogout = async () => {
         await logout();
-        router.push("/");
+        router.replace("/"); // فقط خانه — نه login
     };
 
     return (
