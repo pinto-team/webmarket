@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Card, CardContent, CardMedia, Typography, Box } from "@mui/material";
-import { getProductImageUrl } from "@/utils/imageUtils";
+import { getProductImageUrl, PLACEHOLDER_PRODUCT_IMAGE } from "@/utils/imageUtils";
 import { currency } from "@/lib";
 
 interface ProductResource {
@@ -11,9 +11,11 @@ interface ProductResource {
     excerpt?: string;
     price: number;
     upload?: {
-        main_url: string;
+        proxy_url?: string;
+        main_url?: string;
         thumb_url?: string;
     };
+    proxy_url?: string;
 }
 
 interface ProductCardProps {
@@ -21,7 +23,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-    const imageUrl = getProductImageUrl(product);
+    const imageUrl = getProductImageUrl(product, "500x500");
     const excerpt = (product.excerpt || "").trim();
 
     return (
@@ -32,7 +34,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     display: "flex",
                     flexDirection: "column",
                     transition: "box-shadow 150ms ease",
-                    "&:hover": { boxShadow: 6 }
+                    "&:hover": { boxShadow: 6 },
                 }}
             >
                 <CardMedia
@@ -42,6 +44,11 @@ export default function ProductCard({ product }: ProductCardProps) {
                     alt={product.title}
                     loading="lazy"
                     sx={{ objectFit: "cover" }}
+                    onError={(e: any) => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        if (img.src.includes(PLACEHOLDER_PRODUCT_IMAGE)) return;
+                        img.src = PLACEHOLDER_PRODUCT_IMAGE;
+                    }}
                 />
 
                 <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 1 }}>
@@ -59,7 +66,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 textOverflow: "ellipsis",
                                 display: "-webkit-box",
                                 WebkitLineClamp: 2,
-                                WebkitBoxOrient: "vertical"
+                                WebkitBoxOrient: "vertical",
                             }}
                         >
                             {excerpt}

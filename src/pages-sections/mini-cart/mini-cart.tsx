@@ -68,8 +68,8 @@ export default function MiniCart() {
                         color="primary"
                         variant="contained"
                         size="medium"
-                        LinkComponent={Link}
                         component={Link}
+                        href="/checkout"
                         sx={{ mb: 1 }}
                     >
                         {t("cart.proceedToCheckout")}
@@ -87,6 +87,7 @@ export default function MiniCart() {
                     </Button>
                 </Box>
             )}
+
         </Box>
     );
 }

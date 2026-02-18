@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
 import Typography from "@mui/material/Typography";
 
@@ -21,6 +21,8 @@ interface Props {
 }
 
 export default function ProductReviews({ comments = [], productCode }: Props) {
+    const fallbackAvatar = "/assets/images/avatars/001-man.svg";
+
     return (
         <div>
             {/* REVIEW LIST */}
@@ -29,40 +31,54 @@ export default function ProductReviews({ comments = [], productCode }: Props) {
                     {t("productDetail.noReviewsYet")}
                 </Typography>
             ) : (
-                comments.map((comment, ind) => (
-                    <ReviewRoot key={ind}>
-                        <div className="user-info">
-                            <Avatar variant="rounded" className="user-avatar">
-                                {comment.ownerable.upload?.main_url && (
-                                    <Image
-                                        src={comment.ownerable.upload.main_url}
+                comments.map((comment, ind) => {
+                    const avatarUrl = comment.ownerable.upload?.main_url || fallbackAvatar;
+
+                    return (
+                        <ReviewRoot key={ind}>
+                            <div className="user-info">
+                                <Avatar variant="rounded" className="user-avatar" sx={{ bgcolor: "grey.100" }}>
+                                    <Box
+                                        component="img"
+                                        src={avatarUrl}
                                         alt={comment.ownerable.username}
-                                        fill
-                                        sizes="(48px 48px)"
+                                        loading="lazy"
+                                        sx={{
+                                            width: "100%",
+                                            height: "100%",
+                                            objectFit: "cover",
+                                            display: "block",
+                                        }}
+                                        onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                            const img = e.currentTarget;
+                                            if (img.src.includes(fallbackAvatar)) return;
+                                            img.src = fallbackAvatar;
+                                        }}
+
                                     />
-                                )}
-                            </Avatar>
+                                </Avatar>
 
-                            <div>
-                                <Typography variant="h5" sx={{ mb: 1 }}>
-                                    {comment.ownerable.username}
-                                </Typography>
-
-                                <div className="user-rating">
-                                    <Rating size="small" value={comment.rating} color="warn" readOnly />
-                                    <Typography variant="h6">{toPersianNumber(comment.rating)}</Typography>
-                                    <Typography component="span">
-                                        {formatPersianDate(comment.created_at)}
+                                <div>
+                                    <Typography variant="h5" sx={{ mb: 1 }}>
+                                        {comment.ownerable.username}
                                     </Typography>
+
+                                    <div className="user-rating">
+                                        <Rating size="small" value={comment.rating} color="warn" readOnly />
+                                        <Typography variant="h6">{toPersianNumber(comment.rating)}</Typography>
+                                        <Typography component="span">
+                                            {formatPersianDate(comment.created_at)}
+                                        </Typography>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <Typography variant="body1" sx={{ color: "grey.700" }}>
-                            {comment.description}
-                        </Typography>
-                    </ReviewRoot>
-                ))
+                            <Typography variant="body1" sx={{ color: "grey.700" }}>
+                                {comment.description}
+                            </Typography>
+                        </ReviewRoot>
+                    );
+                })
             )}
 
             {/* REVIEW FORM */}

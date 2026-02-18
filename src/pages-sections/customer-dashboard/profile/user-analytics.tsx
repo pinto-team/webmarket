@@ -1,6 +1,5 @@
-import Image from "next/image";
-
 import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import Skeleton from "@mui/material/Skeleton";
@@ -12,7 +11,7 @@ import { currency } from "lib";
 import { useOrderStats } from "@/hooks/useOrderStats";
 import type { UserResource } from "@/types/auth.types";
 import { t } from "@/i18n/t";
-import {formatPersianNumber, toPersianNumber} from "@/utils/persian";
+import { formatPersianNumber, toPersianNumber } from "@/utils/persian";
 
 type Props = { user: UserResource };
 
@@ -24,14 +23,13 @@ export default function UserAnalytics({ user }: Props) {
         `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
         user.username;
 
-    const avatarUrl =
-        user.upload?.main_url || "/assets/images/avatars/001-man.svg";
+    const fallbackAvatar = "/assets/images/avatars/001-man.svg";
+    const avatarUrl = user.upload?.main_url || fallbackAvatar;
 
     const balance = user.wallet?.balance || 0;
 
     const displayNameValue =
         displayName ? toPersianNumber(displayName) : t("common.noData");
-
 
     return (
         <Grid container spacing={3}>
@@ -48,8 +46,24 @@ export default function UserAnalytics({ user }: Props) {
                         borderColor: "grey.100",
                     }}
                 >
-                    <Avatar variant="rounded" sx={{ height: 65, width: 65 }}>
-                        <Image fill alt={displayName} src={avatarUrl} sizes="65px" />
+                    <Avatar variant="rounded" sx={{ height: 65, width: 65, bgcolor: "grey.100" }}>
+                        <Box
+                            component="img"
+                            src={avatarUrl}
+                            alt={displayName}
+                            loading="lazy"
+                            sx={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                display: "block",
+                            }}
+                            onError={(e) => {
+                                const img = e.currentTarget;
+                                if (img.src.includes(fallbackAvatar)) return;
+                                img.src = fallbackAvatar;
+                            }}
+                        />
                     </Avatar>
 
                     <FlexBetween flexWrap="wrap" flex={1}>
@@ -57,7 +71,6 @@ export default function UserAnalytics({ user }: Props) {
                             <Typography variant="h5">
                                 {t("profile.usernameLabel")}: {displayNameValue}
                             </Typography>
-
 
                             <FlexBox alignItems="center" gap={1}>
                                 <Typography variant="body1" color="text.secondary">
@@ -85,6 +98,7 @@ export default function UserAnalytics({ user }: Props) {
             </Grid>
 
             <Grid container spacing={3} size={{ md: 6, xs: 12 }}>
+                {/* بقیه فایل بدون تغییر */}
                 <Grid size={{ lg: 3, xs: 6 }}>
                     <Card
                         elevation={0}

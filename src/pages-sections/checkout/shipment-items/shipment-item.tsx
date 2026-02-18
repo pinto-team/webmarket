@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { useState } from "react";
 import { Box, Card, Typography } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import VerifiedUser from "@mui/icons-material/VerifiedUser";
@@ -10,7 +10,11 @@ import ImageIcon from "@mui/icons-material/Image";
 
 import { CartItemResource } from "@/types/product.types";
 import { cartService } from "@/services/cart.service";
-import { getProductImageUrl, isPlaceholderProductImage } from "@/utils/imageUtils";
+import {
+    getProductImageUrl,
+    isPlaceholderProductImage,
+    PLACEHOLDER_PRODUCT_IMAGE,
+} from "@/utils/imageUtils";
 import { formatPersianPrice, toPersianNumber, formatPersianDateLong } from "@/utils/persian";
 import { t } from "@/i18n/t";
 
@@ -37,12 +41,22 @@ export default function ShipmentItem({ item }: ShipmentItemProps) {
 
     const productCode =
         product?.code ||
-        sku.product?.code ||
+        sku?.product?.code ||
         cartService.getProductCodeForSku(sku.id) ||
-        sku.code;
+        sku?.code ||
+        "";
 
-    const imageUrl = getProductImageUrl(sku.product || sku);
-    const hasImage = !isPlaceholderProductImage(imageUrl);
+    const href = productCode ? `/products/${productCode}` : null;
+
+    // ✅ Always produce backend proxy URL (or placeholder)
+    const initialUrl = getProductImageUrl(sku?.product || sku, "300x300");
+
+    // ✅ Keep a stable src so onError can switch safely
+    const [imgSrc, setImgSrc] = useState(initialUrl);
+    const [imgFailed, setImgFailed] = useState(false);
+
+    const isPlaceholder = isPlaceholderProductImage(imgSrc);
+    const hasImage = !imgFailed && !isPlaceholder;
 
     const deliveryDate = calculateDeliveryDate(deliveryDays);
     const currency = t("products.currencyLabel");
@@ -72,16 +86,31 @@ export default function ShipmentItem({ item }: ShipmentItemProps) {
                     position: "relative",
                     bgcolor: "grey.100",
                     borderRadius: 2,
+                    overflow: "hidden",
                 }}
             >
                 {hasImage ? (
-                    <Image
-                        alt={sku.title}
-                        fill
-                        src={imageUrl}
-                        sizes="180px"
-                        style={{ objectFit: "contain" }}
-                        priority
+                    // ✅ REAL <img> (no next/image) => NO /_next/image?url=...
+                    <Box
+                        component="img"
+                        alt={sku?.title || "product"}
+                        src={imgSrc}
+                        loading="eager"
+                        sx={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            display: "block",
+                        }}
+                        onError={() => {
+                            // ✅ Anti-explosion fallback:
+                            // 1) mark failed
+                            // 2) try placeholder once (if not already)
+                            setImgFailed(true);
+                            if (!isPlaceholderProductImage(imgSrc)) {
+                                setImgSrc(PLACEHOLDER_PRODUCT_IMAGE);
+                            }
+                        }}
                     />
                 ) : (
                     <Box
@@ -109,19 +138,17 @@ export default function ShipmentItem({ item }: ShipmentItemProps) {
                 }}
             >
                 <div>
-                    <Link
-                        href={`/products/${productCode}`}
-                        style={{ textDecoration: "none", color: "inherit" }}
-                    >
-                        <Typography
-                            variant="h6"
-                            fontSize={{ xs: 16, sm: 18 }}
-                            fontWeight={500}
-                            gutterBottom
-                        >
-                            {sku.title}
+                    {href ? (
+                        <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
+                            <Typography variant="h6" fontSize={{ xs: 16, sm: 18 }} fontWeight={500} gutterBottom>
+                                {sku?.title}
+                            </Typography>
+                        </Link>
+                    ) : (
+                        <Typography variant="h6" fontSize={{ xs: 16, sm: 18 }} fontWeight={500} gutterBottom>
+                            {sku?.title}
                         </Typography>
-                    </Link>
+                    )}
 
                     <Box
                         sx={{

@@ -34,12 +34,19 @@ export interface CustomerResource {
 }
 
 export interface UploadResource {
-  id: number;
-  main_url: string;
-  thumb_url?: string;
-  title?: string;
-  size?: number;
+    id: number;
+
+    // backend image pipeline (required for rendering)
+    proxy_url?: string;
+
+    // legacy (keep optional only for backward compatibility)
+    main_url?: string;
+    thumb_url?: string;
+
+    title?: string;
+    size?: number;
 }
+
 
 export interface TicketCreateRequest {
   description: string;

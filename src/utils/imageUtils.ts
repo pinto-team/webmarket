@@ -1,37 +1,23 @@
-/**
- * Image Utils — LOCKED (backend-first)
- *
- * Goal:
- * - Single source of truth for image URLs in the frontend
- * - Always prefer backend `proxy_url` (image pipeline is backend-owned)
- * - No frontend resizing (no `?size=` injection on box urls)
- *
- * Priority:
- * - upload.proxy_url -> proxy_url -> upload.thumb_url -> thumb_url -> upload.main_url -> main_url -> thumbnail -> placeholder
- *
- * Notes:
- * - If proxy_url contains placeholders {WIDTH}/{HEIGHT}/{QUALITY}, we fill them.
- * - If proxy_url is already a final URL (no placeholders), we return it as-is.
- */
+// file: src/utils/imageUtils.ts
 
 const PLACEHOLDER_IMAGE = "/placeholder.png";
 
 function parseSize(size?: string): { width: number; height: number } {
     if (!size) return { width: 800, height: 800 };
-
     const [wRaw, hRaw] = size.split("x");
-    const width = Number(wRaw);
-    const height = Number(hRaw);
-
+    const w = Number(wRaw);
+    const h = Number(hRaw);
     return {
-        width: Number.isFinite(width) && width > 0 ? width : 800,
-        height: Number.isFinite(height) && height > 0 ? height : 800
+        width: Number.isFinite(w) && w > 0 ? w : 800,
+        height: Number.isFinite(h) && h > 0 ? h : 800,
     };
 }
 
 function fillProxyTemplate(url: string, size?: string, quality = 80): string {
-    // Only fill if template placeholders exist
-    if (!url.includes("{WIDTH}") && !url.includes("{HEIGHT}") && !url.includes("{QUALITY}")) return url;
+    if (!url) return "";
+    const hasTemplate =
+        url.includes("{WIDTH}") || url.includes("{HEIGHT}") || url.includes("{QUALITY}");
+    if (!hasTemplate) return url;
 
     const { width, height } = parseSize(size);
 
@@ -41,41 +27,36 @@ function fillProxyTemplate(url: string, size?: string, quality = 80): string {
         .replaceAll("{QUALITY}", String(quality));
 }
 
-export const getProductImageUrl = (product: any, size?: string): string => {
-    if (!product) return PLACEHOLDER_IMAGE;
-
-    // Pick the best available base URL
-    const proxyUrl =
-        product?.upload?.proxy_url ||
-        product?.proxy_url ||
-        "";
-
-    const fallbackUrl =
-        product?.upload?.thumb_url ||
-        product?.thumb_url ||
-        product?.upload?.main_url ||
-        product?.main_url ||
-        product?.thumbnail ||
-        "";
-
-    // Always prefer proxy_url (backend pipeline)
-    if (proxyUrl) {
-        return fillProxyTemplate(proxyUrl, size, 80) || PLACEHOLDER_IMAGE;
-    }
-
-    // Fallback (should be rare if backend always provides proxy_url)
-    if (fallbackUrl) return fallbackUrl;
-
-    return PLACEHOLDER_IMAGE;
-};
-
 /**
- * Convenience helpers (sizes are only used for filling proxy template).
+ * ✅ Canonical: get URL for ANY server-provided image entity.
+ * Rule: only proxy_url is allowed.
  */
-export const getProductImageUrls = {
-    thumbnail: (product: any) => getProductImageUrl(product, "150x150"),
-    small: (product: any) => getProductImageUrl(product, "300x300"),
-    medium: (product: any) => getProductImageUrl(product, "500x500"),
-    large: (product: any) => getProductImageUrl(product, "800x800"),
-    original: (product: any) => getProductImageUrl(product)
+export const getServerImageUrl = (entity: any, size?: string, quality = 80): string => {
+    // Accept direct string too
+    const raw =
+        typeof entity === "string"
+            ? entity
+            : entity?.upload?.proxy_url ||
+            entity?.proxy_url ||
+            entity?.image?.proxy_url ||
+            entity?.icon?.proxy_url ||
+            "";
+
+    if (!raw) return PLACEHOLDER_IMAGE;
+
+    const finalUrl = fillProxyTemplate(raw, size, quality);
+    return finalUrl || PLACEHOLDER_IMAGE;
 };
+
+// Backward-compatible wrapper (kept for existing code)
+export const getProductImageUrl = (product: any, size?: string): string => {
+    return getServerImageUrl(product, size, 80);
+};
+
+export const isPlaceholderProductImage = (url?: string | null): boolean => {
+    if (!url) return true;
+    return url.includes("/placeholder.png") || url.includes("placeholder");
+};
+
+export const PLACEHOLDER_PRODUCT_IMAGE = PLACEHOLDER_IMAGE;
+export const PLACEHOLDER_IMAGE_URL = PLACEHOLDER_IMAGE;

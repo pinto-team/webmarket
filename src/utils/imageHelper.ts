@@ -1,18 +1,12 @@
-import { ImageResource } from '@/types/product.types';
+// file:/D:/taavoni-online-backup/src/utils/imageHelper.ts
 
-/**
- * Get product thumbnail URL (optimized for all uses)
- * Always uses thumb_url as per backend specification
- */
+import { ImageResource } from "@/types/product.types";
+import { getProductImageUrl } from "@/utils/imageUtils";
+
 export const getProductThumbnail = (upload?: ImageResource | null): string => {
-  if (!upload) return '/placeholder.png';
-  return upload.thumb_url || '/placeholder.png';
+    return getProductImageUrl({ upload }, "150x150");
 };
 
-/**
- * Get product main image URL (for detail pages)
- */
 export const getProductMainImage = (upload?: ImageResource | null): string => {
-  if (!upload) return '/placeholder.png';
-  return upload.main_url || '/placeholder.png';
+    return getProductImageUrl({ upload }, "800x800");
 };

@@ -1,3 +1,5 @@
+"use client";
+
 import {
     Box,
     Card,
@@ -6,27 +8,25 @@ import {
     FormControlLabel,
     Typography,
     CircularProgress,
-    Alert
+    Alert,
 } from "@mui/material";
 import { GatewayResource } from "@/types/gateway.types";
-import Image from "next/image";
 import { t } from "@/i18n/t";
-
-interface GatewaySelectorProps {
-    gateways: GatewayResource[];
-    selectedGatewayId: number | null;
-    onSelect: (gatewayId: number, isShopGateway: boolean) => void;
-    loading?: boolean;
-    error?: string | null;
-}
 
 export const GatewaySelector = ({
                                     gateways,
                                     selectedGatewayId,
                                     onSelect,
                                     loading,
-                                    error
-                                }: GatewaySelectorProps) => {
+                                    error,
+                                }: {
+    gateways: GatewayResource[];
+    selectedGatewayId: number | null;
+    onSelect: (gatewayId: number, isShopGateway: boolean) => void;
+    loading?: boolean;
+    error?: string | null;
+}) => {
+    const fallbackLogo = "/placeholder.png";
 
     if (loading) {
         return (
@@ -41,18 +41,14 @@ export const GatewaySelector = ({
     }
 
     if (gateways.length === 0) {
-        return (
-            <Alert severity="warning">
-                {t("payment.noGatewayAvailable")}
-            </Alert>
-        );
+        return <Alert severity="warning">{t("payment.noGatewayAvailable")}</Alert>;
     }
 
     return (
         <RadioGroup
             value={selectedGatewayId}
             onChange={(e) => {
-                const gatewayId = Number(e.target.value);
+                const gatewayId = Number((e.target as HTMLInputElement).value);
                 const gateway = gateways.find((g) => g.id === gatewayId);
                 onSelect(gatewayId, gateway?.is_shop_specific || false);
             }}
@@ -66,13 +62,10 @@ export const GatewaySelector = ({
                         p: 2,
                         cursor: "pointer",
                         border: "1px solid",
-                        borderColor:
-                            selectedGatewayId === gateway.id ? "primary.main" : "divider",
+                        borderColor: selectedGatewayId === gateway.id ? "primary.main" : "divider",
                         backgroundColor: "grey.50",
                     }}
-                    onClick={() =>
-                        onSelect(gateway.id, gateway.is_shop_specific || false)
-                    }
+                    onClick={() => onSelect(gateway.id, gateway.is_shop_specific || false)}
                 >
                     <FormControlLabel
                         value={gateway.id}
@@ -87,11 +80,26 @@ export const GatewaySelector = ({
                                 }}
                             >
                                 {gateway.logo && gateway.logo.trim() !== "" && (
-                                    <Image
+                                    <Box
+                                        component="img"
                                         src={gateway.logo}
                                         alt={gateway.title}
                                         width={48}
                                         height={48}
+                                        loading="lazy"
+                                        sx={{
+                                            width: 48,
+                                            height: 48,
+                                            objectFit: "contain",
+                                            display: "block",
+                                            borderRadius: 1,
+                                            bgcolor: "transparent",
+                                        }}
+                                        onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                            const img = e.currentTarget;
+                                            if (img.src.includes(fallbackLogo)) return;
+                                            img.src = fallbackLogo;
+                                        }}
                                     />
                                 )}
 

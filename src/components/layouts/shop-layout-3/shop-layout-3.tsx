@@ -2,7 +2,6 @@
 
 import { Fragment, PropsWithChildren } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { t } from "@/i18n/t";
 
 import Divider from "@mui/material/Divider";
@@ -26,6 +25,7 @@ import { Header, HeaderCart, HeaderLogin, MobileHeader, HeaderSearch } from "com
 
 import LayoutModel from "models/Layout.model";
 import { formatPersianNumber } from "@/utils/persian";
+import { getServerImageUrl } from "@/utils/imageUtils";
 
 interface Props extends PropsWithChildren {
     data: LayoutModel;
@@ -62,6 +62,10 @@ export default function ShopLayout3({
 
     const yearFa = formatPersianNumber(new Date().getFullYear());
 
+    const footerLogoUrl = footer?.logo
+        ? getServerImageUrl(footer.logo, "105x50")
+        : "/placeholder.png";
+
     return (
         <Fragment>
             <Topbar>
@@ -91,28 +95,54 @@ export default function ShopLayout3({
 
             {children}
 
-            {showMobileMenu && <MobileNavigationBar navigation={mobileNavigation.version1} />}
+            {showMobileMenu && (
+                <MobileNavigationBar navigation={mobileNavigation.version1} />
+            )}
 
             {showFooter && (
                 <Footer1 color="text.primary" bgcolor="background.paper">
                     <Footer1.Brand>
                         <Link href="/">
-                            <Image src={footer.logo} alt={t("common.logoAlt")} width={105} height={50} />
+                            <img
+                                src={footerLogoUrl}
+                                alt={t("common.logoAlt")}
+                                width={105}
+                                height={50}
+                                loading="lazy"
+                                style={{ display: "block", objectFit: "contain" }}
+                                onError={(e) => {
+                                    const el = e.currentTarget as HTMLImageElement;
+                                    if (el.src.includes("/placeholder.png")) return;
+                                    el.src = "/placeholder.png";
+                                }}
+                            />
                         </Link>
 
-                        <Typography variant="body1" sx={{ mt: 1, mb: 3, maxWidth: 370, lineHeight: 1.7 }}>
+                        <Typography
+                            variant="body1"
+                            sx={{ mt: 1, mb: 3, maxWidth: 370, lineHeight: 1.7 }}
+                        >
                             {footer.description}
                         </Typography>
 
-                        <FooterApps playStoreUrl={footer.playStoreUrl} appleStoreUrl={footer.appStoreUrl} />
+                        <FooterApps
+                            playStoreUrl={footer.playStoreUrl}
+                            appleStoreUrl={footer.appStoreUrl}
+                        />
                     </Footer1.Brand>
 
                     <Footer1.Widget1>
-                        <FooterLinksWidget title={t("footer.aboutTitle")} links={footer.about} />
+                        <FooterLinksWidget
+                            title={t("footer.aboutTitle")}
+                            links={footer.about}
+                        />
                     </Footer1.Widget1>
 
                     <Footer1.Widget2>
-                        <FooterLinksWidget title={t("footer.customerServicesTitle")} links={footer.customers} />
+                        <FooterLinksWidget
+                            title={t("footer.customerServicesTitle")}
+                            links={footer.customers}
+                        />
                     </Footer1.Widget2>
 
                     <Footer1.Contact>
@@ -128,8 +158,12 @@ export default function ShopLayout3({
                     <Footer1.Copyright>
                         <Divider />
 
-                        <Typography variant="body2" sx={{ py: 3, textAlign: "center", span: { fontWeight: 500 } }}>
-                            &copy; {t("footer.copyright")} {yearFa} <span>{t("footer.brandName")}</span>,{" "}
+                        <Typography
+                            variant="body2"
+                            sx={{ py: 3, textAlign: "center", span: { fontWeight: 500 } }}
+                        >
+                            &copy; {t("footer.copyright")} {yearFa}{" "}
+                            <span>{t("footer.brandName")}</span>,{" "}
                             {t("footer.allRightsReserved")}
                         </Typography>
                     </Footer1.Copyright>
