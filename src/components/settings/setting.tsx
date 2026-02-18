@@ -75,7 +75,7 @@ const demos = [
   { id: 16, path: "/gadget-3", img: "/assets/images/landing/home/gadget-3.jpg" },
   { id: 15, path: "/grocery-4", img: "/assets/images/landing/home/grocery-4.jpg" },
   { id: 12, path: "/furniture-2", img: "/assets/images/landing/home/furniture-2.jpg" },
-  { id: 13, path: "/gadget-2", img: "/assets/images/landing/home/gadget-2.jpg" },
+  { id: 13, path: "/home", img: "/assets/images/landing/home/gadget-2.jpg" },
   { id: 14, path: "/medical", img: "/assets/images/landing/home/medical.png" },
   { id: 5, path: "/fashion-3", img: "/assets/images/landing/home/fashion-3.jpg" },
   { id: 0, path: "/market-1", img: "/assets/images/landing/page-1.png" },
