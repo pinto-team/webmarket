@@ -1,33 +1,35 @@
 /**
  * Persian/English digit helpers + formatting
+ * src/utils/persian.ts
  */
 
-const faNumberFormat = new Intl.NumberFormat("fa-IR");
-const faMoneyFormat = new Intl.NumberFormat("fa-IR");
+const PERSIAN_DIGITS = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"] as const;
+
+const faNumberFormat = new Intl.NumberFormat("fa-IR"); // grouping: ۱۲٬۳۴۵
+const faMoneyFormat = new Intl.NumberFormat("fa-IR");  // same grouping; unit handled by UI
 
 /**
- * Convert ANY digits in a string/number to Persian digits (۰-۹)
+ * Convert ANY ASCII digits in a string/number to Persian digits (۰-۹)
  * - safe for mixed strings: "Order 123" -> "Order ۱۲۳"
  */
 export const toPersianNumber = (value: string | number): string => {
-    const persianDigits = ["۰","۱","۲","۳","۴","۵","۶","۷","۸","۹"];
-    return String(value).replace(/\d/g, (d) => persianDigits[Number(d)]);
+    return String(value).replace(/\d/g, (d) => PERSIAN_DIGITS[Number(d)]);
 };
 
 /**
  * Convert Persian digits (۰-۹) to English digits (0-9)
+ * - useful for parsing user input that contains Persian digits
  */
 export const toEnglishNumber = (value: string): string => {
-    const persianDigits = ["۰","۱","۲","۳","۴","۵","۶","۷","۸","۹"];
-    let result = value;
-    persianDigits.forEach((p, i) => {
+    let result = String(value);
+    PERSIAN_DIGITS.forEach((p, i) => {
         result = result.replace(new RegExp(p, "g"), String(i));
     });
     return result;
 };
 
 /**
- * Format a number in fa-IR locale (۱۲٬۳۴۵)
+ * Format a number in fa-IR locale with grouping (۱۲٬۳۴۵)
  * Use this for plain numbers, counts, badges, etc.
  */
 export const formatPersianNumber = (value: number | string): string => {
@@ -47,29 +49,70 @@ export const formatPersianPrice = (price: number | string): string => {
 };
 
 /**
- * Format date in Persian locale
+ * Safe date parser (accepts string/number/Date)
  */
-export const formatPersianDate = (
-    date: string | Date,
-    options?: Intl.DateTimeFormatOptions
-): string => {
-    const dateObj = typeof date === "string" ? new Date(date) : date;
-    return dateObj.toLocaleDateString("fa-IR", options);
+const toValidDate = (input: string | number | Date): Date | null => {
+    const d = input instanceof Date ? input : new Date(input);
+    return Number.isFinite(d.getTime()) ? d : null;
 };
 
 /**
- * Format date and time in Persian locale
+ * Format date in Persian calendar (Jalali) - date only
+ * Default output typically like: ۱۴۰۴/۱۱/۲۹ (browser-dependent separators)
  */
-export const formatPersianDateTime = (date: string | Date): string => {
-    const dateObj = typeof date === "string" ? new Date(date) : date;
-    return dateObj.toLocaleString("fa-IR");
+export const formatPersianDate = (
+    input: string | number | Date,
+    options?: Intl.DateTimeFormatOptions
+): string => {
+    const d = toValidDate(input);
+    if (!d) return "";
+
+    return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        ...options,
+    }).format(d);
 };
 
-export const formatPersianRelativeTime = (dateInput: string | Date): string => {
-    const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
-    const now = new Date();
+/**
+ * Format date & time in Persian calendar (Jalali)
+ * Default output typically like: ۱۴۰۴/۱۱/۲۹، ۱۴:۳۲
+ */
+export const formatPersianDateTime = (
+    input: string | number | Date
+): string => {
+    const d = new Date(input);
+    if (!Number.isFinite(d.getTime())) return "";
 
-    const diffMs = now.getTime() - date.getTime();
+    const parts = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    }).formatToParts(d);
+
+    const get = (type: string) =>
+        parts.find((p) => p.type === type)?.value ?? "";
+
+    const formatted = `${get("year")}/${get("month")}/${get("day")} ${get("hour")}:${get("minute")}`;
+
+    return "\u200E" + formatted;
+};
+
+
+/**
+ * Simple Persian relative time formatter
+ * (keeps output Persian and numbers Persian)
+ */
+export const formatPersianRelativeTime = (dateInput: string | number | Date): string => {
+    const d = toValidDate(dateInput);
+    if (!d) return "";
+
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
     const diffSec = Math.floor(diffMs / 1000);
 
     if (diffSec < 60) return "همین الآن";
@@ -84,21 +127,30 @@ export const formatPersianRelativeTime = (dateInput: string | Date): string => {
     return `${toPersianNumber(diffDay)} روز قبل`;
 };
 
-export const formatPersianDateLong = (dateInput: Date | string): string => {
-    const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
-    const formatter = new Intl.DateTimeFormat("fa-IR", {
+/**
+ * Long Persian date, e.g. "۲۹ بهمن ۱۴۰۴"
+ */
+export const formatPersianDateLong = (dateInput: string | number | Date): string => {
+    const d = toValidDate(dateInput);
+    if (!d) return "";
+
+    return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
         year: "numeric",
         month: "long",
         day: "numeric",
-    });
-    return formatter.format(date);
+    }).format(d);
 };
 
-
+/**
+ * Get current Jalali year as number (latin digits)
+ */
 export const getCurrentJalaliYear = (): number => {
-    const parts = new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric" })
-        .formatToParts(new Date());
+    const parts = new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric" }).formatToParts(
+        new Date()
+    );
     const yearPart = parts.find((p) => p.type === "year")?.value || "0";
-    const latinYear = yearPart.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d).toString());
+
+    // Convert Persian digits to latin digits
+    const latinYear = yearPart.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
     return Number(latinYear);
 };

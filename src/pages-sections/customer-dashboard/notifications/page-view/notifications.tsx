@@ -17,6 +17,7 @@ import { getNotifications, updateNotification } from "@/services/notification.se
 import type { NotificationResource } from "@/types/notification.types";
 import { format } from "date-fns/format";
 import { t } from "@/i18n/t";
+import {formatPersianDateTime} from "@/utils/persian";
 
 export function NotificationsPageView() {
     const searchParams = useSearchParams();
@@ -120,7 +121,7 @@ export function NotificationsPageView() {
                             </Typography>
 
                             <Typography variant="caption" color="text.disabled">
-                                {format(new Date(notification.created_at), t("dateTime.notificationFormat"))}
+                                {formatPersianDateTime(notification.created_at)}
                             </Typography>
                         </Box>
 

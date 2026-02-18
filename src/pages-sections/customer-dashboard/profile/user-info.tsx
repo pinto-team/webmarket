@@ -13,7 +13,7 @@ type Props = { user: UserResource };
 export default function UserInfo({ user }: Props) {
     const birthDate =
         user.birth_year && user.birth_month && user.birth_day
-            ? `${toPersianNumber(user.birth_day)}/${toPersianNumber(user.birth_month)}/${toPersianNumber(user.birth_year)}`
+            ? `${toPersianNumber(user.birth_year)}/${toPersianNumber(user.birth_month)}/${toPersianNumber(user.birth_day)}`
             : t("common.noData");
 
     return (

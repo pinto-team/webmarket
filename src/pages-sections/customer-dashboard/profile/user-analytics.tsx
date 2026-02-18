@@ -12,7 +12,7 @@ import { currency } from "lib";
 import { useOrderStats } from "@/hooks/useOrderStats";
 import type { UserResource } from "@/types/auth.types";
 import { t } from "@/i18n/t";
-import { formatPersianNumber } from "@/utils/persian";
+import {formatPersianNumber, toPersianNumber} from "@/utils/persian";
 
 type Props = { user: UserResource };
 
@@ -28,6 +28,10 @@ export default function UserAnalytics({ user }: Props) {
         user.upload?.main_url || "/assets/images/avatars/001-man.svg";
 
     const balance = user.wallet?.balance || 0;
+
+    const displayNameValue =
+        displayName ? toPersianNumber(displayName) : t("common.noData");
+
 
     return (
         <Grid container spacing={3}>
@@ -50,7 +54,10 @@ export default function UserAnalytics({ user }: Props) {
 
                     <FlexBetween flexWrap="wrap" flex={1}>
                         <div>
-                            <Typography variant="h5">{displayName}</Typography>
+                            <Typography variant="h5">
+                                {t("profile.usernameLabel")}: {displayNameValue}
+                            </Typography>
+
 
                             <FlexBox alignItems="center" gap={1}>
                                 <Typography variant="body1" color="text.secondary">

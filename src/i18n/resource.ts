@@ -218,6 +218,7 @@ export const resources = {
                 welcome: "خوش آمدید",
                 yes: "بله",
                 no: "خیر",
+
             },
             dashboard: {
                 accountSettings: "تنظیمات حساب",
@@ -232,6 +233,7 @@ export const resources = {
                 transactions: "تراکنش‌ها",
                 wallet: "کیف پول",
                 wishlist: "علاقه‌مندی‌ها"
+
             },
             date: {
                 day: "روز",
@@ -369,6 +371,12 @@ export const resources = {
                 fetchError: "خطا در دریافت اعلان‌ها"
             },
             orders: {
+                stats: {
+                    all: "همه سفارش‌ها",
+                    awaitingDelivery: "در انتظار تحویل",
+                    awaitingShipment: "در انتظار ارسال",
+                    awaitingPayment: "در انتظار پرداخت"
+                },
                 cancelOrder: "لغو سفارش",
                 customer: "مشتری",
                 items: "اقلام",
@@ -569,6 +577,8 @@ export const resources = {
             },
             profile: {
                 accountSettings: "تنظیمات حساب",
+                usernameLabel: "نام کاربری",
+                userIdentifierLabel: "شناسه کاربری",
                 balanceLabel: "موجودی کیف پول",
                 statusLabel: "وضعیت حساب",
                 allOrders: "همه سفارش‌ها",
