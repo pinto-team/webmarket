@@ -8,42 +8,48 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
+
 import { PostCategoryResource } from "@/types/content.types";
 import { contentService } from "@/services/content.service";
+import { t } from "@/i18n/t";
 
 export default function BlogCategoryNav() {
-  const [categories, setCategories] = useState<PostCategoryResource[]>([]);
-  const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState<PostCategoryResource[]>([]);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await contentService.getPostCategories();
-        setCategories(data);
-      } catch (err) {
-        console.error("Failed to load categories", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCategories();
-  }, []);
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const data = await contentService.getPostCategories();
+                setCategories(data);
+            } catch (err) {
+                console.error(t("blog.category.fetchError"), err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  if (loading) return <CircularProgress size={24} />;
-  if (!categories.length) return null;
+        fetchCategories();
+    }, []);
 
-  return (
-    <div>
-      <Typography variant="h6" className="mb-2">دسته بندی‌ها</Typography>
-      <List>
-        {categories.map((cat) => (
-          <ListItem key={cat.slug} disablePadding>
-            <ListItemButton component={Link} href={`/blog/category/${cat.slug}`}>
-              <ListItemText primary={cat.name} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  );
+    if (loading) return <CircularProgress size={24} />;
+    if (!categories.length) return null;
+
+    return (
+        <div>
+            <Typography variant="h6" className="mb-2">
+                {t("blog.category.navTitle")}
+            </Typography>
+
+            <List>
+                {categories.map((cat) => (
+                    <ListItem key={cat.slug} disablePadding>
+                        <ListItemButton component={Link} href={`/blog/category/${cat.slug}`}>
+                            <ListItemText primary={cat.name} />
+                        </ListItemButton>
+                    </ListItem>
+                ))}
+            </List>
+        </div>
+    );
 }

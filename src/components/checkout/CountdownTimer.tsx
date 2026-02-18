@@ -1,30 +1,53 @@
-import { Box, Typography } from '@mui/material';
-import { AccessTime } from '@mui/icons-material';
+import { Box, Typography } from "@mui/material";
+import { AccessTime } from "@mui/icons-material";
+import { t } from "@/i18n/t";
+import { toPersianNumber } from "@/utils/persian";
 
 interface CountdownTimerProps {
-  seconds: number;
+    seconds: number;
 }
 
 export const CountdownTimer = ({ seconds }: CountdownTimerProps) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  const isWarning = seconds < 120;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    const isWarning = seconds < 120;
 
-  if (seconds <= 0) {
+    const formatTwoDigits = (value: number) =>
+        toPersianNumber(value).toString().padStart(2, toPersianNumber(0));
+
+    if (seconds <= 0) {
+        return (
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    color: "error.main",
+                }}
+            >
+                <AccessTime />
+                <Typography variant="body2">
+                    {t("payment.timeExpired")}
+                </Typography>
+            </Box>
+        );
+    }
+
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
-        <AccessTime />
-        <Typography variant="body2">زمان پرداخت به پایان رسیده است</Typography>
-      </Box>
+        <Box
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                color: isWarning ? "warning.main" : "text.secondary",
+            }}
+        >
+            <AccessTime />
+            <Typography variant="body2">
+                {t("payment.remainingTime", {
+                    time: `${formatTwoDigits(minutes)}:${formatTwoDigits(remainingSeconds)}`,
+                })}
+            </Typography>
+        </Box>
     );
-  }
-
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: isWarning ? 'warning.main' : 'text.secondary' }}>
-      <AccessTime />
-      <Typography variant="body2">
-        زمان باقیمانده: {minutes.toString().padStart(2, '0')}:{remainingSeconds.toString().padStart(2, '0')}
-      </Typography>
-    </Box>
-  );
 };

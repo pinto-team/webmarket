@@ -2,69 +2,127 @@ import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
+
 import FlexBetween from "components/flex-box/flex-between";
 import { currency } from "lib";
+
 import type { OrderResource } from "@/types/order.types";
+import { t } from "@/i18n/t";
 
 type Props = { order: OrderResource };
 
 export default function OrderSummery({ order }: Props) {
-  const address = order.customer_address;
-  const addressText = address
-    ? `${address.region?.title || ''} - ${address.district || ''} - ${address.street || ''}`
-    : 'آدرس ثبت نشده';
+    const address = order.customer_address;
 
-  return (
-    <Grid container spacing={3}>
-      <Grid size={{ md: 6, xs: 12 }}>
-        <Card elevation={0} sx={{ p: 3, border: "1px solid", borderColor: "grey.100" }}>
-          <Typography variant="h5" sx={{ mb: 2 }}>
-            آدرس تحویل
-          </Typography>
+    const addressText = address
+        ? [
+            address.region?.title,
+            address.district,
+            address.street,
+        ]
+            .filter(Boolean)
+            .join(" - ")
+        : t("common.unknown");
 
-          <Typography variant="body1">{addressText}</Typography>
-          <Typography variant="body2" color="text.secondary" mt={1}>
-            {order.customer_name} - {order.customer_mobile}
-          </Typography>
-        </Card>
-      </Grid>
+    return (
+        <Grid container spacing={3}>
+            <Grid size={{ md: 6, xs: 12 }}>
+                <Card
+                    elevation={0}
+                    sx={{
+                        p: 3,
+                        border: "1px solid",
+                        borderColor: "grey.100",
+                    }}
+                >
+                    <Typography variant="h5" sx={{ mb: 2 }}>
+                        {t("checkout.shippingAddress")}
+                    </Typography>
 
-      <Grid size={{ md: 6, xs: 12 }}>
-        <Card elevation={0} sx={{ p: 3, border: "1px solid", borderColor: "grey.100" }}>
-          <Typography variant="h5" sx={{ mb: 2 }}>
-            خلاصه سفارش
-          </Typography>
+                    <Typography variant="body1">
+                        {addressText}
+                    </Typography>
 
-          <ListItem title="جمع کل:" value={currency(order.total_price)} />
-          <ListItem title="هزینه ارسال:" value={currency(order.cargo_price)} />
-          <ListItem title="تخفیف:" value={currency(order.off_price)} />
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        mt={1}
+                    >
+                        {order.customer_name} - {order.customer_mobile}
+                    </Typography>
+                </Card>
+            </Grid>
 
-          <Divider sx={{ mb: 1 }} />
+            <Grid size={{ md: 6, xs: 12 }}>
+                <Card
+                    elevation={0}
+                    sx={{
+                        p: 3,
+                        border: "1px solid",
+                        borderColor: "grey.100",
+                    }}
+                >
+                    <Typography variant="h5" sx={{ mb: 2 }}>
+                        {t("checkout.orderSummary")}
+                    </Typography>
 
-          <FlexBetween mb={2}>
-            <Typography variant="h6">مبلغ پرداختی</Typography>
-            <Typography variant="h6">{currency(order.paid_price)}</Typography>
-          </FlexBetween>
+                    <ListItem
+                        title={t("checkout.subtotal")}
+                        value={currency(order.total_price)}
+                    />
 
-          {order.coupon_code && (
-            <Typography variant="body2" color="text.secondary">
-              کد تخفیف: {order.coupon_code}
-            </Typography>
-          )}
-        </Card>
-      </Grid>
-    </Grid>
-  );
+                    <ListItem
+                        title={t("checkout.shipping")}
+                        value={currency(order.cargo_price)}
+                    />
+
+                    <ListItem
+                        title={t("checkout.discount")}
+                        value={currency(order.off_price)}
+                    />
+
+                    <Divider sx={{ mb: 1 }} />
+
+                    <FlexBetween mb={2}>
+                        <Typography variant="h6">
+                            {t("checkout.total")}
+                        </Typography>
+
+                        <Typography variant="h6">
+                            {currency(order.paid_price)}
+                        </Typography>
+                    </FlexBetween>
+
+                    {order.coupon_code && (
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                        >
+                            {t("checkout.discountCode")}: {order.coupon_code}
+                        </Typography>
+                    )}
+                </Card>
+            </Grid>
+        </Grid>
+    );
 }
 
-function ListItem({ title, value }: { title: string; value: string }) {
-  return (
-    <FlexBetween mb={1}>
-      <Typography color="text.secondary" variant="body1">
-        {title}
-      </Typography>
+function ListItem({
+                      title,
+                      value,
+                  }: {
+    title: string;
+    value: string;
+}) {
+    return (
+        <FlexBetween mb={1}>
+            <Typography color="text.secondary" variant="body1">
+                {title}
+            </Typography>
 
-      <Typography variant="h6">{value}</Typography>
-    </FlexBetween>
-  );
+            <Typography variant="h6">
+                {value}
+            </Typography>
+        </FlexBetween>
+    );
 }

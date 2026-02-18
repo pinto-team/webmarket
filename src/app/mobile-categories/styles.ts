@@ -13,10 +13,8 @@ export const StyledRoot = styled("div")(({ theme }) => ({
         overflowY: "auto",
         backgroundColor: theme.palette.grey[100],
 
-        // ✅ دقیقاً زیر کروم واقعی بالا
         top: "var(--app-top-offset, 0px)",
 
-        // ✅ بالای bottom nav
         bottom: layoutConstant.mobileNavHeight,
 
         borderRight: `1px solid ${theme.palette.grey[300]}`,
@@ -31,10 +29,8 @@ export const StyledRoot = styled("div")(({ theme }) => ({
         padding: "0.75rem 1.25rem",
         backgroundColor: theme.palette.background.paper,
 
-        // ✅ دقیقاً زیر کروم واقعی بالا
         top: "var(--app-top-offset, 0px)",
 
-        // ✅ بالای bottom nav
         bottom: layoutConstant.mobileNavHeight,
 
         WebkitOverflowScrolling: "touch",

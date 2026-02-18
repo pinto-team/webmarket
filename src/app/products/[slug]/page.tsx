@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: SlugParams): Promise<Metadata
     const { slug } = await params;
     const origin = await getOrigin();
 
-    const shopName = t("meta.pageName.shop", t("nav.shops", "فروشگاه"));
+    const shopName = t("meta.pageName.shop", t("nav.shops"));
 
     try {
         const product = await productService.getProduct(slug, origin);

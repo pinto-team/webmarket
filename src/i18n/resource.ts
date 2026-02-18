@@ -2,7 +2,12 @@ export const resources = {
     fa: {
         translation: {
             common: {
+                welcome: "خوش آمدید",
+                submitting: "در حال ارسال...",
                 submit: "ثبت",
+                multiply: "×",
+                unknown: "نامشخص",
+                clearAll: "پاک کردن همه",
                 dash: "-",
                 cancel: "انصراف",
                 save: "ذخیره",
@@ -36,8 +41,41 @@ export const resources = {
                 productsLabel: "محصول",
                 logoAlt: "لوگو",
                 copy: "کپی",
+                comma: "،",
+                pipe: "|",
+                leftParen: "(",
+                rightParen: ")",
             },
             auth: {
+                alreadyHaveAccount: "حساب کاربری دارید؟",
+                codeSentTo: "کد تایید به {{mobile}} ارسال شد",
+                createAccount: "ایجاد حساب کاربری",
+                dontHaveAccount: "حساب کاربری ندارید؟",
+                email: "ایمیل",
+                forgotPassword: "فراموشی رمز عبور",
+                login: "...",
+                loginFailed: "...",
+                loginWithFacebook: "ورود با فیسبوک",
+                loginWithGoogle: "ورود با گوگل",
+                logout: "خروج",
+                mobile: "شماره موبایل",
+                nationalId: "...",
+                nationalIdPlaceholder: "۱۲۳۴۵۶۷۸۹۰",
+                newPassword: "رمز عبور جدید",
+                or: "یا",
+                password: "...",
+                passwordPlaceholder: "********",
+                register: "ثبت‌نام",
+                rememberMe: "مرا به خاطر بسپار",
+                resetPassword: "بازنشانی رمز عبور",
+                sessionExpired: "نشست شما منقضی شده است. لطفاً دوباره وارد شوید.",
+                sendVerificationCode: "ارسال کد تایید",
+                usernameOrEmail: "نام کاربری یا ایمیل",
+                verificationCode: "کد تایید",
+                verifyAndLogin: "تایید و ورود",
+                or: "یا",
+                loginWithFacebook: "ورود با فیسبوک",
+                loginWithGoogle: "ورود با گوگل",
                 login: "ورود",
                 register: "ثبت‌نام",
                 logout: "خروج",
@@ -70,6 +108,8 @@ export const resources = {
                 passwordMatch: "رمزهای عبور مطابقت ندارند",
                 codeLength: "کد باید ۵ رقم باشد",
                 acceptTerms: "باید قوانین و مقررات را بپذیرید",
+                invalidInput: "اطلاعات وارد شده نامعتبر است",
+
             },
             nav: {
                 home: "خانه",
@@ -86,12 +126,40 @@ export const resources = {
                 wishlist: "علاقه‌مندی‌ها",
                 cart: "سبد خرید",
                 profile: "پروفایل",
+
+            },
+            navCategories: {
+                noSubcategories: "زیر‌دسته‌ای برای نمایش وجود ندارد",
             },
             products: {
+                defaultAlt: "محصول",
+                itemsCountLabel: "{{count}} محصول",
+                priceRangeTitle: "محدوده قیمت (تومان)",
+                priceFrom: "از",
+                priceTo: "تا",
+                filtersTitle: "فیلترها",
+                noCategories: "دسته‌بندی موجود نیست",
+                notFound: {
+                    title: "محصول یافت نشد",
+                    description:
+                        "متأسفانه محصول مورد نظر شما یافت نشد. ممکن است حذف شده یا آدرس اشتباه باشد.",
+                    viewAll: "مشاهده همه محصولات",
+                    goHome: "بازگشت به خانه",
+                },
+                search: {
+                    metaTitle: "جستجوی محصولات",
+                },
+                breadcrumbTitle: "محصولات",
+                inStock: "موجود",
+                outOfStock: "ناموجود",
+                lowStock: "موجودی کم",
+                currencyLabel: "تومان",
+                loadError: "خطا در بارگذاری اطلاعات",
+                searchPlaceholder: "جستجوی محصولات...",
+                noResults: "محصولی یافت نشد",
+                count: "{{total}} محصول",
                 title: "محصولات",
-                search: "جستجوی محصولات",
                 filter: "فیلتر محصولات",
-                sort: "مرتب‌سازی",
                 sortBy: {
                     newest: "جدیدترین",
                     oldest: "قدیمی‌ترین",
@@ -104,9 +172,6 @@ export const resources = {
                 priceRange: "محدوده قیمت",
                 brand: "برند",
                 category: "دسته‌بندی",
-                inStock: "موجود",
-                outOfStock: "ناموجود",
-                lowStock: "موجودی کم",
                 addToCart: "افزودن به سبد خرید",
                 addToWishlist: "افزودن به علاقه‌مندی‌ها",
                 viewDetails: "مشاهده جزئیات",
@@ -125,7 +190,28 @@ export const resources = {
                 noProducts: "محصولی یافت نشد",
                 saleBadge: "فروش ویژه",
                 noBrand: "بدون برند",
-                currencyLabel: "تومان",
+                searchBreadcrumb: "جستجو: {{keyword}}",
+                searchResultsFor: "نتایج جستجو برای: ",
+                searchCount: "{{total}} محصول",
+                sort: {
+                    most_visited: "پربازدیدترین",
+                    most_sales: "پرفروشترین",
+                    lowest: "ارزانترین",
+                    highest: "گرانترین",
+                    label: "مرتب‌سازی",
+                    default: "پیش‌فرض",
+                    mostVisited: "پربازدیدترین",
+                    mostSales: "پرفروش‌ترین",
+                },
+                searchError: "خطا در جستجو: {{error}}",
+                filters: {
+                    fetchFailed: "خطا در دریافت اطلاعات فیلترها",
+                },
+                logs: {
+                    fetchingWithBrand: "[Products Page] Fetching with brand filter:",
+                    fetchFailed: "Failed to fetch data:",
+                },
+
             },
             productDetail: {
                 hot: "داغ",
@@ -193,17 +279,22 @@ export const resources = {
                 details: "نمایش جزئیات",
                 max: "حداکثر",
                 unknownDelivery: "نامشخص",
+                quantityLabel: "تعداد: {{qty}}",
             },
             checkout: {
+                subtotal: "جمع کل",
+                shipping: "هزینه ارسال",
+                tax: "مالیات",
+                discount: "تخفیف",
+                discountCode: "کد تخفیف",
+                proceedToCheckout: "ادامه فرآیند خرید",
+                noCargoMethods: "روش ارسالی در دسترس نیست",
                 title: "تسویه حساب",
                 shippingAddress: "آدرس ارسال",
                 billingAddress: "آدرس صورت‌حساب",
                 paymentMethod: "روش پرداخت",
                 orderSummary: "خلاصه سفارش",
-                subtotal: "جمع جزئی",
-                shipping: "هزینه ارسال",
-                discount: "تخفیف",
-                tax: "مالیات",
+                selectShippingMethod: "انتخاب روش ارسال",
                 total: "جمع کل",
                 placeOrder: "ثبت سفارش",
                 continueToPayment: "ادامه به پرداخت",
@@ -212,6 +303,12 @@ export const resources = {
                 orderNumber: "شماره سفارش",
                 trackOrder: "پیگیری سفارش",
                 selectAddressWarning: "لطفا آدرس تحویل را انتخاب کنید",
+                metaTitle: "تسویه حساب",
+                shipmentTitle: "مرسوله {{index}}",
+                warehouseLabel: "انبار",
+                weightLabel: "وزن",
+                kilogram: "کیلوگرم",
+                freeShipping: "رایگان",
             },
             dashboard: {
                 title: "داشبورد",
@@ -225,6 +322,7 @@ export const resources = {
                 settings: "تنظیمات",
                 wallet: "کیف پول",
                 notifications: "اعلان‌ها",
+                accountSettings: "تنظیمات حساب",
             },
             profile: {
                 title: "پروفایل من",
@@ -263,13 +361,14 @@ export const resources = {
 
             },
             orders: {
+                viewDetails: "مشاهده جزئیات",
+                loadError: "خطا در دریافت سفارشات: {{error}}",
                 title: "سفارشات من",
                 orderNumber: "شماره سفارش",
                 orderDate: "تاریخ سفارش",
                 status: "وضعیت",
                 total: "مبلغ کل",
                 items: "اقلام",
-                viewDetails: "مشاهده جزئیات",
                 trackOrder: "پیگیری سفارش",
                 cancelOrder: "لغو سفارش",
                 returnOrder: "مرجوع کردن",
@@ -281,6 +380,16 @@ export const resources = {
                     delivered: "تحویل داده شده",
                     cancelled: "لغو شده",
                     returned: "مرجوع شده",
+                },
+                order: "سفارش",
+                notFound: "سفارش یافت نشد",
+                customer: "مشتری",
+                mobile: "موبایل",
+                notes: {
+                    title: "افزودن یادداشت",
+                    placeholder: "یادداشت خود را برای این سفارش بنویسید...",
+                    add: "ثبت یادداشت",
+                    addedSuccess: "یادداشت با موفقیت ثبت شد",
                 },
             },
             addresses: {
@@ -299,6 +408,7 @@ export const resources = {
                 noAddresses: "آدرسی ثبت نشده است",
                 selectAddress: "انتخاب آدرس",
                 editAddress: "ویرایش آدرس",
+                deleteConfirm: "آیا از حذف این آدرس مطمئن هستید؟",
                 addNewFull: "افزودن آدرس جدید",
                 deletedSuccess: "آدرس حذف شد",
                 deleteFailed: "خطا در حذف آدرس",
@@ -310,10 +420,12 @@ export const resources = {
                     floor: "طبقه",
                     unit: "واحد",
                     selectPlaceholder: "انتخاب کنید",
-
+                    errors: {
+                        provincesFetchError: "خطا در دریافت لیست استان‌ها",
+                        citiesFetchError: "خطا در دریافت لیست شهرها",
+                    },
                     addSubmit: "افزودن آدرس",
                     editSubmit: "ویرایش آدرس",
-
                     validation: {
                         provinceRequired: "انتخاب استان الزامی است",
                         cityRequired: "انتخاب شهر الزامی است",
@@ -321,6 +433,13 @@ export const resources = {
                         postalRequired: "کد پستی الزامی است",
                         postalLength: "کد پستی باید ۱۰ رقم باشد",
                     },
+                },
+                separator: " - ",
+                fields: {
+                    title: "عنوان",
+                    mobile: "موبایل",
+                    address: "آدرس",
+                    postal: "کد پستی",
                 },
             },
             errors: {
@@ -335,6 +454,17 @@ export const resources = {
                 details: "جزئیات",
                 copyMessage: "کپی پیام",
                 copyStack: "کپی استک",
+                productLoadTitle: "خطا در بارگذاری محصول",
+                productLoadDescription: "متأسفانه مشکلی در بارگذاری اطلاعات محصول پیش آمد.",
+                labels: {
+                    digest: "digest",
+                    status: "status",
+                    request: "request",
+                    serverMessage: "serverMessage",
+                    serverErrors: "serverErrors",
+                    cause: "cause",
+                    stack: "stack",
+                },
             },
             messages: {
                 addedToCart: "محصول به سبد خرید اضافه شد",
@@ -371,7 +501,22 @@ export const resources = {
                 product: {
                     notFoundTitle: "محصول یافت نشد",
                     notFoundDescription: "محصول مورد نظر یافت نشد.",
-                }
+                },
+                defaultTitle: "فروشگاه آنلاین",
+                defaultDescription: "فروشگاه آنلاین با بهترین محصولات",
+                defaultKeywords: ["فروشگاه آنلاین", "خرید اینترنتی"],
+                defaultShopTitle: "فروشگاه",
+
+                page: {
+                    titleFormat: "{{page}} - {{shop}}",
+                    descriptionFormat: "{{page}} در {{shop}}",
+                },
+
+                keywords: {
+                    onlineShop: "فروشگاه آنلاین",
+                    ecommerce: "خرید اینترنتی",
+                },
+
             },
             home: {
                 bestSellers: {
@@ -388,6 +533,9 @@ export const resources = {
                 },
             },
             pagination: {
+                previous: "قبلی",
+                next: "بعدی",
+                pageInfo: "صفحه {{current}} از {{total}}",
                 showing: "نمایش",
                 of: "از",
             },
@@ -403,9 +551,38 @@ export const resources = {
                 contactTitle: "تماس با ما",
                 emailLabel: "ایمیل",
                 phoneLabel: "تلفن",
+                copyrightLine: "© Copyright {{year}} {{brand}}، {{rights}}.",
+
             },
             blog: {
+                readMore: "بیشتر بخوانید",
                 latestPostsTitle: "آخرین مقالات",
+                tag: {
+                    notFound: "برچسب یافت نشد",
+                    title: "برچسب: {{name}}",
+                    cloudTitle: "برچسب‌ها",
+                    fetchError: "خطا در دریافت برچسب‌ها",
+                },
+                cloudTitle: "برچسب‌ها",
+                fetchError: "خطا در دریافت برچسب‌ها",
+                category: {
+                    notFound: "دسته بندی یافت نشد",
+                    navTitle: "دسته‌بندی‌ها",
+                    fetchError: "خطا در دریافت دسته‌بندی‌ها",
+                },
+                postChip: "مقاله",
+                search: {
+                    metaTitle: "جستجوی مقالات",
+                    breadcrumb: "جستجو: {{q}}",
+                    resultsFor: "نتایج جستجو در مقالات برای:",
+                    postCountLabel: "مقاله",
+                    noResults: "مقاله‌ای یافت نشد",
+                    error: "خطا در جستجو: {{error}}",
+                },
+                post: {
+                    notFoundTitle: "پست یافت نشد",
+                    views: "بازدید",
+                },
             },
             transactions: {
                 title: "تراکنش‌های مالی",
@@ -432,6 +609,21 @@ export const resources = {
                 review: "بررسی",
             },
             payment: {
+                title: "پرداخت",
+
+                timeout: "زمان پرداخت به پایان رسید",
+                loadOrderFailed: "خطا در بارگذاری سفارش",
+
+                selectShippingMethod: "انتخاب روش ارسال",
+                selectGateway: "انتخاب درگاه پرداخت",
+
+                selectGatewayWarning: "لطفاً یک درگاه پرداخت انتخاب کنید",
+                selectAllShipmentsWarning: "لطفاً روش ارسال را برای تمام مرسوله‌ها انتخاب کنید",
+
+                paymentLinkFailed: "خطا در دریافت لینک پرداخت",
+                createPaymentFailed: "خطا در ایجاد پرداخت",
+
+                noGateways: "درگاه پرداختی موجود نیست",
                 callback: {
                     successTitle: "پرداخت موفق",
                     successSubtitle: "سفارش شما با موفقیت ثبت شد.",
@@ -444,6 +636,77 @@ export const resources = {
 
                     fetchError: "خطا در دریافت وضعیت سفارش",
                 },
+                orderLabel: "سفارش: {{code}}",
+                totalLabel: "جمع کل:",
+                proceed: "ادامه به پرداخت",
+                noGatewayAvailable: "درگاه پرداختی موجود نیست",
+                shopSpecificGateway: "درگاه اختصاصی فروشگاه",
+                timeExpired: "زمان پرداخت به پایان رسیده است",
+                remainingTime: "زمان باقیمانده: {{time}}",
+            },
+            categories: {
+                dropdownTitle: "دسته‌بندی‌ها",
+                subcategories: "زیردسته‌ها",
+            },
+            shops: {
+                metaTitle: "فروشگاه‌ها",
+            },
+            tickets: {
+                createTitle: "ایجاد تیکت جدید",
+                create: "ایجاد تیکت",
+                createError: "خطا در ایجاد تیکت",
+                descriptionPlaceholder: "موضوع و توضیحات تیکت خود را بنویسید...",
+                validation: {
+                    descriptionRequired: "لطفا توضیحات تیکت را وارد کنید",
+                },
+            },
+            notifications: {
+                empty: "اعلانی وجود ندارد",
+                fetchError: "خطا در دریافت اعلان‌ها",
+            },
+            search: {
+                submit: "جستجو",
+                placeholder: "جستجو...",
+                ariaLabel: "جستجوی محصولات",
+                placeholderUniversal: "جستجو در محصولات و مقالات...",
+                suggestionsFetchError: "خطا در دریافت پیشنهادهای جستجو",
+                types: {
+                    recent: "اخیر",
+                    product: "محصول",
+                    category: "دسته‌بندی",
+                    brand: "برند",
+                },
+                date: {
+                    year: "سال",
+                    month: "ماه",
+                    day: "روز",
+                    jalaliMonths: {
+                        1: "فروردین",
+                        2: "اردیبهشت",
+                        3: "خرداد",
+                        4: "تیر",
+                        5: "مرداد",
+                        6: "شهریور",
+                        7: "مهر",
+                        8: "آبان",
+                        9: "آذر",
+                        10: "دی",
+                        11: "بهمن",
+                        12: "اسفند",
+                    },
+                },
+
+            },
+            files: {
+                defaultName: "فایل",
+                kb: "کیلوبایت",
+                select: "انتخاب فایل",
+                accept: ".jpg,.jpeg,.png,.webp,.zip",
+                allowedFormats: "JPG, PNG, WEBP, ZIP",
+                allowedFormatsWithMax: "فرمت‌های مجاز: {{formats}} (حداکثر {{maxMb}}MB)",
+            },
+            dateTime: {
+                notificationFormat: "yyyy/MM/dd HH:mm",
             },
 
 

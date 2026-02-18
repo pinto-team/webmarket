@@ -10,42 +10,40 @@ function getValueByPath(obj: Dict, path: string): any {
     return path.split(".").reduce((acc, key) => acc?.[key], obj);
 }
 
-function interpolate(template: string, values?: InterpolationValues): string {
-    if (!values) return template;
-
-    return template.replace(/\{\{(.*?)\}\}/g, (_, key) => {
-        const value = values[key.trim()];
-        if (value == null) return "";
-
-        // اگر عدد بود فارسیش کن
-        if (typeof value === "number") {
-            return toPersianNumber(value);
-        }
-
-        return String(value);
-    });
+function normalizeText(text: string): string {
+    return toPersianNumber(text);
 }
 
-export function t(
-    key: string,
-    options?: InterpolationValues | string
-): string {
+function interpolate(template: string, values?: InterpolationValues): string {
+    if (!values) return normalizeText(template);
+
+    const out = template.replace(/\{\{(.*?)\}\}/g, (_, rawKey) => {
+        const key = String(rawKey).trim();
+        const value = values[key];
+
+        if (value == null) return "";
+
+        return normalizeText(String(value));
+    });
+
+    return normalizeText(out);
+}
+
+export function t(key: string, options?: InterpolationValues | string): string {
     const value = getValueByPath(dict, key);
 
-    // اگر key پیدا نشد
     if (value == null) {
-        return typeof options === "string" ? options : key;
+        const fallback = typeof options === "string" ? options : key;
+        return normalizeText(fallback);
     }
 
     if (typeof value !== "string") {
-        return key;
+        return normalizeText(key);
     }
 
-    // اگر options string باشه یعنی fallback
     if (typeof options === "string") {
-        return value;
+        return normalizeText(value);
     }
 
-    // interpolation
     return interpolate(value, options);
 }

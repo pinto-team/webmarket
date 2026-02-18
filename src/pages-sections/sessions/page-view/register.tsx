@@ -3,16 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
 
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 import { useAuth } from "hooks/useAuth";
-import { Checkbox, TextField, FormProvider } from "components/form-hook";
+import { Checkbox, FormProvider, TextField } from "components/form-hook";
 import BirthdayPicker from "components/BirthdayPicker";
 import FlexBox from "components/flex-box/flex-box";
 
@@ -21,9 +21,9 @@ import Label from "../components/label";
 import usePasswordVisible from "../use-password-visible";
 
 import { t } from "@/i18n/t";
-import { toPersianNumber, toEnglishNumber } from "@/utils/persian";
+import { toEnglishNumber, toPersianNumber } from "@/utils/persian";
 
-type RegisterStep = "register" | "otp";
+type RegisterStep = "otp" | "register";
 
 export default function RegisterPageView() {
     const router = useRouter();
@@ -31,26 +31,25 @@ export default function RegisterPageView() {
     const { visiblePassword, togglePasswordVisible } = usePasswordVisible();
 
     const [error, setError] = useState<string | null>(null);
-    const [step, setStep] = useState<RegisterStep>("register");
     const [mobile, setMobile] = useState("");
+    const [step, setStep] = useState<RegisterStep>("register");
 
-    const validationSchema = yup.object().shape({
-        username: yup
-            .string()
-            .matches(/^[0-9]{10}$/, t("validation.nationalIdLength"))
-            .required(t("validation.required")),
-        mobile: yup
-            .string()
-            .matches(/^09[0-9]{9}$/, t("validation.mobile"))
-            .required(t("validation.required")),
+    const validationSchema = yup.object({
+        birth_day: yup.number().min(1).max(31).required(t("validation.required")),
+        birth_month: yup.number().min(1).max(12).required(t("validation.required")),
         birth_year: yup
             .number()
             .min(1300, t("validation.required"))
             .max(1403, t("validation.required"))
             .required(t("validation.required")),
-        birth_month: yup.number().min(1).max(12).required(t("validation.required")),
-        birth_day: yup.number().min(1).max(31).required(t("validation.required")),
-        password: yup.string().min(6, t("validation.passwordMin")).required(t("validation.required")),
+        mobile: yup
+            .string()
+            .matches(/^09[0-9]{9}$/, t("validation.mobile"))
+            .required(t("validation.required")),
+        password: yup
+            .string()
+            .min(6, t("validation.passwordMin"))
+            .required(t("validation.required")),
         re_password: yup
             .string()
             .oneOf([yup.ref("password")], t("validation.passwordMatch"))
@@ -59,26 +58,35 @@ export default function RegisterPageView() {
             .bool()
             .test("rules", t("validation.acceptTerms"), (value) => value === true)
             .required(t("validation.acceptTerms")),
+        username: yup
+            .string()
+            .matches(/^[0-9]{10}$/, t("validation.nationalIdLength"))
+            .required(t("validation.required")),
     });
 
-    const otpValidationSchema = yup.object().shape({
-        code: yup.string().length(5, t("validation.codeLength")).required(t("validation.required")),
+    const otpValidationSchema = yup.object({
+        code: yup
+            .string()
+            .length(5, t("validation.codeLength"))
+            .required(t("validation.required")),
     });
 
     const inputProps = {
-        endAdornment: <EyeToggleButton show={visiblePassword} click={togglePasswordVisible} />,
+        endAdornment: (
+            <EyeToggleButton show={visiblePassword} click={togglePasswordVisible} />
+        ),
     };
 
     const methods = useForm({
         defaultValues: {
-            username: "",
-            mobile: "",
-            birth_year: 1380,
-            birth_month: 1,
             birth_day: 1,
+            birth_month: 1,
+            birth_year: 1380,
+            mobile: "",
             password: "",
             re_password: "",
             rules: false,
+            username: "",
         },
         resolver: yupResolver(validationSchema),
     });
@@ -92,15 +100,14 @@ export default function RegisterPageView() {
         try {
             setError(null);
 
-            // ensure numeric fields are correct even if user typed Persian digits elsewhere
             const registerData = {
-                username: toEnglishNumber(String(values.username)),
-                mobile: toEnglishNumber(String(values.mobile)),
-                birth_year: values.birth_year,
-                birth_month: values.birth_month,
                 birth_day: values.birth_day,
+                birth_month: values.birth_month,
+                birth_year: values.birth_year,
+                mobile: toEnglishNumber(String(values.mobile)),
                 password: values.password,
                 rules: values.rules,
+                username: toEnglishNumber(String(values.username)),
             };
 
             await register(registerData as any);
@@ -112,6 +119,7 @@ export default function RegisterPageView() {
                 err?.validationMessage ||
                 err?.response?.data?.message ||
                 t("errors.general");
+
             setError(errorMsg);
         }
     });
@@ -119,20 +127,30 @@ export default function RegisterPageView() {
     const handleOTPSubmit = otpMethods.handleSubmit(async (values) => {
         try {
             setError(null);
-            await verifyOTP({ mobile, code: values.code });
+
+            await verifyOTP({
+                code: values.code,
+                mobile,
+            });
+
             router.push("/");
         } catch (err: any) {
             const errorMsg =
                 err?.validationMessage ||
                 err?.response?.data?.message ||
                 t("errors.general");
+
             setError(errorMsg);
         }
     });
 
     if (step === "otp") {
         return (
-            <FormProvider key="otp-form" methods={otpMethods} onSubmit={handleOTPSubmit}>
+            <FormProvider
+                key="otp-form"
+                methods={otpMethods}
+                onSubmit={handleOTPSubmit}
+            >
                 {error && (
                     <Alert severity="error" className="mb-2">
                         {error}
@@ -140,28 +158,35 @@ export default function RegisterPageView() {
                 )}
 
                 <Alert severity="info" className="mb-2">
-                    {t("auth.verificationCode")}: {toPersianNumber(mobile)}
+                    {t("auth.codeSentTo", { mobile })}
                 </Alert>
 
                 <div className="mb-2">
                     <Label>{t("auth.verificationCode")}</Label>
                     <TextField
+                        autoFocus
                         fullWidth
                         name="code"
-                        size="medium"
                         placeholder={t("validation.codeLength")}
-                        autoFocus
+                        size="medium"
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^0-9]/g, "");
                             otpMethods.setValue("code", value);
                         }}
                         slotProps={{
-                            htmlInput: { maxLength: 5, inputMode: "numeric" },
+                            htmlInput: { inputMode: "numeric", maxLength: 5 },
                         }}
                     />
                 </div>
 
-                <Button fullWidth size="large" type="submit" color="primary" variant="contained" loading={otpMethods.formState.isSubmitting}>
+                <Button
+                    fullWidth
+                    color="primary"
+                    loading={otpMethods.formState.isSubmitting}
+                    size="large"
+                    type="submit"
+                    variant="contained"
+                >
                     {t("auth.verifyAndLogin")}
                 </Button>
             </FormProvider>
@@ -169,7 +194,11 @@ export default function RegisterPageView() {
     }
 
     return (
-        <FormProvider key="register-form" methods={methods} onSubmit={handleSubmitForm}>
+        <FormProvider
+            key="register-form"
+            methods={methods}
+            onSubmit={handleSubmitForm}
+        >
             {error && (
                 <Alert severity="error" className="mb-2">
                     {error}
@@ -181,14 +210,14 @@ export default function RegisterPageView() {
                 <TextField
                     fullWidth
                     name="username"
+                    placeholder={t("auth.nationalIdPlaceholder")}
                     size="medium"
-                    placeholder="1234567890"
                     onChange={(e) => {
                         const value = e.target.value.replace(/[^0-9۰-۹]/g, "");
                         methods.setValue("username", toEnglishNumber(value) as any);
                     }}
                     slotProps={{
-                        htmlInput: { maxLength: 10, inputMode: "numeric" },
+                        htmlInput: { inputMode: "numeric", maxLength: 10 },
                     }}
                 />
             </div>
@@ -198,14 +227,14 @@ export default function RegisterPageView() {
                 <TextField
                     fullWidth
                     name="mobile"
-                    size="medium"
                     placeholder="09123456789"
+                    size="medium"
                     onChange={(e) => {
                         const value = e.target.value.replace(/[^0-9۰-۹]/g, "");
                         methods.setValue("mobile", toEnglishNumber(value) as any);
                     }}
                     slotProps={{
-                        htmlInput: { maxLength: 11, inputMode: "numeric" },
+                        htmlInput: { inputMode: "numeric", maxLength: 11 },
                     }}
                 />
             </div>
@@ -219,9 +248,9 @@ export default function RegisterPageView() {
                 <Label>{t("auth.password")}</Label>
                 <TextField
                     fullWidth
-                    size="medium"
                     name="password"
-                    placeholder="*********"
+                    placeholder={t("auth.passwordPlaceholder")}
+                    size="medium"
                     type={visiblePassword ? "text" : "password"}
                     slotProps={{ input: inputProps }}
                 />
@@ -231,9 +260,9 @@ export default function RegisterPageView() {
                 <Label>{t("profile.confirmPassword")}</Label>
                 <TextField
                     fullWidth
-                    size="medium"
                     name="re_password"
-                    placeholder="*********"
+                    placeholder={t("auth.passwordPlaceholder")}
+                    size="medium"
                     type={visiblePassword ? "text" : "password"}
                     slotProps={{ input: inputProps }}
                 />
@@ -241,18 +270,30 @@ export default function RegisterPageView() {
 
             <div className="agreement">
                 <Checkbox
+                    color="secondary"
                     name="rules"
                     size="small"
-                    color="secondary"
                     label={
-                        <FlexBox flexWrap="wrap" alignItems="center" justifyContent="flex-start" gap={1}>
+                        <FlexBox
+                            alignItems="center"
+                            flexWrap="wrap"
+                            gap={1}
+                            justifyContent="flex-start"
+                        >
                             <Box>{t("validation.acceptTerms")}</Box>
                         </FlexBox>
                     }
                 />
             </div>
 
-            <Button fullWidth size="large" type="submit" color="primary" variant="contained" loading={methods.formState.isSubmitting}>
+            <Button
+                fullWidth
+                color="primary"
+                loading={methods.formState.isSubmitting}
+                size="large"
+                type="submit"
+                variant="contained"
+            >
                 {t("auth.createAccount")}
             </Button>
         </FormProvider>

@@ -13,7 +13,7 @@ export default async function Page({ params }: SlugParams) {
 
     if (!shop) notFound();
 
-    const filters = {}; // ✅ placeholder تا وقتی endpoint واقعی filters مشخص بشه
+    const filters = {};
 
     return <ShopDetailsPageView shop={shop} filters={filters as any} />;
 }

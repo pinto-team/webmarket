@@ -5,23 +5,8 @@ import { MenuItem, Select, FormControl, FormHelperText } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 
 import FlexBox from "./flex-box/flex-box";
-import { toPersianNumber } from "@/utils/persian";
+import { toPersianNumber, getCurrentJalaliYear } from "@/utils/persian";
 import { t } from "@/i18n/t";
-
-const persianMonths = [
-    { value: 1, label: "فروردین" },
-    { value: 2, label: "اردیبهشت" },
-    { value: 3, label: "خرداد" },
-    { value: 4, label: "تیر" },
-    { value: 5, label: "مرداد" },
-    { value: 6, label: "شهریور" },
-    { value: 7, label: "مهر" },
-    { value: 8, label: "آبان" },
-    { value: 9, label: "آذر" },
-    { value: 10, label: "دی" },
-    { value: 11, label: "بهمن" },
-    { value: 12, label: "اسفند" },
-];
 
 const getDaysInMonth = (month: number) => {
     if (month <= 6) return 31;
@@ -29,9 +14,7 @@ const getDaysInMonth = (month: number) => {
     return 29;
 };
 
-const CURRENT_YEAR = 1403;
 const YEARS_RANGE = 100;
-const years = Array.from({ length: YEARS_RANGE }, (_, i) => CURRENT_YEAR - i);
 
 export default function BirthdayPicker() {
     const { control, watch, setValue } = useFormContext();
@@ -39,8 +22,20 @@ export default function BirthdayPicker() {
     const selectedMonth = watch("birth_month");
     const selectedDay = watch("birth_day");
 
-    const maxDays = useMemo(() => getDaysInMonth(Number(selectedMonth) || 1), [selectedMonth]);
-    const days = useMemo(() => Array.from({ length: maxDays }, (_, i) => i + 1), [maxDays]);
+    const currentYear = getCurrentJalaliYear();
+    const years = useMemo(
+        () => Array.from({ length: YEARS_RANGE }, (_, i) => currentYear - i),
+        [currentYear]
+    );
+
+    const maxDays = useMemo(
+        () => getDaysInMonth(Number(selectedMonth) || 1),
+        [selectedMonth]
+    );
+    const days = useMemo(
+        () => Array.from({ length: maxDays }, (_, i) => i + 1),
+        [maxDays]
+    );
 
     useEffect(() => {
         if (!selectedDay) return;
@@ -52,7 +47,7 @@ export default function BirthdayPicker() {
 
     return (
         <FlexBox gap={1} sx={{ flexDirection: "row" }}>
-            {/* DAY (comes first in RTL -> right side) */}
+            {/* DAY */}
             <Controller
                 name="birth_day"
                 control={control}
@@ -60,7 +55,7 @@ export default function BirthdayPicker() {
                     <FormControl fullWidth error={!!error} size="medium">
                         <Select {...field} displayEmpty>
                             <MenuItem value="" disabled>
-                                {t("date.day", "روز")}
+                                {t("date.day")}
                             </MenuItem>
 
                             {days.map((day) => (
@@ -83,12 +78,12 @@ export default function BirthdayPicker() {
                     <FormControl fullWidth error={!!error} size="medium">
                         <Select {...field} displayEmpty>
                             <MenuItem value="" disabled>
-                                {t("date.month", "ماه")}
+                                {t("date.month")}
                             </MenuItem>
 
-                            {persianMonths.map((month) => (
-                                <MenuItem key={month.value} value={month.value}>
-                                    {month.label}
+                            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                                <MenuItem key={m} value={m}>
+                                    {t(`date.jalaliMonths.${m}`)}
                                 </MenuItem>
                             ))}
                         </Select>
@@ -106,7 +101,7 @@ export default function BirthdayPicker() {
                     <FormControl fullWidth error={!!error} size="medium">
                         <Select {...field} displayEmpty>
                             <MenuItem value="" disabled>
-                                {t("date.year", "سال")}
+                                {t("date.year")}
                             </MenuItem>
 
                             {years.map((year) => (

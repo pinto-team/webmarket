@@ -36,10 +36,10 @@ export default function PaymentCallbackPage() {
                 const orderData = await orderService.getOrder(orderId || orderCode || "");
                 setOrder(orderData);
 
-                const isSuccess = success === "true" || orderData?.status === 1;
+                const isSuccess = success === "true";
                 setStatus(isSuccess ? "success" : "failed");
             } catch (error) {
-                console.error(t("payment.callback.fetchError", "خطا در دریافت وضعیت سفارش"), error);
+                console.error(t("payment.callback.fetchError"), error);
                 setStatus("failed");
             }
         };
@@ -55,8 +55,7 @@ export default function PaymentCallbackPage() {
         );
     }
 
-    const orderCodeText =
-        order?.code != null ? toPersianNumber(String(order.code)) : null;
+    const orderCodeText = order?.code != null ? toPersianNumber(String(order.code)) : null;
 
     return (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px" p={2}>
@@ -64,6 +63,7 @@ export default function PaymentCallbackPage() {
                 {status === "success" ? (
                     <>
                         <CheckCircleIcon sx={{ fontSize: 80, color: "success.main", mb: 2 }} />
+
                         <Typography variant="h4" gutterBottom>
                             {t("payment.callback.successTitle")}
                         </Typography>
@@ -78,17 +78,14 @@ export default function PaymentCallbackPage() {
                             </Typography>
                         )}
 
-                        <Button
-                            variant="contained"
-                            size="large"
-                            onClick={() => router.push(order ? "/customer/orders" : "/")}
-                        >
+                        <Button variant="contained" size="large" onClick={() => router.push("/customer/orders")}>
                             {t("payment.callback.viewOrders")}
                         </Button>
                     </>
                 ) : (
                     <>
                         <ErrorIcon sx={{ fontSize: 80, color: "error.main", mb: 2 }} />
+
                         <Typography variant="h4" gutterBottom>
                             {t("payment.callback.failedTitle")}
                         </Typography>

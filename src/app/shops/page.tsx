@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import { ShopsPageView } from "pages-sections/shops/page-view";
 import { shopDataService } from "@/services/shopData.service";
+import { tServer } from "@/i18n/serverT";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-    return { title: "فروشگاه‌ها" };
+    return {
+        title: tServer("shops.metaTitle"),
+    };
 }
 
 export default async function Page() {
     const shops = await shopDataService.getShops();
 
-    // چون ShopsPageView props بیشتری می‌خواد، فعلاً ساده‌ترین:
     const totalShops = shops.length;
     const totalPages = 1;
     const firstIndex = totalShops ? 1 : 0;

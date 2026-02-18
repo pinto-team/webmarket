@@ -62,3 +62,9 @@ export const getProductImageUrls = {
   large: (product: any) => getProductImageUrl(product, '800x800'),
   original: (product: any) => getProductImageUrl(product),
 };
+
+
+export const isPlaceholderProductImage = (url?: string | null): boolean => {
+    if (!url) return true;
+    return url.includes("placeholder-product");
+};

@@ -30,7 +30,11 @@ import ProgressBar from "components/progress";
 import LayoutWrapper from "components/layouts/LayoutWrapper";
 import ShopDataLoader from "components/layouts/ShopDataLoader";
 
-// ✅ Use Next font instead of node_modules path
+import { getShopDataServer } from "@/utils/shopDataCache";
+import { tServer } from "@/i18n/serverT";
+
+export const dynamic = "force-dynamic";
+
 const vazirmatn = Vazirmatn({
     subsets: ["arabic"],
     weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -43,29 +47,48 @@ interface RootLayoutProps {
     modal: ReactNode;
 }
 
-export const dynamic = "force-dynamic";
-
-// ✅ Metadata from your real server cache util
-import { getShopDataServer } from "@/utils/shopDataCache";
-
 export async function generateMetadata(): Promise<Metadata> {
     const shopData = await getShopDataServer();
-    const title = shopData?.title || "فروشگاه آنلاین";
+
+    const title: string =
+        shopData?.title && shopData.title.trim().length > 0
+            ? shopData.title
+            : tServer<string>("meta.defaultTitle");
+
+    const description: string =
+        shopData?.footer_description &&
+        shopData.footer_description.trim().length > 0
+            ? shopData.footer_description
+            : tServer<string>("meta.defaultDescription");
+
+    const keywords: string[] =
+        Array.isArray(tServer<string[]>("meta.defaultKeywords"))
+            ? tServer<string[]>("meta.defaultKeywords")
+            : [];
 
     return {
         title: {
             default: title,
             template: `%s - ${title}`,
         },
-        description: shopData?.footer_description || "فروشگاه آنلاین با بهترین محصولات",
-        keywords: ["فروشگاه آنلاین", "خرید اینترنتی", title],
+        description,
+        keywords,
     };
 }
 
 export default async function RootLayout({ children, modal }: RootLayoutProps) {
     return (
-        <html lang="fa" dir="rtl" suppressHydrationWarning className={vazirmatn.variable}>
-        <body id="body" className={vazirmatn.className} suppressHydrationWarning>
+        <html
+            lang="fa"
+            dir="rtl"
+            suppressHydrationWarning
+            className={vazirmatn.variable}
+        >
+        <body
+            id="body"
+            className={vazirmatn.className}
+            suppressHydrationWarning
+        >
         <QueryProvider>
             <AuthProvider>
                 <CartProvider>

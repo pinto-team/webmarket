@@ -1,30 +1,31 @@
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
+
 // GLOBAL CUSTOM COMPONENTS
 import ProductCard1 from "components/product-cards/product-card-1";
-import {t} from "i18next";
+
+import { t } from "@/i18n/t";
 
 // ==============================================================
 type Props = { products: any[] };
 // ==============================================================
 
 export default function RelatedProducts({ products }: Props) {
-  // IF NO PRODUCTS RETURN NULL
-  if (!products || !products.length) return null;
+    if (!products || !products.length) return null;
 
-  return (
-    <div className="mb-4">
-      <Typography variant="h3" sx={{ mb: 3 }}>
-        {t("Related Products")}
-      </Typography>
+    return (
+        <div className="mb-4">
+            <Typography variant="h3" sx={{ mb: 3 }}>
+                {t("productDetail.relatedProducts")}
+            </Typography>
 
-      <Grid container spacing={3}>
-        {products.map((product) => (
-          <Grid size={{ lg: 3, md: 4, sm: 6, xs: 12 }} key={product.id}>
-            <ProductCard1 product={product} />
-          </Grid>
-        ))}
-      </Grid>
-    </div>
-  );
+            <Grid container spacing={3}>
+                {products.map((product) => (
+                    <Grid size={{ lg: 3, md: 4, sm: 6, xs: 12 }} key={product.id}>
+                        <ProductCard1 product={product} />
+                    </Grid>
+                ))}
+            </Grid>
+        </div>
+    );
 }

@@ -3,138 +3,151 @@ import Image from "next/image";
 import { Fragment, PropsWithChildren } from "react";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-// CUSTOM GLOBAL COMPONENTS
+
 import {
-  Footer1,
-  FooterApps,
-  FooterContact,
-  FooterLinksWidget,
-  FooterSocialLinks
+    Footer1,
+    FooterApps,
+    FooterContact,
+    FooterLinksWidget,
+    FooterSocialLinks,
 } from "components/footer";
 import { NavigationList } from "components/navbar";
 import { CategoryList } from "components/categories";
 import { SecondaryHeader } from "components/secondary-header";
 import { MobileMenu } from "components/mobile-navbar/mobile-menu";
 import { MobileNavigationBar } from "components/mobile-navigation";
-import { SearchInput1, SearchInput2 } from "components/search-box";
 import UniversalSearchBar from "components/search/UniversalSearchBar";
 import { Topbar, TopbarSocialLinks } from "components/topbar";
 import { Header, HeaderCart, HeaderLogin, HeaderSearch, MobileHeader } from "components/header";
-// CUSTOM DATA MODEL
-import LayoutModel from "models/Layout.model";
 
-// ==============================================================
+import LayoutModel from "models/Layout.model";
+import { t } from "@/i18n/t";
+import { toPersianNumber } from "@/utils/persian";
+
 interface Props extends PropsWithChildren {
-  data: LayoutModel;
+    data: LayoutModel;
 }
-// ==============================================================
 
 export default function SalesLayout({ children, data }: Props) {
-  const { header, topbar, mobileNavigation, footer } = data;
+    const { header, topbar, mobileNavigation, footer } = data;
 
-  const MOBILE_VERSION_HEADER = (
-    <MobileHeader>
-      <MobileHeader.Left>
-        <MobileMenu navigation={header.navigation} />
-      </MobileHeader.Left>
+    const year = toPersianNumber(new Date().getFullYear());
 
-      <MobileHeader.Logo logoUrl={mobileNavigation.logo} />
+    const MOBILE_VERSION_HEADER = (
+        <MobileHeader>
+            <MobileHeader.Left>
+                <MobileMenu navigation={header.navigation} />
+            </MobileHeader.Left>
 
-      <MobileHeader.Right>
-        <HeaderSearch>
-          <UniversalSearchBar size="small" />
-        </HeaderSearch>
+            <MobileHeader.Logo logoUrl={mobileNavigation.logo} />
 
-        <HeaderLogin />
-        <HeaderCart />
-      </MobileHeader.Right>
-    </MobileHeader>
-  );
+            <MobileHeader.Right>
+                <HeaderSearch>
+                    <UniversalSearchBar size="small" />
+                </HeaderSearch>
 
-  return (
-    <Fragment>
-      <Topbar>
-        <Topbar.Left label={topbar.label} title={topbar.title} />
+                <HeaderLogin />
+                <HeaderCart />
+            </MobileHeader.Right>
+        </MobileHeader>
+    );
 
-        <Topbar.Right>
-          
-          <TopbarSocialLinks links={topbar.socials} />
-        </Topbar.Right>
-      </Topbar>
+    return (
+        <Fragment>
+            <Topbar>
+                <Topbar.Left label={topbar.label} title={topbar.title} />
 
-      <Header mobileHeader={MOBILE_VERSION_HEADER}>
-        <Header.Left>
-          <Header.Logo url={header.logo} />
-        </Header.Left>
+                <Topbar.Right>
+                    <TopbarSocialLinks links={topbar.socials} />
+                </Topbar.Right>
+            </Topbar>
 
-        <Header.Mid>
-          <NavigationList navigation={header.navigation} />
-        </Header.Mid>
+            <Header mobileHeader={MOBILE_VERSION_HEADER}>
+                <Header.Left>
+                    <Header.Logo url={header.logo} />
+                </Header.Left>
 
-        <Header.Right>
-          <HeaderLogin />
-          <HeaderCart />
-        </Header.Right>
-      </Header>
+                <Header.Mid>
+                    <NavigationList navigation={header.navigation} />
+                </Header.Mid>
 
-      <SecondaryHeader elevation={0}>
-        <SecondaryHeader.Left>
-          <CategoryList categories={header.categoryMenus} />
-        </SecondaryHeader.Left>
+                <Header.Right>
+                    <HeaderLogin />
+                    <HeaderCart />
+                </Header.Right>
+            </Header>
 
-        <SecondaryHeader.Right>
-          <UniversalSearchBar />
-        </SecondaryHeader.Right>
-      </SecondaryHeader>
+            <SecondaryHeader elevation={0}>
+                <SecondaryHeader.Left>
+                    <CategoryList categories={header.categoryMenus} />
+                </SecondaryHeader.Left>
 
-      {children}
+                <SecondaryHeader.Right>
+                    <UniversalSearchBar />
+                </SecondaryHeader.Right>
+            </SecondaryHeader>
 
-      <Footer1>
-        <Footer1.Brand>
-          <Link href="/">
-            <Image src={footer.logo} alt="logo" width={105} height={50} />
-          </Link>
+            {children}
 
-          <Typography
-            variant="body1"
-            sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}>
-            {footer.description}
-          </Typography>
+            <Footer1>
+                <Footer1.Brand>
+                    <Link href="/">
+                        <Image
+                            src={footer.logo}
+                            alt={t("common.logoAlt")}
+                            width={105}
+                            height={50}
+                        />
+                    </Link>
 
-          <FooterApps playStoreUrl={footer.playStoreUrl} appleStoreUrl={footer.appStoreUrl} />
-        </Footer1.Brand>
+                    <Typography
+                        variant="body1"
+                        sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}
+                    >
+                        {footer.description}
+                    </Typography>
 
-        <Footer1.Widget1>
-          <FooterLinksWidget title="درباره ما" links={footer.about} />
-        </Footer1.Widget1>
+                    <FooterApps
+                        playStoreUrl={footer.playStoreUrl}
+                        appleStoreUrl={footer.appStoreUrl}
+                    />
+                </Footer1.Brand>
 
-        <Footer1.Widget2>
-          <FooterLinksWidget title="خدمات مشتریان" links={footer.customers} />
-        </Footer1.Widget2>
+                <Footer1.Widget1>
+                    <FooterLinksWidget title={t("footer.aboutTitle")} links={footer.about} />
+                </Footer1.Widget1>
 
-        <Footer1.Contact>
-          <FooterContact
-            phone={footer.contact.phone}
-            email={footer.contact.email}
-            address={footer.contact.address}
-          />
+                <Footer1.Widget2>
+                    <FooterLinksWidget title={t("footer.customerServicesTitle")} links={footer.customers} />
+                </Footer1.Widget2>
 
-          <FooterSocialLinks links={footer.socials} />
-        </Footer1.Contact>
+                <Footer1.Contact>
+                    <FooterContact
+                        phone={footer.contact.phone}
+                        email={footer.contact.email}
+                        address={footer.contact.address}
+                    />
 
-        <Footer1.Copyright>
-          <Divider sx={{ borderColor: "grey.800" }} />
+                    <FooterSocialLinks links={footer.socials} />
+                </Footer1.Contact>
 
-          <Typography
-            variant="body2"
-            sx={{ py: 3, textAlign: "center", span: { fontWeight: 500 } }}>
-            &copy; Copyright {new Date().getFullYear()} <span>تاووني</span>, کلیه حقوق محفوظ است.
-          </Typography>
-        </Footer1.Copyright>
-      </Footer1>
+                <Footer1.Copyright>
+                    <Divider sx={{ borderColor: "grey.800" }} />
 
-      {/* SMALLER DEVICE NAVIGATION */}
-      <MobileNavigationBar navigation={mobileNavigation.version1} />
-    </Fragment>
-  );
+                    <Typography
+                        variant="body2"
+                        sx={{ py: 3, textAlign: "center", span: { fontWeight: 500 } }}
+                    >
+                        {t("footer.copyrightLine", {
+                            year,
+                            brand: t("footer.brandName"),
+                            rights: t("footer.allRightsReserved"),
+                        })}
+                    </Typography>
+                </Footer1.Copyright>
+            </Footer1>
+
+            <MobileNavigationBar navigation={mobileNavigation.version1} />
+        </Fragment>
+    );
 }

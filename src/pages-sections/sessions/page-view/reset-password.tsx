@@ -3,16 +3,16 @@
 import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
 
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import { TextField, FormProvider } from "components/form-hook";
+import { FormProvider, TextField } from "components/form-hook";
 import FlexRowCenter from "components/flex-box/flex-row-center";
 
 import BoxLink from "../components/box-link";
@@ -30,23 +30,20 @@ export default function ResetPasswordPageView() {
     const { visiblePassword, togglePasswordVisible } = usePasswordVisible();
 
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
-    const [step, setStep] = useState<Step>("request");
-
-    const [username, setUsername] = useState("");
     const [mobile, setMobile] = useState("");
+    const [step, setStep] = useState<Step>("request");
+    const [success, setSuccess] = useState<string | null>(null);
+    const [username, setUsername] = useState("");
 
-    // STEP 1: REQUEST OTP
-    const requestSchema = yup.object().shape({
-        username: yup.string().required(t("validation.required")),
+    const requestSchema = yup.object({
         mobile: yup
             .string()
             .matches(/^09[0-9]{9}$/, t("validation.mobile"))
             .required(t("validation.required")),
+        username: yup.string().required(t("validation.required")),
     });
 
-    // STEP 2: RESET PASSWORD WITH OTP
-    const resetSchema = yup.object().shape({
+    const resetSchema = yup.object({
         confirmCode: yup
             .string()
             .matches(/^[0-9]{5}$/, t("validation.codeLength"))
@@ -62,14 +59,24 @@ export default function ResetPasswordPageView() {
     });
 
     const requestMethods = useForm({
-        defaultValues: { username: "", mobile: "" },
+        defaultValues: { mobile: "", username: "" },
         resolver: yupResolver(requestSchema),
     });
 
     const resetMethods = useForm({
-        defaultValues: { confirmCode: "", password: "", password_confirmation: "" },
+        defaultValues: {
+            confirmCode: "",
+            password: "",
+            password_confirmation: "",
+        },
         resolver: yupResolver(resetSchema),
     });
+
+    const inputProps = {
+        endAdornment: (
+            <EyeToggleButton show={visiblePassword} click={togglePasswordVisible} />
+        ),
+    };
 
     const handleRequestOTP = requestMethods.handleSubmit(async (values) => {
         try {
@@ -77,22 +84,22 @@ export default function ResetPasswordPageView() {
             setSuccess(null);
 
             const payload = {
-                username: toEnglishNumber(String(values.username)),
                 mobile: toEnglishNumber(String(values.mobile)),
+                username: toEnglishNumber(String(values.username)),
             };
 
             await authService.passwordLost(payload as any);
 
-            setUsername(payload.username);
             setMobile(payload.mobile);
-
-            setSuccess(t("messages.otpSent", t("messages.success", t("common.success"))));
+            setUsername(payload.username);
+            setSuccess(t("messages.otpSent"));
             setStep("reset");
         } catch (err: any) {
             const errorMsg =
                 err?.validationMessage ||
                 err?.response?.data?.message ||
                 t("errors.general");
+
             setError(errorMsg);
         }
     });
@@ -103,29 +110,30 @@ export default function ResetPasswordPageView() {
             setSuccess(null);
 
             await authService.passwordReset({
-                username,
-                password: values.password,
                 code: toEnglishNumber(String(values.confirmCode)),
+                password: values.password,
+                username,
             } as any);
 
-            setSuccess(t("messages.passwordResetSuccess", t("common.success")));
+            setSuccess(t("messages.passwordResetSuccess"));
             setTimeout(() => router.push("/login"), 2000);
         } catch (err: any) {
             const errorMsg =
                 err?.validationMessage ||
                 err?.response?.data?.message ||
                 t("errors.general");
+
             setError(errorMsg);
         }
     });
 
-    const inputProps = {
-        endAdornment: <EyeToggleButton show={visiblePassword} click={togglePasswordVisible} />,
-    };
-
     return (
         <Fragment>
-            <Typography variant="h3" fontWeight={700} sx={{ mb: 4, textAlign: "center" }}>
+            <Typography
+                variant="h3"
+                fontWeight={700}
+                sx={{ mb: 4, textAlign: "center" }}
+            >
                 {t("auth.resetPassword")}
             </Typography>
 
@@ -142,48 +150,62 @@ export default function ResetPasswordPageView() {
             )}
 
             {step === "request" ? (
-                <FormProvider key="request-form" methods={requestMethods} onSubmit={handleRequestOTP}>
+                <FormProvider
+                    key="request-form"
+                    methods={requestMethods}
+                    onSubmit={handleRequestOTP}
+                >
                     <Stack spacing={3}>
                         <TextField
                             fullWidth
                             name="username"
-                            label={t("auth.nationalId", t("auth.email"))}
+                            label={t("auth.usernameOrEmail")}
+                            placeholder={t("auth.usernameOrEmail")}
                             size="medium"
-                            placeholder={t("auth.usernameOrEmail", t("auth.email"))}
-                            onChange={(e) => {
-                                requestMethods.setValue("username", toEnglishNumber(e.target.value) as any);
-                            }}
+                            onChange={(e) =>
+                                requestMethods.setValue(
+                                    "username",
+                                    toEnglishNumber(e.target.value) as any
+                                )
+                            }
                         />
 
                         <TextField
                             fullWidth
                             name="mobile"
                             label={t("auth.mobile")}
+                            placeholder={t("auth.mobile")}
                             size="medium"
-                            placeholder="09123456789"
                             onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9۰-۹]/g, "");
-                                requestMethods.setValue("mobile", toEnglishNumber(value) as any);
+                                requestMethods.setValue(
+                                    "mobile",
+                                    toEnglishNumber(value) as any
+                                );
                             }}
                             slotProps={{
-                                htmlInput: { maxLength: 11, inputMode: "numeric" },
+                                htmlInput: { inputMode: "numeric", maxLength: 11 },
                             }}
                         />
 
                         <Button
                             fullWidth
+                            color="primary"
+                            loading={requestMethods.formState.isSubmitting}
                             size="large"
                             type="submit"
-                            color="primary"
                             variant="contained"
-                            loading={requestMethods.formState.isSubmitting}
                         >
-                            {t("auth.sendVerificationCode", t("auth.verificationCode"))}
+                            {t("auth.sendVerificationCode")}
                         </Button>
                     </Stack>
                 </FormProvider>
             ) : (
-                <FormProvider key="reset-form" methods={resetMethods} onSubmit={handleResetPassword}>
+                <FormProvider
+                    key="reset-form"
+                    methods={resetMethods}
+                    onSubmit={handleResetPassword}
+                >
                     <Stack spacing={3}>
                         <Alert severity="info">
                             {t("messages.otpSentToMobile")} {toPersianNumber(mobile)}
@@ -193,23 +215,26 @@ export default function ResetPasswordPageView() {
                             fullWidth
                             name="confirmCode"
                             label={t("auth.verificationCode")}
+                            placeholder={t("auth.verificationCode")}
                             size="medium"
-                            placeholder="12345"
                             onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9۰-۹]/g, "");
-                                resetMethods.setValue("confirmCode", toEnglishNumber(value) as any);
+                                resetMethods.setValue(
+                                    "confirmCode",
+                                    toEnglishNumber(value) as any
+                                );
                             }}
                             slotProps={{
-                                htmlInput: { maxLength: 5, inputMode: "numeric" },
+                                htmlInput: { inputMode: "numeric", maxLength: 5 },
                             }}
                         />
 
                         <TextField
                             fullWidth
                             name="password"
-                            label={t("auth.newPassword", t("profile.changePassword"))}
+                            label={t("auth.newPassword")}
+                            placeholder={t("auth.passwordPlaceholder")}
                             size="medium"
-                            placeholder="*********"
                             type={visiblePassword ? "text" : "password"}
                             slotProps={{ input: inputProps }}
                         />
@@ -218,19 +243,19 @@ export default function ResetPasswordPageView() {
                             fullWidth
                             name="password_confirmation"
                             label={t("profile.confirmPassword")}
+                            placeholder={t("auth.passwordPlaceholder")}
                             size="medium"
-                            placeholder="*********"
                             type={visiblePassword ? "text" : "password"}
                             slotProps={{ input: inputProps }}
                         />
 
                         <Button
                             fullWidth
+                            color="primary"
+                            loading={resetMethods.formState.isSubmitting}
                             size="large"
                             type="submit"
-                            color="primary"
                             variant="contained"
-                            loading={resetMethods.formState.isSubmitting}
                         >
                             {t("auth.resetPassword")}
                         </Button>

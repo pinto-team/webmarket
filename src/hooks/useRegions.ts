@@ -1,62 +1,64 @@
-import { useState, useEffect } from 'react';
-import { RegionResource } from '@/types/region.types';
-import { regionService } from '@/services/region.service';
+import { useState, useEffect } from "react";
+import { RegionResource } from "@/types/region.types";
+import { regionService } from "@/services/region.service";
+import { t } from "@/i18n/t";
 
 export const useRegions = () => {
-  const [provinces, setProvinces] = useState<RegionResource[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const [provinces, setProvinces] = useState<RegionResource[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await regionService.getRegions();
-        // فیلتر کردن استانها (parent_id === null)
-        const provinces = data.filter(region => region.parent_id === null);
-        setProvinces(provinces);
-      } catch (err) {
-        setError('خطا در دریافت لیست استانها');
-        setProvinces([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+    useEffect(() => {
+        const fetchProvinces = async () => {
+            setLoading(true);
+            setError(null);
 
-    fetchProvinces();
-  }, []);
+            try {
+                const data = await regionService.getRegions();
+                const provinces = data.filter((region) => region.parent_id === null);
+                setProvinces(provinces);
+            } catch {
+                setError(t("addresses.form.errors.provincesFetchError"));
+                setProvinces([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  return { provinces, loading, error };
+        fetchProvinces();
+    }, []);
+
+    return { provinces, loading, error };
 };
 
 export const useCities = (provinceId: number | null) => {
-  const [cities, setCities] = useState<RegionResource[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const [cities, setCities] = useState<RegionResource[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!provinceId || provinceId === 0) {
-      setCities([]);
-      return;
-    }
+    useEffect(() => {
+        if (!provinceId || provinceId === 0) {
+            setCities([]);
+            return;
+        }
 
-    const fetchCities = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await regionService.getRegions(provinceId);
-        setCities(data);
-      } catch (err) {
-        setError('خطا در دریافت لیست شهرها');
-        setCities([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+        const fetchCities = async () => {
+            setLoading(true);
+            setError(null);
 
-    fetchCities();
-  }, [provinceId]);
+            try {
+                const data = await regionService.getRegions(provinceId);
+                setCities(data);
+            } catch {
+                setError(t("addresses.form.errors.citiesFetchError"));
+                setCities([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  return { cities, loading, error };
+        fetchCities();
+    }, [provinceId]);
+
+    return { cities, loading, error };
 };

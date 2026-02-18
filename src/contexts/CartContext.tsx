@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
+import {
+    createContext,
+    PropsWithChildren,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { useSnackbar } from "notistack";
 
 import { cartService } from "@/services/cart.service";
@@ -22,12 +29,12 @@ interface CartContextType {
     refreshCart: () => Promise<void>;
 }
 
-export const CartContext = createContext<CartContextType>({} as CartContextType);
+export const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const useCart = () => {
     const context = useContext(CartContext);
-    if (!context) {
-        throw new Error(t("errors.general", "خطایی رخ داده است"));
+    if (context === undefined) {
+        throw new Error(t("errors.general"));
     }
     return context;
 };
@@ -46,7 +53,7 @@ export default function CartProvider({ children }: PropsWithChildren) {
     );
 
     const subtotal = useMemo(
-        () => cart.reduce((sum, item) => sum + ((item.sku?.price || 0) * (item.quantity || 0)), 0),
+        () => cart.reduce((sum, item) => sum + (item.sku?.price || 0) * (item.quantity || 0), 0),
         [cart]
     );
 

@@ -30,21 +30,24 @@ export default function LoginPageView() {
     const [sessionExpired, setSessionExpired] = useState(false);
 
     useEffect(() => {
-        if (searchParams.get("session_expired") === "true") {
-            setSessionExpired(true);
-        }
+        setSessionExpired(searchParams.get("session_expired") === "true");
     }, [searchParams]);
 
-    const validationSchema = yup.object().shape({
+    const validationSchema = yup.object({
         username: yup
             .string()
             .matches(/^[0-9]{10}$/, t("validation.nationalIdLength"))
             .required(t("validation.required")),
-        password: yup.string().required(t("validation.required")),
+        password: yup
+            .string()
+            .required(t("validation.required")),
     });
 
     const methods = useForm({
-        defaultValues: { username: "", password: "" },
+        defaultValues: {
+            username: "",
+            password: "",
+        },
         resolver: yupResolver(validationSchema),
     });
 
@@ -63,7 +66,8 @@ export default function LoginPageView() {
             const errorMsg =
                 err?.validationMessage ||
                 err?.response?.data?.message ||
-                t("auth.loginFailed", t("errors.general"));
+                t("errors.general");
+
             setError(errorMsg);
         }
     });
@@ -88,13 +92,16 @@ export default function LoginPageView() {
                     fullWidth
                     name="username"
                     size="medium"
-                    placeholder="1234567890"
+                    placeholder={t("auth.nationalIdPlaceholder")}
                     onChange={(e) => {
                         const value = e.target.value.replace(/[^0-9۰-۹]/g, "");
                         methods.setValue("username", toEnglishNumber(value) as any);
                     }}
                     slotProps={{
-                        htmlInput: { maxLength: 10, inputMode: "numeric" },
+                        htmlInput: {
+                            maxLength: 10,
+                            inputMode: "numeric",
+                        },
                     }}
                 />
             </div>
@@ -105,13 +112,16 @@ export default function LoginPageView() {
                     fullWidth
                     size="medium"
                     name="password"
-                    autoComplete="on"
-                    placeholder="*********"
+                    autoComplete="current-password"
+                    placeholder={t("auth.passwordPlaceholder")}
                     type={visiblePassword ? "text" : "password"}
                     slotProps={{
                         input: {
                             endAdornment: (
-                                <EyeToggleButton show={visiblePassword} click={togglePasswordVisible} />
+                                <EyeToggleButton
+                                    show={visiblePassword}
+                                    click={togglePasswordVisible}
+                                />
                             ),
                         },
                     }}

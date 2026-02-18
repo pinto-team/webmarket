@@ -8,52 +8,55 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 // STYLED COMPONENT
 import { SearchOutlinedIcon } from "./styles";
+import { t } from "@/i18n/t";
 
 export function SearchInput2() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [search, setSearch] = useState("");
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [search, setSearch] = useState("");
 
-  const handleSearch = useCallback(() => {
-    if (search.trim()) {
-      const params = new URLSearchParams(searchParams);
-      params.set("q", search);
-      router.push(`/products/search?${params.toString()}`);
-      setSearch("");
-    }
-  }, [router, searchParams, search]);
+    const handleSearch = useCallback(() => {
+        if (search.trim()) {
+            const params = new URLSearchParams(searchParams);
+            params.set("q", search);
+            router.push(`/products/search?${params.toString()}`);
+            setSearch("");
+        }
+    }, [router, searchParams, search]);
 
-  const INPUT_PROPS = {
-    sx: {
-      border: 0,
-      height: 44,
-      paddingRight: 0,
-      overflow: "hidden",
-      backgroundColor: "grey.50",
-      "& .MuiOutlinedInput-notchedOutline": { border: 0 }
-    },
-    endAdornment: (
-      <Button
-        color="primary"
-        disableElevation
-        variant="contained"
-        onClick={handleSearch}
-        sx={{ px: "3rem", height: "100%", borderRadius: "0 4px 4px 0" }}>
-        جستجو
-      </Button>
-    ),
-    startAdornment: <SearchOutlinedIcon fontSize="small" />
-  };
+    const INPUT_PROPS = {
+        sx: {
+            border: 0,
+            height: 44,
+            paddingRight: 0,
+            overflow: "hidden",
+            backgroundColor: "grey.50",
+            "& .MuiOutlinedInput-notchedOutline": { border: 0 }
+        },
+        endAdornment: (
+            <Button
+                color="primary"
+                disableElevation
+                variant="contained"
+                onClick={handleSearch}
+                sx={{ px: "3rem", height: "100%", borderRadius: "0 4px 4px 0" }}
+            >
+                {t("search.submit")}
+            </Button>
+        ),
+        startAdornment: <SearchOutlinedIcon fontSize="small" />
+    };
 
-  return (
-    <Box position="relative" flex="1 1 0" maxWidth={670} mx="auto">
-      <TextField
-        fullWidth
-        variant="outlined"
-        placeholder="جستجو..."
-        onChange={(e) => setSearch(e.target.value)}
-        slotProps={{ input: INPUT_PROPS }}
-      />
-    </Box>
-  );
+    return (
+        <Box position="relative" flex="1 1 0" maxWidth={670} mx="auto">
+            <TextField
+                fullWidth
+                variant="outlined"
+                placeholder={t("search.placeholder")}
+                aria-label={t("search.ariaLabel")}
+                onChange={(e) => setSearch(e.target.value)}
+                slotProps={{ input: INPUT_PROPS }}
+            />
+        </Box>
+    );
 }

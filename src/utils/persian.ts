@@ -65,3 +65,40 @@ export const formatPersianDateTime = (date: string | Date): string => {
     return dateObj.toLocaleString("fa-IR");
 };
 
+export const formatPersianRelativeTime = (dateInput: string | Date): string => {
+    const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+    const now = new Date();
+
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+
+    if (diffSec < 60) return "همین الآن";
+
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${toPersianNumber(diffMin)} دقیقه قبل`;
+
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${toPersianNumber(diffHour)} ساعت قبل`;
+
+    const diffDay = Math.floor(diffHour / 24);
+    return `${toPersianNumber(diffDay)} روز قبل`;
+};
+
+export const formatPersianDateLong = (dateInput: Date | string): string => {
+    const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+    const formatter = new Intl.DateTimeFormat("fa-IR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+    return formatter.format(date);
+};
+
+
+export const getCurrentJalaliYear = (): number => {
+    const parts = new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric" })
+        .formatToParts(new Date());
+    const yearPart = parts.find((p) => p.type === "year")?.value || "0";
+    const latinYear = yearPart.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d).toString());
+    return Number(latinYear);
+};

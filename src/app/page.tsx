@@ -7,8 +7,7 @@ import { tServer } from "@/i18n/serverT";
 export async function generateMetadata(): Promise<Metadata> {
     const shopData = await getShopDataServer();
 
-    // no hardcoded strings ✅
-    const pageName = tServer<string>("meta.pageName.shop", "فروشگاه");
+    const pageName = tServer<string>("meta.pageName.shop");
 
     return generatePageMetadata(pageName, shopData);
 }

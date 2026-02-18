@@ -1,78 +1,73 @@
-import { AxiosError } from "axios";
 import { enqueueSnackbar } from "notistack";
+import { t } from "@/i18n/t";
 
 export interface ValidationErrors {
-  [field: string]: string;
+    [field: string]: string;
 }
 
 export interface ErrorHandlerResult {
-  message: string;
-  validationErrors?: ValidationErrors;
-  shouldShowToast?: boolean;
+    messageKey: string;
+    messageParams?: Record<string, any>;
+    validationErrors?: ValidationErrors;
+    shouldShowToast?: boolean;
 }
 
-/**
- * مدیریت مرکزی خطاهای API
- */
 export const handleApiError = (error: any): ErrorHandlerResult => {
-  // خطای شبکه
-  if (!error.response) {
-    return {
-      message: "خطا در اتصال به سرور",
-      shouldShowToast: true
-    };
-  }
-
-  const { status, data } = error.response;
-
-  switch (status) {
-    case 401:
-      return {
-        message: "جلسه شما منقضی شده است",
-        shouldShowToast: false // چون در interceptor هندل میشه
-      };
-
-    case 422:
-      // خطاهای validation که از interceptor میان
-      if (error.validationErrors) {
+    if (!error?.response) {
         return {
-          message: error.validationMessage || "اطلاعات وارد شده نامعتبر است",
-          validationErrors: error.validationErrors,
-          shouldShowToast: false
+            messageKey: "errors.network",
+            shouldShowToast: true,
         };
-      }
-      return {
-        message: data?.message || "اطلاعات وارد شده نامعتبر است",
-        shouldShowToast: true
-      };
+    }
 
-    case 404:
-      return {
-        message: "اطلاعات مورد نظر یافت نشد",
-        shouldShowToast: true
-      };
+    const status = error.response?.status as number | undefined;
 
-    case 500:
-      return {
-        message: "خطای داخلی سرور",
-        shouldShowToast: true
-      };
+    switch (status) {
+        case 401:
+            return {
+                messageKey: "auth.sessionExpired",
+                shouldShowToast: false,
+            };
 
-    default:
-      return {
-        message: data?.message || "خطای غیرمنتظره",
-        shouldShowToast: true
-      };
-  }
+        case 422:
+            if (error?.validationErrors) {
+                return {
+                    messageKey: error?.validationMessageKey || "validation.invalidInput",
+                    validationErrors: error.validationErrors,
+                    shouldShowToast: false,
+                };
+            }
+            return {
+                messageKey: "validation.invalidInput",
+                shouldShowToast: true,
+            };
+
+        case 404:
+            return {
+                messageKey: "errors.notFound",
+                shouldShowToast: true,
+            };
+
+        case 500:
+            return {
+                messageKey: "errors.serverError",
+                shouldShowToast: true,
+            };
+
+        default:
+            return {
+                messageKey: "errors.general",
+                shouldShowToast: true,
+            };
+    }
 };
 
-/**
- * نمایش خطا با toast
- */
 export const showErrorToast = (error: any) => {
-  const result = handleApiError(error);
-  if (result.shouldShowToast) {
-    enqueueSnackbar(result.message, { variant: "error" });
-  }
-  return result;
+    const result = handleApiError(error);
+
+    if (result.shouldShowToast) {
+        enqueueSnackbar(t(result.messageKey, result.messageParams), { variant: "error" });
+    }
+
+    return result;
 };
