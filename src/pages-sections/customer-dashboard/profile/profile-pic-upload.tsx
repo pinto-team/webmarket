@@ -67,7 +67,9 @@ export default function ProfilePicUpload({
                 upload_id: result.id,
             });
 
-            setAvatarUrl(result.main_url);
+            if (result.main_url) {
+                setAvatarUrl(result.main_url);
+            }
 
             toast.success(t("profile.avatarUploadSuccess"));
         } catch {

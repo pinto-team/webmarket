@@ -27,6 +27,21 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "pages-sections/*": [
+        "./pages-sections/*"
+      ],
+      "components/*": [
+        "./components/*"
+      ],
+      "contexts/*": [
+        "./contexts/*"
+      ],
+      "providers/*": [
+        "./providers/*"
+      ],
+      "theme/*": [
+        "./theme/*"
       ]
     }
   },

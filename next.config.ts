@@ -7,6 +7,10 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  experimental: {
+    turbopackUseSystemTlsCerts: true,
+    optimizePackageImports: ["@mui/material", "@mui/icons-material", "lodash"],
+  },
   images: {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

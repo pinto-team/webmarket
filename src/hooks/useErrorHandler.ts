@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useSnackbar } from "notistack";
+
+import { t } from "@/i18n/t";
 import { handleApiError, ValidationErrors } from "@/utils/errorHandler";
 
 export const useErrorHandler = () => {
@@ -9,19 +11,20 @@ export const useErrorHandler = () => {
 
   const handleError = (err: any) => {
     const result = handleApiError(err);
-    
+    const message = t(result.messageKey, result.messageParams);
+
     if (result.validationErrors) {
       setFieldErrors(result.validationErrors);
       setError(null);
     } else {
-      setError(result.message);
+      setError(message);
       setFieldErrors({});
     }
-    
+
     if (result.shouldShowToast) {
-      enqueueSnackbar(result.message, { variant: "error" });
+      enqueueSnackbar(message, { variant: "error" });
     }
-    
+
     return result;
   };
 
@@ -35,6 +38,6 @@ export const useErrorHandler = () => {
     fieldErrors,
     setFieldErrors,
     handleError,
-    clearErrors
+    clearErrors,
   };
 };
