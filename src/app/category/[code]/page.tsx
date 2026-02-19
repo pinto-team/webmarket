@@ -34,6 +34,13 @@ import { t } from '@/i18n/t';
 const SORT_OPTION_VALUES = ['most_visited', 'most_sales', 'lowest', 'highest'] as const;
 type SortOption = (typeof SORT_OPTION_VALUES)[number];
 
+const SORT_OPTION_LABEL_KEY: Record<SortOption, string> = {
+    most_visited: "products.sort.mostVisited",
+    most_sales: "products.sort.mostSales",
+    lowest: "products.sort.lowest",
+    highest: "products.sort.highest",
+};
+
 export default function CategoryPage({ params }: { params: Promise<{ code: string }> }) {
     const { code } = use(params);
     const router = useRouter();
@@ -68,7 +75,7 @@ export default function CategoryPage({ params }: { params: Promise<{ code: strin
         () =>
             SORT_OPTION_VALUES.map((value) => ({
                 value,
-                label: t(`products.sort.${value}`),
+                label: t(SORT_OPTION_LABEL_KEY[value]),
             })),
         []
     );
