@@ -17,11 +17,11 @@ export default function ProductNotFound() {
                 </Typography>
 
                 <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
-                    {t("product.notFound.title")}
+                    {t("products.notFound.title")}
                 </Typography>
 
                 <Typography variant="body1" sx={{ mb: 4, color: "text.secondary" }}>
-                    {t("product.notFound.description")}
+                    {t("products.notFound.description")}
                 </Typography>
 
                 <Box
@@ -38,7 +38,7 @@ export default function ProductNotFound() {
                         href="/products"
                         size="large"
                     >
-                        {t("product.notFound.viewAll")}
+                        {t("products.notFound.viewAll")}
                     </Button>
 
                     <Button
@@ -47,7 +47,7 @@ export default function ProductNotFound() {
                         href="/"
                         size="large"
                     >
-                        {t("product.notFound.goHome")}
+                        {t("products.notFound.goHome")}
                     </Button>
                 </Box>
             </Box>

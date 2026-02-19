@@ -16,6 +16,21 @@ const getDaysInMonth = (month: number) => {
 
 const YEARS_RANGE = 100;
 
+const JALALI_MONTH_KEYS = [
+    "date.jalaliMonths.1",
+    "date.jalaliMonths.2",
+    "date.jalaliMonths.3",
+    "date.jalaliMonths.4",
+    "date.jalaliMonths.5",
+    "date.jalaliMonths.6",
+    "date.jalaliMonths.7",
+    "date.jalaliMonths.8",
+    "date.jalaliMonths.9",
+    "date.jalaliMonths.10",
+    "date.jalaliMonths.11",
+    "date.jalaliMonths.12",
+] as const;
+
 export default function BirthdayPicker() {
     const { control, watch, setValue } = useFormContext();
 
@@ -81,9 +96,9 @@ export default function BirthdayPicker() {
                                 {t("date.month")}
                             </MenuItem>
 
-                            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                                <MenuItem key={m} value={m}>
-                                    {t(`date.jalaliMonths.${m}`)}
+                            {JALALI_MONTH_KEYS.map((monthKey, index) => (
+                                <MenuItem key={monthKey} value={index + 1}>
+                                    {t(monthKey)}
                                 </MenuItem>
                             ))}
                         </Select>
