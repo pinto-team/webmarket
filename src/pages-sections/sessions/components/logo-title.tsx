@@ -3,16 +3,15 @@
 import Typography from "@mui/material/Typography";
 import FlexRowCenter from "components/flex-box/flex-row-center";
 
-import { useShopData } from "@/contexts/ShopDataContext";
 import { getServerImageUrl } from "@/utils/imageUtils";
 import { t } from "@/i18n/t";
+import {useShopData} from "@/contexts/ShopDataProvider";
 
 export default function LogoWithTitle() {
     const { shopData } = useShopData();
 
     const fallbackLogo = "/assets/images/logo2.svg";
 
-    // ✅ فقط مدل proxy_url
     const logoUrl =
         shopData?.header_logo
             ? getServerImageUrl(shopData.header_logo, "90x90")

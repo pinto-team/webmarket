@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import ShopLayout1 from "./shop-layout-1";
-import { useShopData } from "contexts/ShopDataContext";
+import {useShopData} from "@/contexts/ShopDataProvider";
 
 interface Props {
     children: ReactNode;

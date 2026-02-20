@@ -1,9 +1,9 @@
 'use client';
 
-import {useShopData} from '@/contexts/ShopDataContext';
 import {CategoryList} from 'components/categories';
 import type {CategoryMenuItem} from 'models/Category.model';
 import type {ProductCategory} from '@/types/shopData.types';
+import {useShopData} from "@/contexts/ShopDataProvider";
 
 function mapToMenuItem(cat: ProductCategory): CategoryMenuItem {
     return {

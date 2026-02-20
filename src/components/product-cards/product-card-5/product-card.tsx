@@ -1,6 +1,6 @@
 import Link from "next/link";
 // GLOBAL CUSTOM COMPONENTS
-import { ProductImage } from "components/common/ProductImage";
+import ProductImage from "@/components/common/ProductImage";
 // LOCAL CUSTOM COMPONENTS
 import ProductPrice from "../product-price";
 import ProductTitle from "../product-title";

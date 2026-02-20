@@ -5,110 +5,165 @@ import { Box, type SxProps, type Theme } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 
 import {
-    getProductImageUrl,
+    getServerImageUrl,
     isPlaceholderProductImage,
-    PLACEHOLDER_PRODUCT_IMAGE,
+    PLACEHOLDER_IMAGE_URL,
 } from "@/utils/imageUtils";
-import { t } from "@/i18n/t";
 
 type FallbackMode = "icon" | "placeholder";
 
-interface ProductImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+export interface ProductImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+    /**
+     * Any entity that may include proxy_url in one of these forms:
+     * - entity.upload.proxy_url
+     * - entity.proxy_url
+     * - entity.image.proxy_url
+     * - entity.icon.proxy_url
+     */
+    entity?: any;
+
+    /**
+     * Backward compatible alias:
+     * Many places in your code likely use `product={...}`.
+     * If both entity and product exist, entity wins.
+     */
     product?: any;
 
-    /** If provided, src wins over product */
+    /**
+     * If provided, src wins over entity/product.
+     * src is expected to be a proxy_url (may include {WIDTH}/{HEIGHT}/{QUALITY} template).
+     */
     src?: string;
 
-    alt?: string;
-
-    /** e.g. "300x300" */
+    /**
+     * e.g. "300x300"
+     * If not provided, it will be derived from width/height.
+     */
     size?: string;
 
-    /** Convenience: if size not provided */
-    width?: number;
-    height?: number;
+    /**
+     * Applied only when proxy_url is a template (has {WIDTH}/{HEIGHT}/{QUALITY}).
+     * default: 80
+     */
+    quality?: number;
 
-    /** Optional wrapper support (useful for MUI layouts) */
+    /**
+     * Optional wrapper support (useful in MUI layouts)
+     */
     wrapperSx?: SxProps<Theme>;
 
-    /** default: "icon" */
+    /**
+     * - "icon": show an icon box if image fails
+     * - "placeholder": fallback to PLACEHOLDER_IMAGE_URL if image fails
+     * default: "icon"
+     */
     fallback?: FallbackMode;
+
+    /**
+     * If true, renders only <img .../> without a wrapper <Box>.
+     * default: false
+     */
+    noWrapper?: boolean;
 }
 
-export const ProductImage: React.FC<ProductImageProps> = ({
-                                                              product,
-                                                              src,
-                                                              alt,
-                                                              width = 200,
-                                                              height = 200,
-                                                              size,
-                                                              className = "",
-                                                              style,
-                                                              wrapperSx,
-                                                              fallback = "icon",
-                                                              loading = "lazy",
-                                                              ...imgProps
-                                                          }) => {
-    const imageSize = useMemo(() => size || `${width}x${height}`, [size, width, height]);
+function deriveSize(size?: string, width?: any, height?: any): string | undefined {
+    if (size && String(size).trim().length > 0) return size;
+
+    const w = Number(width);
+    const h = Number(height);
+
+    // If width/height are not provided, let backend choose defaults (via template)
+    if (!Number.isFinite(w) || w <= 0 || !Number.isFinite(h) || h <= 0) return undefined;
+
+    return `${w}x${h}`;
+}
+
+export default function ProductImage({
+                                         entity,
+                                         product,
+                                         src,
+                                         size,
+                                         quality = 80,
+                                         alt = "image",
+                                         width,
+                                         height,
+                                         wrapperSx,
+                                         fallback = "icon",
+                                         loading = "lazy",
+                                         style,
+                                         className,
+                                         noWrapper = false,
+                                         ...imgProps
+                                     }: ProductImageProps) {
+    const imageSize = useMemo(() => deriveSize(size, width, height), [size, width, height]);
 
     const initialSrc = useMemo(() => {
-        if (src) return src;
-        if (product) return getProductImageUrl(product, imageSize);
-        return PLACEHOLDER_PRODUCT_IMAGE;
-    }, [src, product, imageSize]);
+        // src wins (assumed proxy_url)
+        if (src) return getServerImageUrl(src, imageSize, quality);
+
+        // entity wins over product
+        const base = entity ?? product;
+        if (base) return getServerImageUrl(base, imageSize, quality);
+
+        return PLACEHOLDER_IMAGE_URL;
+    }, [src, entity, product, imageSize, quality]);
 
     const [imgSrc, setImgSrc] = useState(initialSrc);
-    const [imgFailed, setImgFailed] = useState(false);
+    const [failed, setFailed] = useState(false);
 
-    // if inputs change, reset
+    // reset when inputs change
     useEffect(() => {
         setImgSrc(initialSrc);
-        setImgFailed(false);
+        setFailed(false);
     }, [initialSrc]);
 
-    const imageAlt = useMemo(() => {
-        return alt || product?.title || t("products.defaultAlt");
-    }, [alt, product]);
+    const showImg = !failed || fallback === "placeholder";
 
-    const isPlaceholder = isPlaceholderProductImage(imgSrc);
-    const showImg = !imgFailed || fallback === "placeholder";
+    const handleError: React.ReactEventHandler<HTMLImageElement> = (e) => {
+        // allow user handler first
+        imgProps.onError?.(e);
+
+        // prevent infinite loop
+        const current = (e.currentTarget as HTMLImageElement).src || imgSrc;
+        if (isPlaceholderProductImage(current) || isPlaceholderProductImage(imgSrc)) {
+            setFailed(true);
+            return;
+        }
+
+        if (fallback === "placeholder") {
+            setImgSrc(PLACEHOLDER_IMAGE_URL);
+            return;
+        }
+
+        // fallback === "icon"
+        setFailed(true);
+    };
+
+    const imgEl = (
+        <img
+            {...imgProps}
+            src={imgSrc}
+            alt={alt}
+            width={width}
+            height={height}
+            loading={loading}
+            className={className}
+            style={style}
+            onError={handleError}
+        />
+    );
+
+    if (noWrapper) return imgEl;
 
     return (
         <Box sx={{ display: "inline-block", ...wrapperSx }}>
             {showImg ? (
-                <img
-                    src={imgSrc}
-                    alt={imageAlt}
-                    width={width}
-                    height={height}
-                    className={className}
-                    style={style}
-                    loading={loading}
-                    onError={(e) => {
-                        // allow user handler first
-                        imgProps.onError?.(e);
-
-                        // Prevent infinite loops
-                        if (isPlaceholderProductImage(imgSrc)) {
-                            setImgFailed(true);
-                            return;
-                        }
-
-                        if (fallback === "placeholder") {
-                            setImgSrc(PLACEHOLDER_PRODUCT_IMAGE);
-                            return;
-                        }
-
-                        // fallback === "icon"
-                        setImgFailed(true);
-                    }}
-                    {...imgProps}
-                />
+                imgEl
             ) : (
                 <Box
                     sx={{
-                        width,
-                        height,
+                        width: width || 48,
+                        height: height || 48,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -116,11 +171,9 @@ export const ProductImage: React.FC<ProductImageProps> = ({
                         borderRadius: 2,
                     }}
                 >
-                    <ImageIcon sx={{ fontSize: Math.min(60, Math.max(24, width / 3)), color: "grey.400" }} />
+                    <ImageIcon sx={{ fontSize: 32, color: "grey.400" }} />
                 </Box>
             )}
         </Box>
     );
-};
-
-export default ProductImage;
+}

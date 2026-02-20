@@ -1,8 +1,7 @@
-// file: src/utils/imageUtils.ts
+// src/utils/imageUtils.ts
+export const PLACEHOLDER_IMAGE_URL = "/placeholder.png";
 
-const PLACEHOLDER_IMAGE = "/placeholder.png";
-
-function parseSize(size?: string): { width: number; height: number } {
+function parseSize(size?: string) {
     if (!size) return { width: 800, height: 800 };
     const [wRaw, hRaw] = size.split("x");
     const w = Number(wRaw);
@@ -13,14 +12,13 @@ function parseSize(size?: string): { width: number; height: number } {
     };
 }
 
-function fillProxyTemplate(url: string, size?: string, quality = 80): string {
+function fillProxyTemplate(url: string, size?: string, quality = 80) {
     if (!url) return "";
     const hasTemplate =
         url.includes("{WIDTH}") || url.includes("{HEIGHT}") || url.includes("{QUALITY}");
     if (!hasTemplate) return url;
 
     const { width, height } = parseSize(size);
-
     return url
         .replaceAll("{WIDTH}", String(width))
         .replaceAll("{HEIGHT}", String(height))
@@ -28,35 +26,25 @@ function fillProxyTemplate(url: string, size?: string, quality = 80): string {
 }
 
 /**
- * ✅ Canonical: get URL for ANY server-provided image entity.
- * Rule: only proxy_url is allowed.
+ * ✅ Canonical: ONLY proxy_url for image rendering.
  */
-export const getServerImageUrl = (entity: any, size?: string, quality = 80): string => {
-    // Accept direct string too
+export function getServerImageUrl(entityOrProxy: any, size?: string, quality = 80): string {
     const raw =
-        typeof entity === "string"
-            ? entity
-            : entity?.upload?.proxy_url ||
-            entity?.proxy_url ||
-            entity?.image?.proxy_url ||
-            entity?.icon?.proxy_url ||
+        typeof entityOrProxy === "string"
+            ? entityOrProxy
+            : entityOrProxy?.upload?.proxy_url ||
+            entityOrProxy?.proxy_url ||
+            entityOrProxy?.image?.proxy_url ||
+            entityOrProxy?.icon?.proxy_url ||
             "";
 
-    if (!raw) return PLACEHOLDER_IMAGE;
+    if (!raw) return PLACEHOLDER_IMAGE_URL;
 
     const finalUrl = fillProxyTemplate(raw, size, quality);
-    return finalUrl || PLACEHOLDER_IMAGE;
-};
+    return finalUrl || PLACEHOLDER_IMAGE_URL;
+}
 
-// Backward-compatible wrapper (kept for existing code)
-export const getProductImageUrl = (product: any, size?: string): string => {
-    return getServerImageUrl(product, size, 80);
-};
-
-export const isPlaceholderProductImage = (url?: string | null): boolean => {
+export function isPlaceholderProductImage(url?: string | null) {
     if (!url) return true;
     return url.includes("/placeholder.png") || url.includes("placeholder");
-};
-
-export const PLACEHOLDER_PRODUCT_IMAGE = PLACEHOLDER_IMAGE;
-export const PLACEHOLDER_IMAGE_URL = PLACEHOLDER_IMAGE;
+}

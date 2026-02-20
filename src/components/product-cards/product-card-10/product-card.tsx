@@ -3,11 +3,11 @@ import Rating from "@mui/material/Rating";
 // CUSTOM COMPONENTS
 import AddToCart from "./add-to-cart";
 import HoverActions from "./hover-actions";
-import { ProductImage } from "components/common/ProductImage";
 // STYLED COMPONENTS
 import { Card, CardMedia, CardContent } from "./styles";
 // CUSTOM UTILS LIBRARY FUNCTION
 import { currency } from "lib";
+import ProductImage from "@/components/common/ProductImage";
 // CUSTOM DATA MODEL
 
 

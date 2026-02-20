@@ -3,7 +3,6 @@ import Rating from "@mui/material/Rating";
 import IconButton from "@mui/material/IconButton";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 // GLOBAL CUSTOM COMPONENTS
-import { ProductImage } from "components/common/ProductImage";
 // LOCAL CUSTOM COMPONENTS
 import ProductPrice from "../product-price";
 import ProductTitle from "../product-title";
@@ -11,6 +10,7 @@ import DiscountChip from "../discount-chip";
 import FavoriteButton from "./favorite-button";
 // STYLED COMPONENTS
 import { ImageWrapper, ContentWrapper, StyledCard, HoverIconWrapper } from "./styles";
+import ProductImage from "@/components/common/ProductImage";
 
 // ========================================================
 interface Props {

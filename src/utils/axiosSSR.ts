@@ -16,8 +16,6 @@ export const createSSRAxiosInstance = (origin?: string) => {
             // ✅ tenant context, without breaking upstream routing
             ...(origin && {
                 Origin: origin,
-                "X-Forwarded-Host": originUrl?.host,
-                "X-Forwarded-Proto": originUrl?.protocol.replace(":", ""),
             }),
         },
         httpsAgent: new https.Agent({

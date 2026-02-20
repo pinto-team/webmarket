@@ -25,6 +25,10 @@ export const shopDataService = {
                 const catRes = await axiosInstance.get<ApiResponse<any[]>>("/product-cats");
                 const flatCats = catRes.data.data ?? [];
 
+                console.log("[ShopData] baseURL:", axiosInstance.defaults.baseURL);
+                console.log("[ShopData] product-cats length:", flatCats.length);
+                console.log("[ShopData] product-cats names:", flatCats.map((x: any) => x?.name).slice(0, 30));
+
                 // 3) normalize to tree
                 shopData.product_categories = buildCategoryTree(flatCats as any);
 

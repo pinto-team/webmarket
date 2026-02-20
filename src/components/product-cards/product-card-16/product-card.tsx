@@ -2,7 +2,6 @@ import Link from "next/link";
 import Rating from "@mui/material/Rating";
 import Typography from "@mui/material/Typography";
 // GLOBAL CUSTOM COMPONENTS
-import { ProductImage } from "components/common/ProductImage";
 // LOCAL CUSTOM COMPONENTS
 import AddToCart from "./add-to-cart";
 import DiscountChip from "../discount-chip";
@@ -10,6 +9,7 @@ import DiscountChip from "../discount-chip";
 import { calculateDiscount, currency } from "lib";
 // STYLED COMPONENTS
 import { PriceText, StyledRoot } from "./styles";
+import ProductImage from "@/components/common/ProductImage";
 // CUSTOM DATA MODEL
 
 

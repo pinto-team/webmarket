@@ -1,6 +1,7 @@
 "use client";
 
-import { useShopData } from "@/contexts/ShopDataContext";
+
+import {useShopData} from "@/contexts/ShopDataProvider";
 
 export default function ShopDataLoader({ children }: { children: React.ReactNode }) {
   const { error } = useShopData();

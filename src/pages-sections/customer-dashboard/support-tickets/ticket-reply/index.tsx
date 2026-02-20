@@ -13,6 +13,7 @@ import FilePreview from "@/components/file-upload/FilePreview";
 
 import { t } from "@/i18n/t";
 import { formatPersianDateTime } from "@/utils/persian";
+import { getServerImageUrl, isPlaceholderProductImage } from "@/utils/imageUtils";
 
 interface TicketReplyProps {
     reply: TicketReplyResource;
@@ -20,26 +21,17 @@ interface TicketReplyProps {
     onReply?: () => void;
 }
 
-export default function TicketReply({
-                                        reply,
-                                        isCustomer,
-                                        onReply,
-                                    }: TicketReplyProps) {
+export default function TicketReply({ reply, isCustomer, onReply }: TicketReplyProps) {
     const author = reply.ownerable;
-    const authorName =
-        author?.title || author?.first_name || t("common.unknown");
+    const authorName = author?.title || author?.first_name || t("common.unknown");
+
+    // ✅ proxy-only avatar
+    const avatarCandidate = getServerImageUrl(author, "80x80", 75);
+    const avatarSrc = !isPlaceholderProductImage(avatarCandidate) ? avatarCandidate : undefined;
 
     return (
-        <Box
-            display="flex"
-            gap={2}
-            mb={3}
-            flexDirection={isCustomer ? "row-reverse" : "row"}
-        >
-            <Avatar
-                src={author?.upload?.thumb_url}
-                sx={{ width: 40, height: 40 }}
-            >
+        <Box display="flex" gap={2} mb={3} flexDirection={isCustomer ? "row-reverse" : "row"}>
+            <Avatar src={avatarSrc} sx={{ width: 40, height: 40 }}>
                 {authorName?.[0]}
             </Avatar>
 
@@ -47,27 +39,14 @@ export default function TicketReply({
                 <Paper
                     sx={{
                         p: 2,
-                        bgcolor: isCustomer
-                            ? "primary.lighter"
-                            : "background.paper",
+                        bgcolor: isCustomer ? "primary.lighter" : "background.paper",
                     }}
                 >
-                    <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                        mb={1}
-                    >
-                        <Typography variant="subtitle2">
-                            {authorName}
-                        </Typography>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                        <Typography variant="subtitle2">{authorName}</Typography>
 
                         {!isCustomer && onReply && (
-                            <Button
-                                size="small"
-                                startIcon={<Reply />}
-                                onClick={onReply}
-                            >
+                            <Button size="small" startIcon={<Reply />} onClick={onReply}>
                                 {t("common.submit")}
                             </Button>
                         )}

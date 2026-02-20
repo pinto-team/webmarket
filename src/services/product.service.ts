@@ -1,14 +1,23 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { createSSRAxiosInstance } from "@/utils/axiosSSR";
 import { ApiResponse, PaginatedResponse } from "@/types/api.types";
-import {
-    ProductResource, BrandWithProducts, CategoryWithProducts, TagWithProducts, ProductFilters as ProductFiltersType,
-    CategoryResource
+import type {
+    ProductResource,
+    BrandWithProducts,
+    CategoryWithProducts,
+    TagWithProducts,
+    ProductFilters as ProductFiltersType,
+    CategoryResource,
 } from "@/types/product.types";
+
+const isDev = process.env.NODE_ENV !== "production";
 
 export const productService = {
     async getProducts(filters?: ProductFiltersType): Promise<PaginatedResponse<ProductResource>> {
-        const response = await axiosInstance.get<ApiResponse<PaginatedResponse<ProductResource>>>("/products", { params: filters });
+        const response = await axiosInstance.get<ApiResponse<PaginatedResponse<ProductResource>>>(
+            "/products",
+            { params: filters }
+        );
         return response.data.data;
     },
 
@@ -18,13 +27,21 @@ export const productService = {
             const response = await axios.get<ApiResponse<ProductResource>>(`/products/${code}`);
             const product = response.data.data;
 
+            // ✅ DO NOT log full product objects (very expensive on SSR/dev)
+            if (isDev) {
+                console.log("[Product Service] getProduct OK:", {
+                    code: product?.code,
+                    title: product?.title,
+                    skuCount: Array.isArray(product?.skus) ? product.skus.length : 0,
+                    commentCount: Array.isArray(product?.comments) ? product.comments.length : 0,
+                });
+            }
 
-            console.log('[Product Service] Response:', product);
             // Add product_code to all SKUs
-            if (product.skus) {
-                product.skus = product.skus.map(sku => ({
+            if (Array.isArray(product?.skus)) {
+                product.skus = product.skus.map((sku: any) => ({
                     ...sku,
-                    product_code: product.code
+                    product_code: product.code,
                 }));
             }
 
@@ -41,7 +58,10 @@ export const productService = {
     },
 
     async getCategory(code: string, params?: ProductFiltersType): Promise<CategoryWithProducts> {
-        const response = await axiosInstance.get<ApiResponse<CategoryWithProducts>>(`/product-cats/${code}`, { params });
+        const response = await axiosInstance.get<ApiResponse<CategoryWithProducts>>(
+            `/product-cats/${code}`,
+            { params }
+        );
         return response.data.data;
     },
 
@@ -51,7 +71,10 @@ export const productService = {
     },
 
     async getBrand(code: string, params?: ProductFiltersType): Promise<BrandWithProducts> {
-        const response = await axiosInstance.get<ApiResponse<BrandWithProducts>>(`/brands/${code}`, { params });
+        const response = await axiosInstance.get<ApiResponse<BrandWithProducts>>(
+            `/brands/${code}`,
+            { params }
+        );
         return response.data.data;
     },
 
@@ -61,7 +84,10 @@ export const productService = {
     },
 
     async getTag(code: string, params?: ProductFiltersType): Promise<TagWithProducts> {
-        const response = await axiosInstance.get<ApiResponse<TagWithProducts>>(`/product-tags/${code}`, { params });
+        const response = await axiosInstance.get<ApiResponse<TagWithProducts>>(
+            `/product-tags/${code}`,
+            { params }
+        );
         return response.data.data;
-    }
+    },
 };

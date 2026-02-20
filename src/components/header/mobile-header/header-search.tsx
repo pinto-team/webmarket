@@ -1,52 +1,55 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Fragment, PropsWithChildren, useEffect, useRef, useState } from "react";
 // MUI
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 // MUI ICON COMPONENT
 import Clear from "@mui/icons-material/Clear";
 import Search from "@mui/icons-material/Search";
 // GLOBAL CUSTOM COMPONENTS
 import FlexBetween from "components/flex-box/flex-between";
 
+function getCurrentSearch(): string {
+    if (typeof window === "undefined") return "";
+    return window.location.search || "";
+}
+
 export function HeaderSearch({ children }: PropsWithChildren) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const currentUrl = useRef(`${pathname}?${searchParams}`);
-  const [open, setOpen] = useState(false);
+    const pathname = usePathname();
+    const currentUrl = useRef(`${pathname}${getCurrentSearch()}`);
+    const [open, setOpen] = useState(false);
 
-  const handleClose = () => setOpen(false);
+    const handleClose = () => setOpen(false);
 
-  useEffect(() => {
-    const newUrl = `${pathname}?${searchParams}`;
+    useEffect(() => {
+        const newUrl = `${pathname}${getCurrentSearch()}`;
 
-    if (currentUrl.current !== newUrl) {
-      handleClose();
-      currentUrl.current = newUrl;
-    }
-  }, [pathname, searchParams]);
+        if (currentUrl.current !== newUrl) {
+            handleClose();
+            currentUrl.current = newUrl;
+        }
+    }, [pathname]);
 
-  return (
-    <Fragment>
-      <IconButton onClick={() => setOpen(true)}>
-        <Search />
-      </IconButton>
-
-      <Drawer open={open} anchor="top" onClose={handleClose} sx={{ zIndex: 9999 }}>
-        <Box width="auto" padding={2} height="100vh">
-          <FlexBetween mb={1}>
-            <IconButton onClick={handleClose}>
-              <Clear fontSize="small" />
+    return (
+        <Fragment>
+            <IconButton onClick={() => setOpen(true)}>
+                <Search />
             </IconButton>
-          </FlexBetween>
 
-          {children}
-        </Box>
-      </Drawer>
-    </Fragment>
-  );
+            <Drawer open={open} anchor="top" onClose={handleClose} sx={{ zIndex: 9999 }}>
+                <Box width="auto" padding={2} height="100vh">
+                    <FlexBetween mb={1}>
+                        <IconButton onClick={handleClose}>
+                            <Clear fontSize="small" />
+                        </IconButton>
+                    </FlexBetween>
+
+                    {children}
+                </Box>
+            </Drawer>
+        </Fragment>
+    );
 }

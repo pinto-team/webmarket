@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
@@ -11,24 +11,25 @@ import DashboardHeader from "../../dashboard-header";
 
 import type { UserResource } from "@/types/auth.types";
 import { t } from "@/i18n/t";
+import { getServerImageUrl } from "@/utils/imageUtils";
 
 type Props = { user: UserResource };
 
 export function ProfileEditPageView({ user }: Props) {
+    const fallbackAvatar = "/assets/images/avatars/001-man.svg";
+
+    const avatarUrl = useMemo(() => {
+        // ✅ proxy-only; if missing -> fallback local svg
+        const url = getServerImageUrl(user, "200x200", 75);
+        return url && !url.includes("placeholder") ? url : fallbackAvatar;
+    }, [user]);
+
     return (
         <Fragment>
-            <DashboardHeader
-                href="/profile"
-                title={t("profile.editProfile")}
-            />
+            <DashboardHeader href="/profile" title={t("profile.editProfile")} />
 
             <Card sx={{ padding: { xs: 3, sm: 4 }, mb: 3 }}>
-                <ProfilePicUpload
-                    image={
-                        user.upload?.main_url ||
-                        "/assets/images/avatars/001-man.svg"
-                    }
-                />
+                <ProfilePicUpload image={avatarUrl} />
 
                 <Typography variant="h6" mb={2}>
                     {t("profile.personalInfo")}

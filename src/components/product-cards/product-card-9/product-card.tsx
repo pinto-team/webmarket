@@ -2,7 +2,6 @@ import Link from "next/link";
 import Rating from "@mui/material/Rating";
 import Typography from "@mui/material/Typography";
 // GLOBAL CUSTOM COMPONENTS
-import { ProductImage } from "components/common/ProductImage";
 // LOCAL CUSTOM COMPONENTS
 import DiscountChip from "../discount-chip";
 import ProductPrice from "../product-price";
@@ -12,6 +11,7 @@ import FavoriteButton from "./components/favorite-button";
 
 // STYLED COMPONENT
 import { ContentWrapper, Wrapper } from "./styles";
+import ProductImage from "@/components/common/ProductImage";
 
 // ===========================================================
 type Props = { product: any };

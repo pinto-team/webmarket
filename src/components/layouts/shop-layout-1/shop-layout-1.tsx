@@ -2,12 +2,10 @@
 
 import { Fragment, PropsWithChildren, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 
-import { useShopData } from "@/contexts/ShopDataContext";
 import SnackbarProvider from "components/SnackbarProvider";
 import ErrorHandler from "components/ErrorHandler";
 
@@ -32,6 +30,9 @@ import LayoutModel from "models/Layout.model";
 
 import { t } from "@/i18n/t";
 import { toPersianNumber } from "@/utils/persian";
+import { getServerImageUrl } from "@/utils/imageUtils";
+import ProductImage from "@/components/common/ProductImage";
+import {useShopData} from "@/contexts/ShopDataProvider";
 
 interface Props extends PropsWithChildren {
     data?: LayoutModel;
@@ -43,9 +44,11 @@ export default function ShopLayout1({ children, data }: Props) {
     const { footer, header, topbar, mobileNavigation } =
     (data as LayoutModel) ?? (shopData as unknown as LayoutModel);
 
-    const headerLogo = shopData?.header_logo?.main_url || header.logo;
-    const mobileLogo = shopData?.mobile_logo?.main_url || mobileNavigation.logo;
-    const footerLogo = shopData?.footer_logo?.main_url || footer.logo;
+    // ✅ proxy-only logo urls (fallback to theme defaults if missing)
+    const headerLogo = getServerImageUrl(shopData?.header_logo, "240x80", 80) || header.logo;
+    const mobileLogo = getServerImageUrl(shopData?.mobile_logo, "240x80", 80) || mobileNavigation.logo;
+    const footerLogo = getServerImageUrl(shopData?.footer_logo, "240x120", 80) || footer.logo;
+
     const topbarData = shopData?.topbar || topbar;
 
     const navigation = shopData?.main_navigation
@@ -95,6 +98,7 @@ export default function ShopLayout1({ children, data }: Props) {
                 <MobileMenu navigation={navigation} />
             </MobileHeader.Left>
 
+            {/* ✅ already expects a url string, now proxy-only */}
             <MobileHeader.Logo logoUrl={mobileLogo} />
 
             <MobileHeader.Right>
@@ -148,6 +152,7 @@ export default function ShopLayout1({ children, data }: Props) {
 
                     <Header mobileHeader={MOBILE_VERSION_HEADER}>
                         <Header.Left>
+                            {/* ✅ already expects url string, now proxy-only */}
                             <Header.Logo url={headerLogo} />
                         </Header.Left>
 
@@ -178,13 +183,16 @@ export default function ShopLayout1({ children, data }: Props) {
 
                 <Footer1>
                     <Footer1.Brand>
-                        <Link href="/">
-                            <Image
+                        <Link href="/" style={{ display: "inline-block" }}>
+                            {/* ✅ replace next/image with ProductImage (UI image) */}
+                            <ProductImage
                                 src={footerLogo}
                                 alt={t("common.logoAlt")}
-                                width={105}
-                                height={50}
-                                style={{ objectFit: "contain", maxHeight: "50px", width: "auto" }}
+                                size="240x120"
+                                quality={80}
+                                fallback="icon"
+                                noWrapper
+                                style={{ objectFit: "contain", maxHeight: "50px", width: "auto", height: "50px", display: "block" }}
                             />
                         </Link>
 

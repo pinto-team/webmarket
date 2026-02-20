@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import { FlexBetween, FlexBox } from "components/flex-box";
 import { currency } from "lib";
 
-import { getProductImageUrl } from "@/utils/imageUtils";
+import ProductImage from "@/components/common/ProductImage";
 import { formatPersianDate } from "@/utils/persian";
 import { t } from "@/i18n/t";
 
@@ -24,38 +24,15 @@ export default function OrderedProducts({ order }: Props) {
                 borderColor: "grey.100",
             }}
         >
-            <FlexBetween
-                px={3}
-                py={2}
-                flexWrap="wrap"
-                gap={1}
-                bgcolor="grey.50"
-            >
-                <Item
-                    title={t("orders.orderNumber")}
-                    value={order.code}
-                />
-
-                <Item
-                    title={t("orders.orderDate")}
-                    value={formatPersianDate(order.created_at)}
-                />
-
-                <Item
-                    title={t("orders.status")}
-                    value={order.status_label}
-                />
+            <FlexBetween px={3} py={2} flexWrap="wrap" gap={1} bgcolor="grey.50">
+                <Item title={t("orders.orderNumber")} value={order.code} />
+                <Item title={t("orders.orderDate")} value={formatPersianDate(order.created_at)} />
+                <Item title={t("orders.status")} value={order.status_label} />
             </FlexBetween>
 
             {order.shipments.map((shipment) =>
                 shipment.items.map((item) => (
-                    <FlexBetween
-                        key={item.id}
-                        px={2}
-                        py={1}
-                        flexWrap="wrap"
-                        gap={1}
-                    >
+                    <FlexBetween key={item.id} px={2} py={1} flexWrap="wrap" gap={1}>
                         <FlexBox gap={2} alignItems="center">
                             <Avatar
                                 variant="rounded"
@@ -65,18 +42,19 @@ export default function OrderedProducts({ order }: Props) {
                                     backgroundColor: "grey.50",
                                 }}
                             >
-                                <img
+                                <ProductImage
+                                    // item.sku should contain upload.proxy_url / proxy_url...
+                                    entity={item.sku}
                                     alt={item.sku_data.title}
-                                    src={getProductImageUrl(
-                                        item.sku,
-                                        "60x60"
-                                    )}
+                                    size="60x60"
+                                    loading="lazy"
+                                    fallback="icon"
+                                    noWrapper
                                     style={{
                                         width: "100%",
                                         height: "100%",
                                         objectFit: "contain",
                                     }}
-                                    loading="lazy"
                                 />
                             </Avatar>
 
@@ -85,11 +63,7 @@ export default function OrderedProducts({ order }: Props) {
                                     {item.sku_data.title}
                                 </Typography>
 
-                                <Typography
-                                    lineHeight={2}
-                                    variant="body1"
-                                    color="text.secondary"
-                                >
+                                <Typography lineHeight={2} variant="body1" color="text.secondary">
                                     {currency(item.price)} × {item.quantity}
                                 </Typography>
                             </div>
@@ -101,25 +75,13 @@ export default function OrderedProducts({ order }: Props) {
     );
 }
 
-function Item({
-                  title,
-                  value,
-              }: {
-    title: string;
-    value: string;
-}) {
+function Item({ title, value }: { title: string; value: string }) {
     return (
         <FlexBox gap={1} alignItems="center">
-            <Typography
-                variant="body1"
-                color="text.secondary"
-            >
+            <Typography variant="body1" color="text.secondary">
                 {title}
             </Typography>
-
-            <Typography variant="body1">
-                {value}
-            </Typography>
+            <Typography variant="body1">{value}</Typography>
         </FlexBox>
     );
 }

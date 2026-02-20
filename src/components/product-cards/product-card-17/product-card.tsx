@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Typography from "@mui/material/Typography";
 // GLOBAL CUSTOM COMPONENTS
-import { ProductImage } from "components/common/ProductImage";
+import ProductImage from "@/components/common/ProductImage";
 // LOCAL CUSTOM COMPONENTS
 import Discount from "./discount";
 import HoverActions from "./hover-actions";

@@ -28,7 +28,7 @@ import {
 import type { CartItemResource } from "@/types/product.types";
 import { t } from "@/i18n/t";
 import { formatPersianDate, formatPersianNumber } from "@/utils/persian";
-import { ProductImage } from "@/components/common/ProductImage";
+import ProductImage from "@/components/common/ProductImage";
 
 type Props = { item: CartItemResource };
 

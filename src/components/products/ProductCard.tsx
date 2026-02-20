@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardContent, CardMedia, Typography, Box } from "@mui/material";
-import { getProductImageUrl, PLACEHOLDER_PRODUCT_IMAGE } from "@/utils/imageUtils";
+import { Card, CardContent, Typography, Box } from "@mui/material";
+
+import ProductImage from "@/components/common/ProductImage";
 import { currency } from "@/lib";
 
 interface ProductResource {
@@ -10,11 +11,9 @@ interface ProductResource {
     title: string;
     excerpt?: string;
     price: number;
-    upload?: {
-        proxy_url?: string;
-        main_url?: string;
-        thumb_url?: string;
-    };
+
+    // ✅ only proxy_url (canonical)
+    upload?: { proxy_url?: string };
     proxy_url?: string;
 }
 
@@ -23,7 +22,6 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-    const imageUrl = getProductImageUrl(product, "500x500");
     const excerpt = (product.excerpt || "").trim();
 
     return (
@@ -37,19 +35,23 @@ export default function ProductCard({ product }: ProductCardProps) {
                     "&:hover": { boxShadow: 6 },
                 }}
             >
-                <CardMedia
-                    component="img"
-                    height={200}
-                    image={imageUrl}
-                    alt={product.title}
-                    loading="lazy"
-                    sx={{ objectFit: "cover" }}
-                    onError={(e: any) => {
-                        const img = e.currentTarget as HTMLImageElement;
-                        if (img.src.includes(PLACEHOLDER_PRODUCT_IMAGE)) return;
-                        img.src = PLACEHOLDER_PRODUCT_IMAGE;
-                    }}
-                />
+                {/* UI Image => ProductImage only */}
+                <Box sx={{ width: "100%", height: 200, overflow: "hidden" }}>
+                    <ProductImage
+                        entity={product}
+                        alt={product.title}
+                        size="500x500"
+                        quality={80}
+                        fallback="placeholder"
+                        noWrapper
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            display: "block",
+                        }}
+                    />
+                </Box>
 
                 <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 1 }}>
                     <Typography variant="h6" gutterBottom noWrap title={product.title}>

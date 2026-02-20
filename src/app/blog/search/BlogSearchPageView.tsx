@@ -8,7 +8,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Pagination from "@mui/material/Pagination";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
 import Chip from "@mui/material/Chip";
 
 import Link from "next/link";
@@ -16,8 +15,9 @@ import Link from "next/link";
 import UniversalSearchBar from "@/components/search/UniversalSearchBar";
 import KeywordHighlight from "@/components/search/KeywordHighlight";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
+import ProductImage from "@/components/common/ProductImage";
+
 import { usePostSearch } from "@/hooks/usePostSearch";
-import { getProductThumbnail } from "@/utils/imageHelper";
 import { t } from "@/i18n/t";
 import { formatPersianDate, toPersianNumber } from "@/utils/persian";
 
@@ -81,12 +81,23 @@ export default function BlogSearchPageView({ searchQuery }: Props) {
                         {results.items.map((post) => (
                             <Grid key={post.code} size={{ xs: 12, md: 6 }}>
                                 <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                                    <CardMedia
-                                        component="img"
-                                        height="200"
-                                        image={getProductThumbnail(post.upload)}
-                                        alt={post.title}
-                                    />
+                                    {/* Replaces CardMedia (UI image => ProductImage only) */}
+                                    <Box sx={{ width: "100%", height: 200, overflow: "hidden" }}>
+                                        <ProductImage
+                                            entity={post}
+                                            alt={post.title}
+                                            size="800x450"
+                                            quality={75}
+                                            fallback="placeholder"
+                                            noWrapper
+                                            style={{
+                                                width: "100%",
+                                                height: "100%",
+                                                objectFit: "cover",
+                                                display: "block",
+                                            }}
+                                        />
+                                    </Box>
 
                                     <CardContent sx={{ flexGrow: 1 }}>
                                         <Typography

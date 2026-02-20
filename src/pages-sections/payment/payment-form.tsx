@@ -1,3 +1,5 @@
+﻿"use client";
+
 import Link from "next/link";
 import { Fragment, useCallback, useState } from "react";
 // MUI
@@ -90,3 +92,4 @@ export default function PaymentForm() {
     </Fragment>
   );
 }
+

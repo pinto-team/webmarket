@@ -10,9 +10,9 @@ import renderChild from "./render-child";
 import { CategoryListItem, StyledRoot } from "./styles";
 
 import type { CategoryMenuItem } from "models/Category.model";
-import { useShopData } from "@/contexts/ShopDataContext";
-import type { ShopData, ProductCategory } from "@/types/shopData.types"; // ShopData رو مطابق پروژه‌ت تنظیم کن
+import type { ShopData, ProductCategory } from "@/types/shopData.types";
 import { t } from "@/i18n/t";
+import {useShopData} from "@/contexts/ShopDataProvider";
 
 type Props = {
     data?: ShopData;

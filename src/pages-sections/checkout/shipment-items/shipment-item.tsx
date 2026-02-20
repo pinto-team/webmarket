@@ -1,20 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { Box, Card, Typography } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import VerifiedUser from "@mui/icons-material/VerifiedUser";
 import Inventory from "@mui/icons-material/Inventory";
-import ImageIcon from "@mui/icons-material/Image";
+
+import ProductImage from "@/components/common/ProductImage";
 
 import { CartItemResource } from "@/types/product.types";
 import { cartService } from "@/services/cart.service";
-import {
-    getProductImageUrl,
-    isPlaceholderProductImage,
-    PLACEHOLDER_PRODUCT_IMAGE,
-} from "@/utils/imageUtils";
 import { formatPersianPrice, toPersianNumber, formatPersianDateLong } from "@/utils/persian";
 import { t } from "@/i18n/t";
 
@@ -48,18 +43,11 @@ export default function ShipmentItem({ item }: ShipmentItemProps) {
 
     const href = productCode ? `/products/${productCode}` : null;
 
-    // ✅ Always produce backend proxy URL (or placeholder)
-    const initialUrl = getProductImageUrl(sku?.product || sku, "300x300");
-
-    // ✅ Keep a stable src so onError can switch safely
-    const [imgSrc, setImgSrc] = useState(initialUrl);
-    const [imgFailed, setImgFailed] = useState(false);
-
-    const isPlaceholder = isPlaceholderProductImage(imgSrc);
-    const hasImage = !imgFailed && !isPlaceholder;
-
     const deliveryDate = calculateDeliveryDate(deliveryDays);
     const currency = t("products.currencyLabel");
+
+    // entity preference: sku.product first, then sku
+    const imageEntity = sku?.product || sku;
 
     return (
         <Card
@@ -89,42 +77,20 @@ export default function ShipmentItem({ item }: ShipmentItemProps) {
                     overflow: "hidden",
                 }}
             >
-                {hasImage ? (
-                    // ✅ REAL <img> (no next/image) => NO /_next/image?url=...
-                    <Box
-                        component="img"
-                        alt={sku?.title || "product"}
-                        src={imgSrc}
-                        loading="eager"
-                        sx={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            display: "block",
-                        }}
-                        onError={() => {
-                            // ✅ Anti-explosion fallback:
-                            // 1) mark failed
-                            // 2) try placeholder once (if not already)
-                            setImgFailed(true);
-                            if (!isPlaceholderProductImage(imgSrc)) {
-                                setImgSrc(PLACEHOLDER_PRODUCT_IMAGE);
-                            }
-                        }}
-                    />
-                ) : (
-                    <Box
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "100%",
-                            height: "100%",
-                        }}
-                    >
-                        <ImageIcon sx={{ fontSize: 60, color: "grey.400" }} />
-                    </Box>
-                )}
+                <ProductImage
+                    entity={imageEntity}
+                    alt={sku?.title || "product"}
+                    size="300x300"
+                    loading="eager"
+                    fallback="icon"
+                    noWrapper
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        display: "block",
+                    }}
+                />
             </Box>
 
             <Box

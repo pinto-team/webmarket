@@ -1,5 +1,6 @@
+"use client";
+
 import Avatar from "@mui/material/Avatar";
-import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import Skeleton from "@mui/material/Skeleton";
@@ -13,6 +14,8 @@ import type { UserResource } from "@/types/auth.types";
 import { t } from "@/i18n/t";
 import { formatPersianNumber, toPersianNumber } from "@/utils/persian";
 
+import ProductImage from "@/components/common/ProductImage";
+
 type Props = { user: UserResource };
 
 export default function UserAnalytics({ user }: Props) {
@@ -24,8 +27,6 @@ export default function UserAnalytics({ user }: Props) {
         user.username;
 
     const fallbackAvatar = "/assets/images/avatars/001-man.svg";
-    const avatarUrl = user.upload?.main_url || fallbackAvatar;
-
     const balance = user.wallet?.balance || 0;
 
     const displayNameValue =
@@ -47,19 +48,24 @@ export default function UserAnalytics({ user }: Props) {
                     }}
                 >
                     <Avatar variant="rounded" sx={{ height: 65, width: 65, bgcolor: "grey.100" }}>
-                        <Box
-                            component="img"
-                            src={avatarUrl}
-                            alt={displayName}
-                            loading="lazy"
-                            sx={{
+                        <ProductImage
+                            entity={user}
+                            alt={displayName || "user"}
+                            size="130x130"
+                            quality={75}
+                            fallback="placeholder"
+                            noWrapper
+                            style={{
                                 width: "100%",
                                 height: "100%",
                                 objectFit: "cover",
                                 display: "block",
                             }}
+                            // If proxy_url missing, ProductImage will go placeholder.
+                            // But for user avatar we prefer a deterministic local fallback:
                             onError={(e) => {
-                                const img = e.currentTarget;
+                                // allow ProductImage to handle first; if it still fails, set local fallback
+                                const img = e.currentTarget as HTMLImageElement;
                                 if (img.src.includes(fallbackAvatar)) return;
                                 img.src = fallbackAvatar;
                             }}
@@ -77,12 +83,7 @@ export default function UserAnalytics({ user }: Props) {
                                     {t("profile.balanceLabel")}
                                 </Typography>
 
-                                <Typography
-                                    fontWeight={500}
-                                    lineHeight={2}
-                                    variant="body1"
-                                    color="primary"
-                                >
+                                <Typography fontWeight={500} lineHeight={2} variant="body1" color="primary">
                                     {currency(balance)}
                                 </Typography>
                             </FlexBox>
@@ -113,20 +114,13 @@ export default function UserAnalytics({ user }: Props) {
                             borderWidth: 1,
                         }}
                     >
-                        {loading ? (
-                            <Skeleton width={60} height={40} />
-                        ) : (
+                        {loading ? <Skeleton width={60} height={40} /> : (
                             <Typography variant="h3" color="primary">
                                 {formatPersianNumber(stats.total)}
                             </Typography>
                         )}
 
-                        <Typography
-                            fontSize={13}
-                            variant="body1"
-                            color="text.secondary"
-                            sx={{ textAlign: "center" }}
-                        >
+                        <Typography fontSize={13} variant="body1" color="text.secondary" sx={{ textAlign: "center" }}>
                             {t("orders.stats.all")}
                         </Typography>
                     </Card>
@@ -146,20 +140,13 @@ export default function UserAnalytics({ user }: Props) {
                             borderWidth: 1,
                         }}
                     >
-                        {loading ? (
-                            <Skeleton width={60} height={40} />
-                        ) : (
+                        {loading ? <Skeleton width={60} height={40} /> : (
                             <Typography variant="h3" color="primary">
                                 {formatPersianNumber(stats.awaitingDelivery)}
                             </Typography>
                         )}
 
-                        <Typography
-                            fontSize={13}
-                            variant="body1"
-                            color="text.secondary"
-                            sx={{ textAlign: "center" }}
-                        >
+                        <Typography fontSize={13} variant="body1" color="text.secondary" sx={{ textAlign: "center" }}>
                             {t("orders.stats.awaitingDelivery")}
                         </Typography>
                     </Card>
@@ -179,20 +166,13 @@ export default function UserAnalytics({ user }: Props) {
                             borderWidth: 1,
                         }}
                     >
-                        {loading ? (
-                            <Skeleton width={60} height={40} />
-                        ) : (
+                        {loading ? <Skeleton width={60} height={40} /> : (
                             <Typography variant="h3" color="primary">
                                 {formatPersianNumber(stats.awaitingShipment)}
                             </Typography>
                         )}
 
-                        <Typography
-                            fontSize={13}
-                            variant="body1"
-                            color="text.secondary"
-                            sx={{ textAlign: "center" }}
-                        >
+                        <Typography fontSize={13} variant="body1" color="text.secondary" sx={{ textAlign: "center" }}>
                             {t("orders.stats.awaitingShipment")}
                         </Typography>
                     </Card>
@@ -212,20 +192,13 @@ export default function UserAnalytics({ user }: Props) {
                             borderWidth: 1,
                         }}
                     >
-                        {loading ? (
-                            <Skeleton width={60} height={40} />
-                        ) : (
+                        {loading ? <Skeleton width={60} height={40} /> : (
                             <Typography variant="h3" color="primary">
                                 {formatPersianNumber(stats.awaitingPayment)}
                             </Typography>
                         )}
 
-                        <Typography
-                            fontSize={13}
-                            variant="body1"
-                            color="text.secondary"
-                            sx={{ textAlign: "center" }}
-                        >
+                        <Typography fontSize={13} variant="body1" color="text.secondary" sx={{ textAlign: "center" }}>
                             {t("orders.stats.awaitingPayment")}
                         </Typography>
                     </Card>

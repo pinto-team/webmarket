@@ -6,7 +6,7 @@ import Discount from "./discount";
 import HoverActions from "./hover-actions";
 import ImageCarousel from "./image-carousel";
 import { FlexBox } from "components/flex-box";
-import { ProductImage } from "components/common/ProductImage";
+import ProductImage from "@/components/common/ProductImage";
 // STYLED COMPONENTS
 import { ImageWrapper, ContentWrapper, StyledRoot } from "./styles";
 // CUSTOM DATA MODEL

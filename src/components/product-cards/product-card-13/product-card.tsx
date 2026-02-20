@@ -2,11 +2,11 @@ import Link from "next/link";
 // LOCAL CUSTOM COMPONENTS
 import DiscountChip from "../discount-chip";
 // GLOBAL CUSTOM COMPONENTS
-import { ProductImage } from "components/common/ProductImage";
 // CUSTOM UTILS LIBRARY FUNCTIONS
 import { calculateDiscount, currency } from "lib";
 // STYLED COMPONENTS
 import { CardRoot, PriceText } from "./styles";
+import ProductImage from "@/components/common/ProductImage";
 // CUSTOM DATA MODEL
 
 

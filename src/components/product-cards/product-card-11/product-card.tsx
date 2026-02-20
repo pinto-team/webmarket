@@ -3,10 +3,10 @@
 import Typography from "@mui/material/Typography";
 import { t } from "@/i18n/t";
 
-import { ProductImage } from "components/common/ProductImage";
 import { CardRoot, PriceText, SaleBadge } from "./styles";
 
 import { toPersianNumber, formatPersianPrice } from "@/utils/persian";
+import ProductImage from "@/components/common/ProductImage";
 
 type Props = { product: any };
 

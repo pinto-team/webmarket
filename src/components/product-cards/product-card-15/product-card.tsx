@@ -3,7 +3,8 @@ import Typography from "@mui/material/Typography";
 // LOCAL CUSTOM COMPONENTS
 import AddToCart from "./add-to-cart";
 // GLOBAL CUSTOM COMPONENTS
-import { ProductImage } from "components/common/ProductImage";
+import ProductImage from "@/components/common/ProductImage";
+
 // CUSTOM UTILS LIBRARY FUNCTIONS
 import { calculateDiscount, currency } from "lib";
 // STYLED COMPONENTS

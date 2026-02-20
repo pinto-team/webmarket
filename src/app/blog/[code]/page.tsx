@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
@@ -16,6 +15,7 @@ import { contentService } from "@/services/content.service";
 import { getOrigin } from "@/utils/getOrigin";
 import { tServer } from "@/i18n/serverT";
 import { formatPersianDate, toPersianNumber } from "@/utils/persian";
+import { getServerImageUrl } from "@/utils/imageUtils";
 
 interface PageProps {
     params: Promise<{ code: string }>;
@@ -33,14 +33,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
         const title = post?.title ? `${post.title} | ${blogTitle}` : notFoundTitle;
 
+        const ogImage = getServerImageUrl(post, "1200x630", 80);
+
         return {
             title,
             description: post.excerpt,
             openGraph: {
                 title: post.title,
                 description: post.excerpt,
-                images: post.upload?.main_url ? [{ url: post.upload.main_url }] : [],
+                images: ogImage ? [{ url: ogImage }] : [],
                 type: "article",
+            },
+            twitter: {
+                card: "summary_large_image",
+                title: post.title,
+                description: post.excerpt,
+                images: ogImage ? [ogImage] : [],
             },
         };
     } catch {
@@ -55,6 +63,8 @@ export default async function BlogPostPage({ params }: PageProps) {
     try {
         const post = await contentService.getPost(code, origin);
 
+        const heroImage = getServerImageUrl(post, "1200x675", 85);
+
         return (
             <Container maxWidth="lg" sx={{ py: 4 }}>
                 <Breadcrumbs sx={{ mb: 3 }}>
@@ -64,7 +74,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 </Breadcrumbs>
 
                 <Box sx={{ maxWidth: 900, mx: "auto" }}>
-                    {post.upload?.main_url && (
+                    {!!heroImage && (
                         <Box
                             sx={{
                                 position: "relative",
@@ -73,15 +83,15 @@ export default async function BlogPostPage({ params }: PageProps) {
                                 borderRadius: 2,
                                 overflow: "hidden",
                                 mb: 4,
+                                bgcolor: "grey.100",
                             }}
                         >
-                            <Image
-                                src={post.upload.main_url}
+                            <Box
+                                component="img"
+                                src={heroImage}
                                 alt={post.title}
-                                fill
-                                style={{ objectFit: "cover" }}
-                                priority
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
+                                sx={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                                loading="eager"
                             />
                         </Box>
                     )}
@@ -134,7 +144,14 @@ export default async function BlogPostPage({ params }: PageProps) {
                                 bgcolor: "grey.50",
                             },
                             "& code": { bgcolor: "grey.100", px: 1, py: 0.5, borderRadius: 1, fontSize: "0.9em" },
-                            "& pre": { bgcolor: "grey.900", color: "white", p: 2, borderRadius: 2, overflow: "auto", my: 2 },
+                            "& pre": {
+                                bgcolor: "grey.900",
+                                color: "white",
+                                p: 2,
+                                borderRadius: 2,
+                                overflow: "auto",
+                                my: 2,
+                            },
                         }}
                         dangerouslySetInnerHTML={{ __html: post.description }}
                     />

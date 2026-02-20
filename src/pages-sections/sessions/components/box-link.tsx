@@ -1,3 +1,5 @@
+﻿"use client";
+
 import Link from "next/link";
 import Box from "@mui/material/Box";
 
@@ -20,3 +22,4 @@ export default function BoxLink({ href, title }: Props) {
     </Box>
   );
 }
+

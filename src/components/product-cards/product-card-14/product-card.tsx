@@ -5,11 +5,11 @@ import Typography from "@mui/material/Typography";
 // CUSTOM COMPONENTS
 import Star from "icons/Star";
 import AddToCart from "./add-to-cart";
-import { ProductImage } from "components/common/ProductImage";
 // CUSTOM UTILS LIBRARY FUNCTIONS
 import { calculateDiscount, currency } from "lib";
 // STYLED COMPONENTS
 import { Content, PriceText, StyledChip, StyledRoot } from "./styles";
+import ProductImage from "@/components/common/ProductImage";
 // CUSTOM DATA MODEL
 
 

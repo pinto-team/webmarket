@@ -19,7 +19,6 @@ import CartProvider from "contexts/CartContext";
 import SettingsProvider from "contexts/SettingContext";
 
 // SHOP DATA PROVIDER
-import { ShopDataProvider } from "contexts/ShopDataContext";
 
 // REACT QUERY PROVIDER
 import QueryProvider from "providers/QueryProvider";
@@ -32,6 +31,7 @@ import ShopDataLoader from "components/layouts/ShopDataLoader";
 
 import { getShopDataServer } from "@/utils/shopDataCache";
 import { tServer } from "@/i18n/serverT";
+import {ShopDataProvider} from "@/contexts/ShopDataProvider";
 
 export const revalidate = 300;
 

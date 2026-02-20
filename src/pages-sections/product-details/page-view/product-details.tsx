@@ -1,62 +1,62 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Container from "@mui/material/Container";
-// LOCAL CUSTOM COMPONENTS
+
 import ProductTabs from "../product-tabs";
 import ProductIntro from "../product-intro";
-import ProductReviews from "../product-reviews";
-import AvailableShops from "../available-shops";
-import RelatedProducts from "../related-products";
-import FrequentlyBought from "../frequently-bought";
 import ProductDescription from "../product-description";
-// TYPES
-import { ProductResource } from "@/types/product.types";
-// HOOKS
+
+import type { ProductResource } from "@/types/product.types";
 import { useProductVariants } from "@/hooks/useProductVariants";
 import { useRelatedProducts } from "@/hooks/useRelatedProducts";
 
-// ==============================================================
+// ✅ Lazy-load heavy sections to reduce initial hydration cost
+const AvailableShops = dynamic(() => import("../available-shops"), { ssr: false });
+const ProductReviews = dynamic(() => import("../product-reviews"), { ssr: false });
+const RelatedProducts = dynamic(() => import("../related-products"), { ssr: false });
+const FrequentlyBought = dynamic(() => import("../frequently-bought"), { ssr: false });
+
 interface Props {
-  product: ProductResource;
+    product: ProductResource;
 }
-// ==============================================================
 
 export default function ProductDetailsPageView({ product }: Props) {
-  const { variantGroups, selectedVariants, selectedSku, selectVariant, isVariantAvailable } = 
-    useProductVariants(product.skus);
+    const { variantGroups, selectedVariants, selectedSku, selectVariant, isVariantAvailable } =
+        useProductVariants(product.skus);
 
-  const { products: relatedProducts } = useRelatedProducts(
-    product.categories[0]?.code,
-    product.code
-  );
+    const categoryCode = product?.categories?.[0]?.code;
 
-  return (
-    <Container className="mt-2 mb-2">
-      {/* PRODUCT DETAILS INFO AREA */}
-      <ProductIntro 
-        product={product}
-        selectedSku={selectedSku}
-        variantGroups={variantGroups}
-        selectedVariants={selectedVariants}
-        onVariantSelect={selectVariant}
-        isVariantAvailable={isVariantAvailable}
-      />
+    // If category is missing, skip related fetch
+    const { products: relatedProducts } = useRelatedProducts(
+        categoryCode || "",
+        product.code
+    );
 
-      {/* AVAILABLE SHOPS */}
-      <AvailableShops skus={product.skus} productCode={product.code} />
+    return (
+        <Container className="mt-2 mb-2">
+            {/* ✅ Render the critical above-the-fold content immediately */}
+            <ProductIntro
+                product={product}
+                selectedSku={selectedSku}
+                variantGroups={variantGroups}
+                selectedVariants={selectedVariants}
+                onVariantSelect={selectVariant}
+                isVariantAvailable={isVariantAvailable}
+            />
 
-      {/* FREQUENTLY BOUGHT TOGETHER */}
-      <FrequentlyBought products={[]} />
+            {/* ✅ Defer heavy sections */}
+            <AvailableShops skus={product.skus} productCode={product.code} />
 
-      {/* PRODUCT DESCRIPTION AND REVIEW */}
-      <ProductTabs 
-        description={<ProductDescription description={product.description} />} 
-        reviews={<ProductReviews comments={product.comments} productCode={product.code} />}
-        reviewCount={product.comments?.length || 0}
-      />
+            <FrequentlyBought products={[]} />
 
-      {/* RELATED PRODUCTS AREA */}
-      <RelatedProducts products={relatedProducts} />
-    </Container>
-  );
+            <ProductTabs
+                description={<ProductDescription description={product.description} />}
+                reviews={<ProductReviews comments={product.comments} productCode={product.code} />}
+                reviewCount={product.comments?.length || 0}
+            />
+
+            <RelatedProducts products={relatedProducts} />
+        </Container>
+    );
 }

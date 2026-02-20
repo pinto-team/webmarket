@@ -1,7 +1,7 @@
 "use client";
 
-import { ChangeEvent, KeyboardEvent, useCallback, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { ChangeEvent, KeyboardEvent, useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Search from "icons/Search";
@@ -41,18 +41,24 @@ interface Props {
     categories: CategoryLink[];
 }
 
+function getCurrentParams(): URLSearchParams {
+    if (typeof window === "undefined") return new URLSearchParams();
+    return new URLSearchParams(window.location.search);
+}
+
 export function SearchInput1({ categories }: Props) {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const [search, setSearch] = useState("");
 
     const handleSearch = useCallback(() => {
-        if (search.trim()) {
-            const params = new URLSearchParams(searchParams);
-            params.set("q", search);
-            router.push(`/products/search?${params.toString()}`);
-        }
-    }, [search, router, searchParams]);
+        const q = search.trim();
+        if (!q) return;
+
+        const params = getCurrentParams();
+        params.set("q", q);
+
+        router.push(`/products/search?${params.toString()}`);
+    }, [search, router]);
 
     const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value);

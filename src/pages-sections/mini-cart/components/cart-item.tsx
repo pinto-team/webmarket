@@ -11,12 +11,12 @@ import Remove from "@mui/icons-material/Remove";
 // CUSTOM COMPONENTS
 import Trash from "icons/Trash";
 import FlexBox from "components/flex-box/flex-box";
-import { ProductImage } from "@/components/common/ProductImage";
 // CUSTOM UTILS LIBRARY FUNCTION
 import { currency } from "lib";
 import { toPersianNumber } from "@/utils/persian";
 // CUSTOM DATA MODEL
 import { CartItemResource } from "@/types/product.types";
+import ProductImage from "@/components/common/ProductImage";
 
 type CartItem = CartItemResource;
 

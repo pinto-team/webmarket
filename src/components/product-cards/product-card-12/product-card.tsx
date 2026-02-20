@@ -1,11 +1,11 @@
 import Link from "next/link";
 import Rating from "@mui/material/Rating";
 // GLOBAL CUSTOM COMPONENTS
-import { ProductImage } from "components/common/ProductImage";
 // CUSTOM UTILS LIBRARY FUNCTIONS
 import { calculateDiscount, currency } from "lib";
 // STYLED COMPONENTS
 import { ImageWrapper, PriceText, Title } from "./styles";
+import ProductImage from "@/components/common/ProductImage";
 // CUSTOM DATA MODEL
 
 

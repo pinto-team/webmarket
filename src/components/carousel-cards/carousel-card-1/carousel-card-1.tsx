@@ -1,3 +1,5 @@
+﻿"use client";
+
 import Link from "next/link";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
@@ -52,3 +54,4 @@ export default function CarouselCard1({
     </StyledRoot>
   );
 }
+

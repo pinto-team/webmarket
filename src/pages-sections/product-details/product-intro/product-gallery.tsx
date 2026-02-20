@@ -1,32 +1,35 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { ImageResource } from "@/types/product.types";
-import { getProductImageUrl, PLACEHOLDER_PRODUCT_IMAGE } from "@/utils/imageUtils";
+
+import ProductImage from "@/components/common/ProductImage";
 // STYLED COMPONENTS
 import { PreviewImage, ProductImageWrapper } from "./styles";
 
 export default function ProductGallery({ images }: { images: (ImageResource | undefined)[] }) {
     const [currentImage, setCurrentImage] = useState(0);
-    const validImages = images.filter((img): img is ImageResource => !!img);
+
+    const validImages = useMemo(
+        () => images.filter((img): img is ImageResource => !!img),
+        [images]
+    );
 
     if (validImages.length === 0) return null;
 
-    const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-        const img = e.currentTarget;
-        if (img.src.includes(PLACEHOLDER_PRODUCT_IMAGE)) return;
-        img.src = PLACEHOLDER_PRODUCT_IMAGE;
-    };
+    const current = validImages[currentImage] ?? validImages[0];
 
     return (
         <Fragment>
             <ProductImageWrapper>
-                <img
+                <ProductImage
+                    entity={current}
                     alt="product"
-                    src={getProductImageUrl(validImages[currentImage], "800x800")}
+                    size="800x800"
                     style={{ width: "100%", height: "100%", objectFit: "contain" }}
                     loading="lazy"
-                    onError={handleError}
+                    fallback="placeholder"
+                    noWrapper
                 />
             </ProductImageWrapper>
 
@@ -37,12 +40,14 @@ export default function ProductGallery({ images }: { images: (ImageResource | un
                         onClick={() => setCurrentImage(ind)}
                         selected={currentImage === ind}
                     >
-                        <img
+                        <ProductImage
+                            entity={img}
                             alt="product"
-                            src={getProductImageUrl(img, "80x80")}
+                            size="80x80"
                             style={{ width: "100%", height: "100%", objectFit: "contain" }}
                             loading="lazy"
-                            onError={handleError}
+                            fallback="placeholder"
+                            noWrapper
                         />
                     </PreviewImage>
                 ))}

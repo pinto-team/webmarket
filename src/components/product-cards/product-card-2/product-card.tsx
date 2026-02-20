@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
 import Typography from "@mui/material/Typography";
 // GLOBAL CUSTOM COMPONENTS
-import { ProductImage } from "components/common/ProductImage";
+import ProductImage from "@/components/common/ProductImage";
 // LOCAL CUSTOM COMPONENTS
 import ProductPrice from "../product-price";
 // CUSTOM DATA MODEL

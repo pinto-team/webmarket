@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -15,7 +15,8 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Box from "@mui/material/Box";
 
 import { usePostCategory } from "@/hooks/usePostCategory";
-import { getProductThumbnail } from "@/utils/imageHelper";
+import ProductImage from "@/components/common/ProductImage";
+
 import { t } from "@/i18n/t";
 import { formatPersianDate } from "@/utils/persian";
 
@@ -80,12 +81,14 @@ export default function BlogCategoryPage() {
                                     }}
                                 >
                                     <Box sx={{ position: "relative", width: "100%", height: 200, overflow: "hidden" }}>
-                                        <Image
-                                            src={getProductThumbnail(post.upload)}
+                                        <ProductImage
+                                            entity={post}
                                             alt={post.title}
-                                            fill
-                                            style={{ objectFit: "cover" }}
-                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                            size="600x400"
+                                            quality={75}
+                                            fallback="placeholder"
+                                            noWrapper
+                                            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                                         />
                                     </Box>
 

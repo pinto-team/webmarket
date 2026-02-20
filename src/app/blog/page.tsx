@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePosts } from "@/hooks/usePosts";
 import { useState, useMemo } from "react";
 
@@ -17,7 +16,7 @@ import Paper from "@mui/material/Paper";
 
 import BlogCategoryNav from "@/components/blog/BlogCategoryNav";
 import TagCloud from "@/components/blog/TagCloud";
-import { getProductThumbnail } from "@/utils/imageHelper";
+import ProductImage from "@/components/common/ProductImage";
 
 import { t } from "@/i18n/t";
 import { formatPersianDate } from "@/utils/persian";
@@ -67,13 +66,27 @@ export default function BlogPage() {
                                                 "&:hover": { transform: "translateY(-4px)", boxShadow: 6 },
                                             }}
                                         >
-                                            <Box sx={{ position: "relative", width: "100%", height: 200, overflow: "hidden" }}>
-                                                <Image
-                                                    src={getProductThumbnail(post.upload)}
+                                            <Box
+                                                sx={{
+                                                    position: "relative",
+                                                    width: "100%",
+                                                    height: 200,
+                                                    overflow: "hidden",
+                                                }}
+                                            >
+                                                <ProductImage
+                                                    entity={post}
                                                     alt={post.title}
-                                                    fill
-                                                    style={{ objectFit: "cover" }}
-                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                    size="600x400"
+                                                    quality={75}
+                                                    fallback="placeholder"
+                                                    noWrapper
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "100%",
+                                                        objectFit: "cover",
+                                                        display: "block",
+                                                    }}
                                                 />
                                             </Box>
 
