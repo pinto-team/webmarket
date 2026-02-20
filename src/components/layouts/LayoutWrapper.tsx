@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
-import ShopLayout1 from "./shop-layout-1";
+import ShopLayout1 from "./shop-home";
 import {useShopData} from "@/contexts/ShopDataProvider";
 
 interface Props {

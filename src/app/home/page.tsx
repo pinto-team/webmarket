@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+    import type { Metadata } from "next";
 import GadgetTwoPageView from "pages-sections/home/page-view";
 
 import { generatePageMetadata } from "@/utils/metadata";
