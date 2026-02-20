@@ -1,26 +1,36 @@
-'use client';
+"use client";
 
-import {CategoryList} from 'components/categories';
-import type {CategoryMenuItem} from 'models/Category.model';
-import type {ProductCategory} from '@/types/shopData.types';
-import {useShopData} from "@/contexts/ShopDataProvider";
-
-function mapToMenuItem(cat: ProductCategory): CategoryMenuItem {
-    return {
-        title: cat.name,
-        href: `/category/${cat.slug}`,
-        children: cat.children?.map(mapToMenuItem),
-        component: cat.children && cat.children.length > 0 ? 'List' : undefined
-    };
-}
+import { useEffect, useMemo, useState } from "react";
+import { CategoryList } from "components/categories";
+import type { CategoryMenuItem } from "models/Category.model";
+import type { ProductCategory } from "@/types/shopData.types";
+import { productService } from "@/services/product.service";
+import { buildCategoryMenuItems } from "@/utils/categoryMenu";
 
 export default function CategoryMenu() {
-    const {shopData} = useShopData();
-    const categories = shopData?.product_categories || [];
+    const [flatCats, setFlatCats] = useState<ProductCategory[]>([]);
 
-    if (!categories.length) return null;
-    console.log("[CategoryMenu] count:", shopData?.product_categories?.length);
-    console.log("[CategoryMenu] first10:", (shopData?.product_categories ?? []).slice(0, 10).map(c => c.name));
+    useEffect(() => {
+        let alive = true;
+        (async () => {
+            try {
+                const res = await productService.getCategories(); // GET /product-cats
+                if (alive) setFlatCats((res ?? []) as any);
+            } catch {
+                if (alive) setFlatCats([]);
+            }
+        })();
+        return () => {
+            alive = false;
+        };
+    }, []);
 
-    return <CategoryList categories={categories.map(mapToMenuItem)}/>;
+    const menuItems: CategoryMenuItem[] = useMemo(
+        () => (flatCats.length ? buildCategoryMenuItems(flatCats) : []),
+        [flatCats]
+    );
+
+    if (!menuItems.length) return null;
+
+    return <CategoryList categories={menuItems} />;
 }
