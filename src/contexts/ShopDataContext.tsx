@@ -1,10 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import { ShopData } from "@/types/shopData.types";
 import { shopDataService } from "@/services/shopData.service";
-import { productService } from "@/services/product.service";
-import { buildCategoryTree } from "@/utils/categoryTree";
 
 interface ShopDataContextType {
     shopData: ShopData | null;
@@ -15,40 +13,29 @@ interface ShopDataContextType {
 
 const ShopDataContext = createContext<ShopDataContextType | undefined>(undefined);
 
-export function ShopDataProvider({ children }: { children: ReactNode }) {
-    const [shopData, setShopData] = useState<ShopData | null>(null);
-    const [loading, setLoading] = useState(true);
+interface ShopDataProviderProps {
+    children: ReactNode;
+    initialShopData?: ShopData | null;
+}
+
+export function ShopDataProvider({ children, initialShopData = null }: ShopDataProviderProps) {
+    const [shopData, setShopData] = useState<ShopData | null>(initialShopData);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchShopData = async () => {
+    const fetchShopData = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // 1) shop data
             const data = await shopDataService.getShopData();
-
-            // 2) real categories (same source as /products)
-            const realCats = await productService.getCategories();
-
-            // 3) build tree if needed (your CategoryMenu expects tree)
-            const treeCats = buildCategoryTree(realCats as any);
-
-            // 4) override product_categories
-            setShopData({
-                ...data,
-                product_categories: treeCats as any
-            });
+            setShopData(data);
         } catch (err) {
             setError("Failed to load shop data");
             console.error("Shop data fetch error:", err);
         } finally {
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchShopData();
     }, []);
 
     return (

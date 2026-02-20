@@ -33,7 +33,7 @@ import ShopDataLoader from "components/layouts/ShopDataLoader";
 import { getShopDataServer } from "@/utils/shopDataCache";
 import { tServer } from "@/i18n/serverT";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 const vazirmatn = Vazirmatn({
     subsets: ["arabic"],
@@ -48,19 +48,8 @@ interface RootLayoutProps {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-    const shopData = await getShopDataServer();
-
-    const title: string =
-        shopData?.title && shopData.title.trim().length > 0
-            ? shopData.title
-            : tServer<string>("meta.defaultTitle");
-
-    const description: string =
-        shopData?.footer_description &&
-        shopData.footer_description.trim().length > 0
-            ? shopData.footer_description
-            : tServer<string>("meta.defaultDescription");
-
+    const title = tServer<string>("meta.defaultTitle");
+    const description = tServer<string>("meta.defaultDescription");
     const keywords: string[] =
         Array.isArray(tServer<string[]>("meta.defaultKeywords"))
             ? tServer<string[]>("meta.defaultKeywords")
@@ -77,6 +66,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children, modal }: RootLayoutProps) {
+    const initialShopData = await getShopDataServer();
+
     return (
         <html
             lang="fa"
@@ -93,7 +84,7 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
             <AuthProvider>
                 <CartProvider>
                     <SettingsProvider>
-                        <ShopDataProvider>
+                        <ShopDataProvider initialShopData={initialShopData}>
                             <ThemeProvider>
                                 <RTL>
                                     <ShopDataLoader>

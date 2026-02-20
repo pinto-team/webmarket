@@ -7,7 +7,6 @@ import type { IdParams } from "models/Common";
 import type Address from "models/Address.model";
 
 import axiosInstance from "@/utils/axiosInstance";
-import { getShopDataServer } from "@/utils/shopDataCache";
 import { tServer } from "@/i18n/serverT";
 
 async function getAddress(id: string): Promise<Address | null> {
@@ -25,9 +24,7 @@ export async function generateMetadata({ params }: IdParams): Promise<Metadata> 
     const address = await getAddress(id);
     if (!address) notFound();
 
-    const shopData = await getShopDataServer();
-    const siteTitle =
-        shopData?.title?.trim() || tServer<string>("meta.defaultTitle");
+    const siteTitle = tServer<string>("meta.defaultTitle");
 
     return {
         title: `${address.title} - ${siteTitle}`,

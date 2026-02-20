@@ -3,6 +3,7 @@ import https from "https";
 import { tokenStorage } from "./token";
 
 const isServer = typeof window === "undefined";
+const shouldVerifyTLS = process.env.NODE_ENV === "production";
 
 const axiosInstance = axios.create({
     baseURL:
@@ -16,8 +17,8 @@ const axiosInstance = axios.create({
     ...(isServer
         ? {
             httpsAgent: new https.Agent({
-                rejectUnauthorized: false,
-                keepAlive: false,
+                rejectUnauthorized: shouldVerifyTLS,
+                keepAlive: true,
             }),
         }
         : {}),
