@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
-import ShopLayout1 from "./shop-home";
+import ShopHome from "./shop-home";
 import {useShopData} from "@/contexts/ShopDataProvider";
 
 interface Props {
@@ -25,6 +25,6 @@ export default function LayoutWrapper({ children }: Props) {
         return null;
     }
 
-    return <ShopLayout1>{children}</ShopLayout1>;
+    return <ShopHome>{children}</ShopHome>;
 
 }

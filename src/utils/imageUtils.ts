@@ -48,3 +48,13 @@ export function isPlaceholderProductImage(url?: string | null) {
     if (!url) return true;
     return url.includes("/placeholder.png") || url.includes("placeholder");
 }
+
+export function getLogoImageUrl(entityOrProxy: any, size?: string, quality = 80): string {
+    const raw = getServerImageUrl(entityOrProxy, size, quality);
+
+    if (!raw) return raw;
+    if (raw.includes("/rs:fill:")) {
+        return raw.replace("/rs:fill:", "/rs:fit:");
+    }
+    return raw;
+}

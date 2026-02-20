@@ -1,1 +1,1 @@
-export { default } from "./shop-layout-1";
+export { default } from "./shop-home";
