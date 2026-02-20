@@ -65,16 +65,19 @@ export default function FilePreview({
 
             {uploading && <CircularProgress size={20} />}
 
-            {resource && (
+            {resource?.main_url && (
                 <IconButton
                     size="small"
+                    component="a"
                     href={resource.main_url}
                     download
                     target="_blank"
+                    rel="noopener noreferrer"
                 >
                     <Download fontSize="small" />
                 </IconButton>
             )}
+
 
             {onRemove && !uploading && (
                 <IconButton size="small" onClick={onRemove}>

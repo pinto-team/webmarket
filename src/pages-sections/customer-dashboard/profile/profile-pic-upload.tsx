@@ -15,41 +15,22 @@ import FlexBox from "components/flex-box/flex-box";
 import { useUpload } from "@/hooks/useUpload";
 import { useProfile } from "@/hooks/useProfile";
 import { t } from "@/i18n/t";
+import { getServerImageUrl } from "@/utils/imageUtils";
 
-export default function ProfilePicUpload({
-                                             image,
-                                         }: {
-    image: string;
-}) {
-    const [avatarUrl, setAvatarUrl] = useState(image);
+export default function ProfilePicUpload({ image }: { image: string }) {
+    // image ممکنه URL مستقیم باشه یا خالی؛ helper خودش placeholder می‌دهد
+    const [avatarUrl, setAvatarUrl] = useState(() => getServerImageUrl(image, "60x60"));
 
     const { upload, uploading } = useUpload();
     const { updateOptions } = useProfile();
 
-    const handleFileChange = async (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const validTypes = [
-            "image/jpeg",
-            "image/jpg",
-            "image/png",
-            "image/webp",
-        ];
+        const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-        if (!validTypes.includes(file.type)) {
-            toast.error(
-                t("files.allowedFormatsWithMax", {
-                    formats: t("files.allowedFormats"),
-                    maxMb: 5,
-                })
-            );
-            return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) {
+        if (!validTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
             toast.error(
                 t("files.allowedFormatsWithMax", {
                     formats: t("files.allowedFormats"),
@@ -67,7 +48,8 @@ export default function ProfilePicUpload({
                 upload_id: result.id,
             });
 
-            setAvatarUrl(result.main_url);
+            // ✅ canonical: proxy_url
+            setAvatarUrl(getServerImageUrl(result, "60x60"));
 
             toast.success(t("profile.avatarUploadSuccess"));
         } catch {
@@ -77,13 +59,8 @@ export default function ProfilePicUpload({
 
     return (
         <FlexBox alignItems="flex-end" mb={4}>
-            <Avatar sx={{ height: 60, width: 60 }}>
-                <Image
-                    fill
-                    alt="user"
-                    src={avatarUrl}
-                    sizes="(60px, 60px)"
-                />
+            <Avatar sx={{ height: 60, width: 60, position: "relative", overflow: "hidden" }}>
+                <Image fill alt="user" src={avatarUrl} sizes="60px" style={{ objectFit: "cover" }} />
             </Avatar>
 
             <IconButton
@@ -94,11 +71,7 @@ export default function ProfilePicUpload({
                 disabled={uploading}
                 sx={{ bgcolor: "grey.300", ml: -2.5 }}
             >
-                {uploading ? (
-                    <CircularProgress size={20} />
-                ) : (
-                    <CameraEnhance fontSize="small" />
-                )}
+                {uploading ? <CircularProgress size={20} /> : <CameraEnhance fontSize="small" />}
             </IconButton>
 
             <Box

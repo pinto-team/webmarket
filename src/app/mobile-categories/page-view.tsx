@@ -2,28 +2,21 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-// MUI
 import Tooltip from "@mui/material/Tooltip";
 
-// GLOBAL CUSTOM COMPONENTS
 import IconComponent from "components/IconComponent";
 import OverlayScrollbar from "components/overlay-scrollbar";
-
-// LOCAL
 import renderChild from "./render-child";
-
-// STYLES
 import { CategoryListItem, StyledRoot } from "./styles";
 
-// TYPES
-import { CategoryMenuItem } from "models/Category.model";
+import type { CategoryMenuItem } from "models/Category.model";
 import { useShopData } from "@/contexts/ShopDataContext";
-import type { ProductCategory } from "@/types/shopData.types";
-
+import type { ShopData, ProductCategory } from "@/types/shopData.types"; // ShopData رو مطابق پروژه‌ت تنظیم کن
 import { t } from "@/i18n/t";
 
-// ==============================================================
+type Props = {
+    data?: ShopData;
+};
 
 function toCategoryMenuItem(cat: ProductCategory): CategoryMenuItem {
     return {
@@ -34,14 +27,16 @@ function toCategoryMenuItem(cat: ProductCategory): CategoryMenuItem {
     };
 }
 
-export default function MobileCategoriesPageView() {
+export default function MobileCategoriesPageView({ data }: Props) {
     const router = useRouter();
     const { shopData } = useShopData();
 
+    const effectiveShopData = data ?? shopData;
+
     const categoryMenus: CategoryMenuItem[] = useMemo(() => {
-        const cats = (shopData?.product_categories ?? []) as ProductCategory[];
+        const cats = (effectiveShopData?.product_categories ?? []) as ProductCategory[];
         return cats.map(toCategoryMenuItem);
-    }, [shopData?.product_categories]);
+    }, [effectiveShopData?.product_categories]);
 
     const initialSelected = useMemo(() => {
         if (!categoryMenus.length) return undefined;
@@ -62,10 +57,7 @@ export default function MobileCategoriesPageView() {
                         <CategoryListItem
                             isActive={selected?.href === item.href}
                             onClick={() => {
-                                if (item.children?.length) {
-                                    setSelected(item);
-                                    return;
-                                }
+                                if (item.children?.length) return setSelected(item);
                                 if (item.href) router.push(item.href);
                             }}
                         >
