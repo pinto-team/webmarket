@@ -70,7 +70,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <Breadcrumbs sx={{ mb: 3 }}>
                     <Link href="/">{tServer("nav.home")}</Link>
                     <Link href="/blog">{tServer("nav.blog")}</Link>
-                    <Typography color="text.primary">{post.title}</Typography>
+                    <Typography color="text.primary">{toPersianNumber(post.title)}</Typography>
                 </Breadcrumbs>
 
                 <Box sx={{ maxWidth: 900, mx: "auto" }}>
@@ -89,7 +89,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                             <Box
                                 component="img"
                                 src={heroImage}
-                                alt={post.title}
+                                alt={toPersianNumber(post.title)}
                                 sx={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                                 loading="eager"
                             />
@@ -97,7 +97,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     )}
 
                     <Typography variant="h3" component="h1" sx={{ mb: 2, fontWeight: 700 }}>
-                        {post.title}
+                        {toPersianNumber(post.title)}
                     </Typography>
 
                     <Box sx={{ display: "flex", gap: 3, mb: 3, color: "text.secondary", flexWrap: "wrap" }}>
@@ -121,7 +121,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                             variant="h6"
                             sx={{ mb: 3, color: "text.secondary", fontWeight: 400, lineHeight: 1.8 }}
                         >
-                            {post.excerpt}
+                            {toPersianNumber(post.excerpt)}
                         </Typography>
                     )}
 
@@ -153,7 +153,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                                 my: 2,
                             },
                         }}
-                        dangerouslySetInnerHTML={{ __html: post.description }}
+                        dangerouslySetInnerHTML={{ __html: toPersianNumber(post.description) }}
                     />
                 </Box>
             </Container>

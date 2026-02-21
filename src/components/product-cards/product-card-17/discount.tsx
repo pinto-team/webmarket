@@ -2,6 +2,7 @@
 
 import Chip, { ChipProps } from "@mui/material/Chip";
 import { styled } from "@mui/material/styles";
+import { toPersianNumber } from "@/utils/persian";
 
 // STYLED COMPONENT
 const StyledChip = styled(Chip, {
@@ -29,7 +30,7 @@ interface Props extends ChipProps {
 
 export default function Discount({ discount = 0, shape = "rounded", ...props }: Props) {
   if (discount > 0) {
-    return <StyledChip size="small" shape={shape} label={`${discount}% off`} {...props} />;
+    return <StyledChip size="small" shape={shape} label={toPersianNumber(`${discount}% off`)} {...props} />;
   }
 
   return null;

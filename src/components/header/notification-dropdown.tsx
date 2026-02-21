@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { getNotifications, updateNotification } from "@/services/notification.service";
 import { NotificationResource } from "@/types/notification.types";
 import { t } from "@/i18n/t";
-import { formatPersianRelativeTime } from "@/utils/persian";
+import { formatPersianNumber, formatPersianRelativeTime, toPersianNumber } from "@/utils/persian";
 
 export default function NotificationDropdown() {
     const [open, setOpen] = useState(false);
@@ -64,7 +64,7 @@ export default function NotificationDropdown() {
         <ClickAwayListener onClickAway={handleClose}>
             <div>
                 <IconButton onClick={handleClick}>
-                    <Badge color="error" badgeContent={unreadCount}>
+                    <Badge color="error" badgeContent={formatPersianNumber(unreadCount)}>
                         <Notifications sx={{ color: "grey.600" }} />
                     </Badge>
                 </IconButton>
@@ -107,11 +107,11 @@ export default function NotificationDropdown() {
                                         variant="subtitle2"
                                         fontWeight={notification.status === 0 ? 600 : 400}
                                     >
-                                        {notification.title}
+                                        {toPersianNumber(notification.title)}
                                     </Typography>
 
                                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                        {notification.description}
+                                        {toPersianNumber(notification.description)}
                                     </Typography>
 
                                     <Typography

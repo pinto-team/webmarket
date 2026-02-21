@@ -2,6 +2,7 @@
 
 import { Fragment, PropsWithChildren, useState } from "react";
 import Badge from "@mui/material/Badge";
+import { formatPersianNumber } from "@/utils/persian";
 // GLOBAL CUSTOM HOOKS
 import { useCart } from "@/contexts/CartContext";
 // STYLED COMPONENTS
@@ -36,7 +37,7 @@ export  function MobileNavigationBar2({ children, navigation }: Props) {
           const CONTENT = (
             <Fragment>
               {badge ? (
-                <Badge badgeContent={cart.length} color="primary">
+                <Badge badgeContent={formatPersianNumber(cart.length)} color="primary">
                   {ICON}
                 </Badge>
               ) : (

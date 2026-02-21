@@ -6,6 +6,7 @@ import ProductImage from "@/components/common/ProductImage";
 import HoverActions from "./hover-actions";
 // CUSTOM UTILS LIBRARY FUNCTION
 import { currency } from "lib";
+import { toPersianNumber } from "@/utils/persian";
 // STYLED COMPONENTS
 import { Card, CardMedia, CardContent } from "./styles";
 // CUSTOM DATA MODEL
@@ -48,7 +49,7 @@ export default function ProductCard8({ product }: Props) {
         {/* PRODUCT RATING / REVIEW */}
         <div className="ratings">
           <Rating readOnly value={rating} sx={{ fontSize: 16 }} />
-          <p className="total">({reviews?.length || 0} Reviews)</p>
+          <p className="total">({toPersianNumber(reviews?.length || 0)} Reviews)</p>
         </div>
       </CardContent>
     </Card>

@@ -3,6 +3,7 @@
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { t } from "@/i18n/t";
+import { toPersianNumber } from "@/utils/persian";
 
 interface Props {
     description?: string;
@@ -28,7 +29,7 @@ export default function ProductDescription({ description }: Props) {
                         "& p": { mb: 2 },
                         "& h1, & h2, & h3, & h4, & h5, & h6": { mt: 2, mb: 1 },
                     }}
-                    dangerouslySetInnerHTML={{ __html: description }}
+                    dangerouslySetInnerHTML={{ __html: toPersianNumber(description) }}
                 />
             )}
         </div>

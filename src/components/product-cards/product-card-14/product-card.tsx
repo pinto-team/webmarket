@@ -7,6 +7,7 @@ import Star from "icons/Star";
 import AddToCart from "./add-to-cart";
 // CUSTOM UTILS LIBRARY FUNCTIONS
 import { calculateDiscount, currency } from "lib";
+import { toPersianNumber } from "@/utils/persian";
 // STYLED COMPONENTS
 import { Content, PriceText, StyledChip, StyledRoot } from "./styles";
 import ProductImage from "@/components/common/ProductImage";
@@ -24,7 +25,7 @@ export default function ProductCard14({ product }: Props) {
     <StyledRoot>
       <Link href={`/products/${slug}`}>
         <div className="img-wrapper">
-          {discount > 0 && <StyledChip size="small" label={`${discount}% off`} />}
+          {discount > 0 && <StyledChip size="small" label={toPersianNumber(`${discount}% off`)} />}
 
           <ProductImage
             product={product}
@@ -51,7 +52,7 @@ export default function ProductCard14({ product }: Props) {
         </Typography>
 
         <PriceText>
-          {calculateDiscount(price, discount)}
+          {toPersianNumber(calculateDiscount(price, discount))}
           {discount && <span className="base-price">{currency(price)}</span>}
         </PriceText>
 

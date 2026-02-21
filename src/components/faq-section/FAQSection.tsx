@@ -6,6 +6,7 @@ import { ExpandMore } from "@mui/icons-material";
 
 import type { FAQ } from "@/types/shopData.types";
 import { t } from "@/i18n/t";
+import { toPersianNumber } from "@/utils/persian";
 
 interface FAQSectionProps {
     faqs: FAQ[];
@@ -43,11 +44,11 @@ export default function FAQSection({ faqs, loading }: FAQSectionProps) {
                     onChange={() => setExpanded(expanded === index ? false : index)}
                 >
                     <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography fontWeight={600}>{faq.question}</Typography>
+                        <Typography fontWeight={600}>{toPersianNumber(faq.question)}</Typography>
                     </AccordionSummary>
 
                     <AccordionDetails>
-                        <div dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                        <div dangerouslySetInnerHTML={{ __html: toPersianNumber(faq.answer) }} />
                     </AccordionDetails>
                 </Accordion>
             ))}

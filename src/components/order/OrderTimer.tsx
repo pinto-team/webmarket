@@ -2,6 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { useOrderTimer } from "@/hooks/useOrderTimer";
+import { toPersianNumber } from "@/utils/persian";
 
 interface OrderTimerProps {
   expiresAt: Date | string | null;
@@ -30,7 +31,7 @@ export default function OrderTimer({ expiresAt, onExpire }: OrderTimerProps) {
         Time Remaining
       </Typography>
       <Typography variant="h5" fontWeight={700} color={minutes < 5 ? "warning.dark" : "info.dark"}>
-        {formatted}
+        {toPersianNumber(formatted)}
       </Typography>
     </Box>
   );
