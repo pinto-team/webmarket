@@ -8,7 +8,7 @@ import BlogSection from "components/blog-section/BlogSection";
 
 // LOCAL CUSTOM SECTION COMPONENTS
 import Section2 from "../section-2";
-import Section3 from "../section-3";
+import Home_banner from "../home_banner";
 import Section4 from "../section-4";
 import {useShopData} from "@/contexts/ShopDataProvider";
 
@@ -26,7 +26,7 @@ export default function GadgetTwoPageView() {
             <Section2 />
 
             {/* APPLE WATCH BANNER SECTION */}
-            <Section3 />
+            <Home_banner />
 
             {/* NEW ARRIVAL PRODUCTS SECTION */}
             <Section4 />
@@ -38,7 +38,6 @@ export default function GadgetTwoPageView() {
             <BlogSection posts={shopData?.blog_posts || []} />
 
             {/* NEWSLETTER SECTION */}
-            <Section3 />
         </>
     );
 }

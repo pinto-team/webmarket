@@ -7,23 +7,32 @@ export interface ShopDataResponse {
 }
 
 export interface ShopData {
-  title: string;
-  theme: ThemeConfig;
-  topbar: TopbarConfig;
-  header_logo: ImageResource;
-  footer_logo: ImageResource;
-  mobile_logo: ImageResource;
-  main_navigation: MenuItem[];
-  hero_slider: HeroSlide[];
-  product_categories: ProductCategory[];
-  faqs: FAQ[];
-  blog_posts: BlogPost[];
-  footer_description: string;
-  app_links: AppLinks;
-  footer_sections: FooterSection[];
-  contact_info: ContactInfo;
-  social_links: SocialLink[];
-  footer_copyright: string;
+    title: string;
+    theme: ThemeConfig;
+    topbar: TopbarConfig;
+    header_logo: ImageResource;
+    footer_logo: ImageResource;
+    mobile_logo: ImageResource;
+    main_navigation: MenuItem[];
+    hero_slider: HeroSlide[];
+    product_categories: ProductCategory[];
+    faqs: FAQ[];
+    blog_posts: BlogPost[];
+    footer_description: string;
+    app_links: AppLinks;
+    footer_sections: FooterSection[];
+    contact_info: ContactInfo;
+    social_links: SocialLink[];
+    footer_copyright: string;
+    home_banner?: HomeBanner;
+}
+
+export interface HomeBanner {
+    image: ImageResource;
+    title: string;
+    subtitle: string;
+    button_text: string;
+    button_link: string;
 }
 
 export interface ThemeConfig {

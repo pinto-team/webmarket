@@ -71,12 +71,6 @@ export async function generateMetadata({ params }: SlugParams): Promise<Metadata
                 images: imageUrl ? [{ url: imageUrl }] : [],
                 type: "website",
             },
-            twitter: {
-                card: "summary_large_image",
-                title: product?.title || shopName,
-                description: ogDesc,
-                images: imageUrl ? [imageUrl] : [],
-            },
         };
     } catch (error) {
         console.error("Error generating metadata for product:", slug, error);

@@ -66,7 +66,7 @@ export default function HeroSlider({ slides, loading }: HeroSliderProps) {
 
                     <Button
                         variant="contained"
-                        color={"dark"}
+                        color={"primary"}
                         size="large"
                         href={safeButtonLink}
                         disabled={safeButtonLink === "#"}
