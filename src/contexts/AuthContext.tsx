@@ -1,9 +1,11 @@
 "use client";
 
-import { createContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth.service";
 import { cartService } from "@/services/cart.service";
 import { tokenStorage } from "@/utils/token";
+import { DEFAULT_AUTH_REDIRECT } from "@/utils/auth-navigation";
 import type {
     LoginRequest,
     RegisterRequest,
@@ -28,8 +30,14 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 );
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const router = useRouter();
     const [user, setUser] = useState<UserResource | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    const clearAuthState = useCallback(() => {
+        tokenStorage.clear();
+        setUser(null);
+    }, []);
 
     useEffect(() => {
         const initAuth = async () => {
@@ -39,15 +47,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     const profile = await authService.getProfile();
                     setUser(profile);
                 } catch {
-                    tokenStorage.clear();
-                    setUser(null);
+                    clearAuthState();
                 }
             }
             setIsLoading(false);
         };
 
         initAuth();
-    }, []);
+    }, [clearAuthState]);
+
+    useEffect(() => {
+        const handleUnauthorized = () => {
+            clearAuthState();
+            router.replace(DEFAULT_AUTH_REDIRECT);
+        };
+
+        window.addEventListener("auth:unauthorized", handleUnauthorized);
+        return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    }, [clearAuthState, router]);
 
     const login = async (data: LoginRequest) => {
         const tempId = cartService.getTempId();
@@ -76,11 +93,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             await authService.logout();
         } catch {
-            // حتی اگر API fail شد، باز هم پاک کن
+            // Even if logout API fails, local state must be cleared.
         }
 
-        tokenStorage.clear();
-        setUser(null);
+        clearAuthState();
+        router.replace(DEFAULT_AUTH_REDIRECT);
     };
 
     const refreshProfile = async () => {

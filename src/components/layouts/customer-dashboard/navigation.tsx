@@ -3,7 +3,6 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useMenuCounts } from "@/hooks/useMenuCounts";
 import NavItem from "./nav-item";
@@ -12,7 +11,6 @@ import { t } from "@/i18n/t";
 
 export function Navigation() {
     const { logout } = useAuth();
-    const router = useRouter();
     const counts = useMenuCounts();
 
     const MENUS = [
@@ -36,7 +34,6 @@ export function Navigation() {
 
     const handleLogout = async () => {
         await logout();
-        router.replace("/"); // فقط خانه — نه login
     };
 
     return (

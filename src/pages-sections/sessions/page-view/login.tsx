@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
@@ -19,19 +19,15 @@ import usePasswordVisible from "../use-password-visible";
 
 import { t } from "@/i18n/t";
 import { toEnglishNumber } from "@/utils/persian";
+import { useLoginContinuation } from "@/hooks/useLoginContinuation";
 
 export default function LoginPageView() {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const { login } = useAuth();
     const { visiblePassword, togglePasswordVisible } = usePasswordVisible();
 
     const [error, setError] = useState<string | null>(null);
-    const [sessionExpired, setSessionExpired] = useState(false);
-
-    useEffect(() => {
-        setSessionExpired(searchParams.get("session_expired") === "true");
-    }, [searchParams]);
+    const { postLoginNavigation, sessionExpired } = useLoginContinuation();
 
     const validationSchema = yup.object({
         username: yup
@@ -57,24 +53,12 @@ export default function LoginPageView() {
 
             await login(payload as any);
 
-            const next = searchParams.get("next");
-            const isModal = searchParams.get("modal") === "1";
-
-            // ✅ 1) اگر next داریم → برو همونجا (بدون back برای جلوگیری از فلیکر)
-            if (next) {
-                const cleanNext = next.split("?")[0];
-                router.replace(cleanNext);
-                return;
-            }
-
-            // ✅ 2) اگر مودال بوده ولی next نداریم → ببند و برگرد
-            if (isModal) {
+            if (postLoginNavigation.type === "back") {
                 router.back();
                 return;
             }
 
-            // ✅ 3) لاگین مستقیم
-            router.replace("/");
+            router.replace(postLoginNavigation.href);
         } catch (err: any) {
             const errorMsg =
                 err?.validationMessage ||
