@@ -23,6 +23,7 @@ import ProductsListView from "components/products-view/products-list-view";
 // TYPES
 import Filters from "models/Filters";
 import Product from "models/Product.model";
+import { formatPersianNumber } from "@/utils/persian";
 
 const SORT_OPTIONS = [
   { label: "Relevance", value: "relevance" },
@@ -77,7 +78,7 @@ export default function ProductSearchPageView({
                 Searching for “{query}”
               </Typography>
               <Typography variant="body1" sx={{ color: "grey.600" }}>
-                {products.length} results found
+                {formatPersianNumber(products.length)} results found
               </Typography>
             </div>
           ) : (

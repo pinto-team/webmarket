@@ -8,6 +8,7 @@ import { Card, CardMedia, CardContent } from "./styles";
 // CUSTOM UTILS LIBRARY FUNCTION
 import { currency } from "lib";
 import ProductImage from "@/components/common/ProductImage";
+import { toPersianNumber } from "@/utils/persian";
 // CUSTOM DATA MODEL
 
 
@@ -41,7 +42,7 @@ export default function ProductCard10({ product }: Props) {
 
         <div className="ratings">
           <Rating name="read-only" value={rating || 4} readOnly />
-          <p className="amount">({reviews?.length || 0})</p>
+          <p className="amount">({toPersianNumber(reviews?.length || 0)})</p>
         </div>
 
         <AddToCart product={product} />

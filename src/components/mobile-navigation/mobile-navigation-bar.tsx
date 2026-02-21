@@ -1,6 +1,7 @@
 "use client";
 
 import Badge from "@mui/material/Badge";
+import { formatPersianNumber } from "@/utils/persian";
 // GLOBAL CUSTOM HOOK
 import { useCart } from "@/contexts/CartContext";
 // GLOBAL CUSTOM COMPONENT
@@ -22,7 +23,7 @@ export function MobileNavigationBar({ navigation }: Props) {
       {navigation.map(({ icon, href, title, badge }) => (
         <StyledNavLink href={href} key={title}>
           {badge ? (
-            <Badge badgeContent={cart.length} color="primary">
+            <Badge badgeContent={formatPersianNumber(cart.length)} color="primary">
               <IconComponent icon={icon} fontSize="small" className="icon" />
             </Badge>
           ) : (

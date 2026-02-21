@@ -7,6 +7,7 @@ import ProductImage from "@/components/common/ProductImage";
 
 // CUSTOM UTILS LIBRARY FUNCTIONS
 import { calculateDiscount, currency } from "lib";
+import { toPersianNumber } from "@/utils/persian";
 // STYLED COMPONENTS
 import { Content, PriceText, StyledRoot } from "./styles";
 // CUSTOM DATA MODEL
@@ -37,10 +38,10 @@ export default function ProductCard15({ product }: Props) {
             {title}
           </Typography>
 
-          <p className="offer">10% off</p>
+          <p className="offer">{toPersianNumber("10% off")}</p>
 
           <PriceText>
-            {calculateDiscount(price, discount)}
+            {toPersianNumber(calculateDiscount(price, discount))}
             {discount ? <span className="base-price">{currency(price)}</span> : null}
           </PriceText>
         </div>
