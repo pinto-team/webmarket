@@ -31,8 +31,7 @@ import LayoutModel from "models/Layout.model";
 import { t } from "@/i18n/t";
 import { toPersianNumber } from "@/utils/persian";
 import ProductImage from "@/components/common/ProductImage";
-import {useShopData} from "@/contexts/ShopDataProvider";
-
+import { useShopData } from "@/contexts/ShopDataProvider";
 
 interface Props extends PropsWithChildren {
     data?: LayoutModel;
@@ -133,8 +132,27 @@ export default function ShopHome({ children, data }: Props) {
         };
     }, []);
 
+    // ----------------------------
+    // Persian digit safety layer
+    // ----------------------------
+    const topbarLabel = topbarData?.label ? toPersianNumber(topbarData.label) : topbarData?.label;
+    const topbarTitle = topbarData?.title ? toPersianNumber(topbarData.title) : topbarData?.title;
+
+    const footerDescriptionText =
+        shopData?.footer_description
+            ? toPersianNumber(shopData.footer_description)
+            : footer.description;
+
+    const phoneFa = toPersianNumber(shopData?.contact_info?.phone || footer.contact.phone);
+
     const yearFa = toPersianNumber(new Date().getFullYear());
-    const fallbackCopyright = `© ${t("footer.copyright")} ${yearFa} ${t("footer.brandName")}, ${t("footer.allRightsReserved")}`;
+    const fallbackCopyright =
+        `© ${t("footer.copyright")} ${yearFa} ${t("footer.brandName")}, ${t("footer.allRightsReserved")}`;
+
+    const footerCopyrightText =
+        shopData?.footer_copyright
+            ? toPersianNumber(shopData.footer_copyright)
+            : fallbackCopyright;
 
     return (
         <SnackbarProvider>
@@ -142,7 +160,7 @@ export default function ShopHome({ children, data }: Props) {
             <Fragment>
                 <div ref={chromeRef}>
                     <Topbar>
-                        <Topbar.Left label={topbarData.label} title={topbarData.title} />
+                        <Topbar.Left label={topbarLabel} title={topbarTitle} />
                         <Topbar.Right>
                             <TopbarSocialLinks links={topbarSocialLinks} />
                         </Topbar.Right>
@@ -190,7 +208,13 @@ export default function ShopHome({ children, data }: Props) {
                                 quality={80}
                                 fallback="icon"
                                 noWrapper
-                                style={{ objectFit: "contain", maxHeight: "50px", width: "auto", height: "50px", display: "block" }}
+                                style={{
+                                    objectFit: "contain",
+                                    maxHeight: "50px",
+                                    width: "auto",
+                                    height: "50px",
+                                    display: "block",
+                                }}
                             />
                         </Link>
 
@@ -198,7 +222,7 @@ export default function ShopHome({ children, data }: Props) {
                             variant="body1"
                             sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}
                         >
-                            {shopData?.footer_description || footer.description}
+                            {footerDescriptionText}
                         </Typography>
 
                         <FooterApps
@@ -239,7 +263,7 @@ export default function ShopHome({ children, data }: Props) {
 
                     <Footer1.Contact>
                         <FooterContact
-                            phone={shopData?.contact_info?.phone || footer.contact.phone}
+                            phone={phoneFa}
                             email={shopData?.contact_info?.email || footer.contact.email}
                             address={shopData?.contact_info?.address || footer.contact.address}
                         />
@@ -251,7 +275,7 @@ export default function ShopHome({ children, data }: Props) {
                         <Divider sx={{ borderColor: "grey.800" }} />
 
                         <Typography variant="body2" sx={{ py: 3, textAlign: "center", span: { fontWeight: 500 } }}>
-                            {shopData?.footer_copyright || fallbackCopyright}
+                            {footerCopyrightText}
                         </Typography>
                     </Footer1.Copyright>
                 </Footer1>

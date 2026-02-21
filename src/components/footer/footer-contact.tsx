@@ -17,7 +17,7 @@ export function FooterContact({ email, phone, address }: Props) {
             <Heading>{t("footer.contactTitle")}</Heading>
 
             <Typography variant="body1" sx={{ py: 0.6 }}>
-                {address}
+                {toPersianNumber(address ?? "")}
             </Typography>
 
             <Typography variant="body1" sx={{ py: 0.6 }}>
@@ -25,7 +25,7 @@ export function FooterContact({ email, phone, address }: Props) {
             </Typography>
 
             <Typography variant="body1" sx={{ py: 0.6, mb: 2 }}>
-                {t("footer.phoneLabel")}: {toPersianNumber(phone)}
+                {t("footer.phoneLabel")}: {toPersianNumber(phone ?? "")}
             </Typography>
         </Fragment>
     );
