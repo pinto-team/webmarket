@@ -34,13 +34,19 @@ axiosInstance.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
-        if (
-            typeof window !== "undefined" &&
-            config.url?.includes("/cart-items")
-        ) {
-            const tempId = localStorage.getItem("temp_cart_id");
-            if (tempId) {
-                config.headers["X-Cart-ID"] = `temp_${tempId}`;
+        const isCartRequest =
+            typeof window !== "undefined" && config.url?.includes("/cart-items");
+
+        if (isCartRequest) {
+            if (!token) {
+                const tempId = localStorage.getItem("temp_cart_id");
+                if (tempId) {
+                    config.headers["X-Cart-ID"] = `temp_${tempId}`;
+                }
+            } else {
+                if (config.headers && "X-Cart-ID" in config.headers) {
+                    delete (config.headers as any)["X-Cart-ID"];
+                }
             }
         }
 
@@ -53,12 +59,9 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        // ✅ فقط توکن رو پاک کن — redirect نکن
         if (error.response?.status === 401) {
             tokenStorage.clear();
         }
-
-        // 422 Validation Error
         if (error.response?.status === 422) {
             const apiError = error.response.data;
 
@@ -69,14 +72,11 @@ axiosInstance.interceptors.response.use(
                     })
                 );
             }
-
             if (apiError.message) {
                 error.message = apiError.message;
             }
-
             if (apiError.data?.errors) {
                 const errors: string[] = [];
-
                 Object.entries(apiError.data.errors).forEach(
                     ([, messages]) => {
                         if (Array.isArray(messages)) {
@@ -84,12 +84,10 @@ axiosInstance.interceptors.response.use(
                         }
                     }
                 );
-
                 error.validationErrors = apiError.data.errors;
                 error.validationMessage = errors.join(", ");
             }
         }
-
         return Promise.reject(error);
     }
 );

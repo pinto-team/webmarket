@@ -38,16 +38,11 @@ export default function LoginPageView() {
             .string()
             .matches(/^[0-9]{10}$/, t("validation.nationalIdLength"))
             .required(t("validation.required")),
-        password: yup
-            .string()
-            .required(t("validation.required")),
+        password: yup.string().required(t("validation.required")),
     });
 
     const methods = useForm({
-        defaultValues: {
-            username: "",
-            password: "",
-        },
+        defaultValues: { username: "", password: "" },
         resolver: yupResolver(validationSchema),
     });
 
@@ -61,7 +56,25 @@ export default function LoginPageView() {
             };
 
             await login(payload as any);
-            router.push("/");
+
+            const next = searchParams.get("next");
+            const isModal = searchParams.get("modal") === "1";
+
+            // ✅ 1) اگر next داریم → برو همونجا (بدون back برای جلوگیری از فلیکر)
+            if (next) {
+                const cleanNext = next.split("?")[0];
+                router.replace(cleanNext);
+                return;
+            }
+
+            // ✅ 2) اگر مودال بوده ولی next نداریم → ببند و برگرد
+            if (isModal) {
+                router.back();
+                return;
+            }
+
+            // ✅ 3) لاگین مستقیم
+            router.replace("/");
         } catch (err: any) {
             const errorMsg =
                 err?.validationMessage ||
@@ -71,7 +84,6 @@ export default function LoginPageView() {
             setError(errorMsg);
         }
     });
-
     return (
         <FormProvider methods={methods} onSubmit={handleSubmitForm}>
             {sessionExpired && (
@@ -98,10 +110,7 @@ export default function LoginPageView() {
                         methods.setValue("username", toEnglishNumber(value) as any);
                     }}
                     slotProps={{
-                        htmlInput: {
-                            maxLength: 10,
-                            inputMode: "numeric",
-                        },
+                        htmlInput: { maxLength: 10, inputMode: "numeric" },
                     }}
                 />
             </div>
@@ -118,10 +127,7 @@ export default function LoginPageView() {
                     slotProps={{
                         input: {
                             endAdornment: (
-                                <EyeToggleButton
-                                    show={visiblePassword}
-                                    click={togglePasswordVisible}
-                                />
+                                <EyeToggleButton show={visiblePassword} click={togglePasswordVisible} />
                             ),
                         },
                     }}

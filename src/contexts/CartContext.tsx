@@ -140,8 +140,13 @@ export default function CartProvider({ children }: PropsWithChildren) {
     };
 
     useEffect(() => {
-        fetchCart();
-    }, []);
+        if (!isAuthenticated) {
+            setCart([]);
+            setError(null);
+
+            cartService.clearTempId();
+        }
+    }, [isAuthenticated]);
 
     useEffect(() => {
         if (!isAuthenticated) return;
