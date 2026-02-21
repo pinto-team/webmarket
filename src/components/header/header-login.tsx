@@ -4,7 +4,6 @@ import Link from "next/link";
 import SvgIcon from "@mui/material/SvgIcon";
 import IconButton from "@mui/material/IconButton";
 import { useAuth } from "@/hooks/useAuth";
-import path from "path";
 
 export function HeaderLogin() {
     const { isAuthenticated } = useAuth();

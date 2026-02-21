@@ -7,17 +7,18 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 
 import { useCart } from "@/contexts/CartContext";
-import { useAuth } from "@/hooks/useAuth"; // ✅ اضافه
+import { useAuth } from "@/hooks/useAuth";
 import { FlexBetween } from "components/flex-box";
 import { currency } from "lib";
 
 import { t } from "@/i18n/t";
+import { getLoginUrl } from "@/utils/auth-navigation";
 import { toPersianNumber } from "@/utils/persian";
 
 export default function CheckoutForm() {
     const router = useRouter();
     const { cart } = useCart();
-    const { isAuthenticated } = useAuth(); // ✅
+    const { isAuthenticated } = useAuth();
 
     const subtotal = cart.reduce((acc, item) => acc + item.sku.price * item.quantity, 0);
     const shipping = 0;
@@ -26,8 +27,7 @@ export default function CheckoutForm() {
 
     const handleProceed = () => {
         if (!isAuthenticated) {
-            // ✅ حتماً next ست می‌شود
-            router.push("/login?modal=1&next=/checkout");
+            router.push(getLoginUrl({ modal: true, next: "/checkout" }));
             return;
         }
         router.push("/checkout");
@@ -78,7 +78,7 @@ export default function CheckoutForm() {
                 fullWidth
                 color="primary"
                 variant="contained"
-                onClick={handleProceed} // ✅
+                onClick={handleProceed}
                 disabled={cart.length === 0}
             >
                 {t("cart.proceedToCheckout")}

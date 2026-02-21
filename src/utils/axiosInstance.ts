@@ -61,6 +61,13 @@ axiosInstance.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             tokenStorage.clear();
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(
+                    new CustomEvent("auth:unauthorized", {
+                        detail: { reason: error.response?.data?.message || "unauthorized" },
+                    })
+                );
+            }
         }
         if (error.response?.status === 422) {
             const apiError = error.response.data;

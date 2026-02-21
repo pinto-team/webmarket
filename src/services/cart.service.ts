@@ -1,5 +1,6 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { v4 as uuidv4 } from "uuid";
+import { tokenStorage } from "@/utils/token";
 
 const TEMP_ID_KEY = "temp_cart_id";
 
@@ -33,20 +34,23 @@ export const cartService = {
   },
 
   async addToCart(params: { sku_id: number; quantity: number; temp_id?: string; product_code?: string }) {
-    const tempId = this.getTempId();
-    
-    // Store product code mapping in localStorage
+    const isAuthenticated = tokenStorage.isAuthenticated();
+    const tempId = !isAuthenticated ? this.getTempId() : undefined;
+
+    // Keep product-to-sku mapping for quick navigation back to product details.
     if (params.product_code && typeof window !== "undefined") {
       const mappings = JSON.parse(localStorage.getItem("sku_product_map") || "{}");
       mappings[params.sku_id] = params.product_code;
       localStorage.setItem("sku_product_map", JSON.stringify(mappings));
     }
-    
-    const response = await axiosInstance.post("/cart-items", {
+
+    const payload = {
       sku_id: params.sku_id,
       quantity: params.quantity,
-      temp_id: params.temp_id || tempId
-    });
+      ...(tempId ? { temp_id: params.temp_id || tempId } : {}),
+    };
+
+    const response = await axiosInstance.post("/cart-items", payload);
     return response.data;
   },
 

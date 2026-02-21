@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAddresses } from "@/hooks/useAddresses";
 import { useSnackbar } from "notistack";
 import { orderService } from "@/services/order.service";
+import { getLoginUrl } from "@/utils/auth-navigation";
 
 import AddressDisplay from "../address-section/address-display";
 import AddressModal from "../address-section/address-modal";
@@ -30,7 +31,7 @@ export default function CheckoutPageView() {
 
     useEffect(() => {
         if (!isAuthenticated) {
-            router.push("/login?redirect=/checkout");
+            router.replace(getLoginUrl({ next: "/checkout" }));
         }
     }, [isAuthenticated, router]);
 
