@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import { contentService } from "@/services/content.service";
-import { getOrigin } from "@/utils/getOrigin";
+import { getServerApi } from "@/utils/serverApi";
 import { toPersianNumber } from "@/utils/persian";
 
 interface PageProps {
@@ -12,10 +12,10 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const origin = await getOrigin();
-  
+  const api = await getServerApi();
+
   try {
-    const page = await contentService.getPage(slug, origin);
+    const page = await contentService.getPage(slug, api);
     return {
       title: page.title,
       description: page.description?.substring(0, 160),
@@ -27,10 +27,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function DynamicPage({ params }: PageProps) {
   const { slug } = await params;
-  const origin = await getOrigin();
-  
+  const api = await getServerApi();
+
   try {
-    const page = await contentService.getPage(slug, origin);
+    const page = await contentService.getPage(slug, api);
     
     return (
       <Container sx={{ py: 4, maxWidth: "lg" }}>

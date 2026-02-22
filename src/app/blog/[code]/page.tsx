@@ -12,7 +12,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { contentService } from "@/services/content.service";
-import { getOrigin } from "@/utils/getOrigin";
+import { getServerApi } from "@/utils/serverApi";
 import { tServer } from "@/i18n/serverT";
 import { formatPersianDate, toPersianNumber } from "@/utils/persian";
 import { getServerImageUrl } from "@/utils/imageUtils";
@@ -23,10 +23,10 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { code } = await params;
-    const origin = await getOrigin();
+    const api = await getServerApi();
 
     try {
-        const post = await contentService.getPost(code, origin);
+        const post = await contentService.getPost(code, api);
 
         const blogTitle = tServer<string>("nav.blog");
         const notFoundTitle = tServer<string>("blog.post.notFoundTitle");
@@ -58,10 +58,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
     const { code } = await params;
-    const origin = await getOrigin();
+    const api = await getServerApi();
 
     try {
-        const post = await contentService.getPost(code, origin);
+        const post = await contentService.getPost(code, api);
 
         const heroImage = getServerImageUrl(post, "1200x675", 85);
 
