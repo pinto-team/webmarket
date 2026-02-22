@@ -1,13 +1,11 @@
 "use client";
 
-import type { ComponentProps, PropsWithChildren, ReactNode } from "react";
+import React, { ComponentProps, PropsWithChildren, ReactNode, useMemo, useState } from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 
-import LazyImage from "components/LazyImage";
 import { HeaderCategoryDropdown } from "./header-category-dropdown";
 import { HeaderWrapper, StyledContainer } from "./styles";
-
 import { t } from "@/i18n/t";
 
 interface HeaderProps extends ComponentProps<typeof HeaderWrapper> {
@@ -36,18 +34,36 @@ Header.Left = function HeaderLeft({ children, ...props }: HeaderLeftProps) {
 };
 
 interface HeaderLogoProps {
-    url: string;
+    url?: string;
 }
 
-Header.Logo = function HeaderLogo({ url }: HeaderLogoProps) {
+Header.Logo = function HeaderLogo({ url = "" }: HeaderLogoProps) {
+    const [imgError, setImgError] = useState(false);
+
+    const fallbackLogo = "/assets/images/logo2.svg";
+    const cleanUrl = useMemo(() => (url || "").trim(), [url]);
+
+    const finalSrc = cleanUrl && !imgError ? cleanUrl : fallbackLogo;
+
     return (
-        <Link href="/">
-            <LazyImage
-                src={url}
+        <Link href="/" style={{ display: "inline-flex", alignItems: "center" }}>
+            <img
+                src={finalSrc}
                 alt={t("common.logoAlt")}
                 width={105}
                 height={50}
-                style={{ objectFit: "contain", maxHeight: 50, width: "auto" }}
+                style={{
+                    objectFit: "contain",
+                    maxHeight: 50,
+                    width: "auto",
+                    display: "block",
+                }}
+                loading="lazy"
+                onError={() => {
+                    if (finalSrc !== fallbackLogo) {
+                        setImgError(true);
+                    }
+                }}
             />
         </Link>
     );

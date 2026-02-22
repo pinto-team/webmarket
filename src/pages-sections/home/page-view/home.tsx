@@ -1,43 +1,47 @@
 "use client";
-//navab
+
 import Container from "components/Container";
 import HeroSlider from "components/hero-slider/HeroSlider";
 import FAQSection from "components/faq-section/FAQSection";
 import BlogSection from "components/blog-section/BlogSection";
 
-
-// LOCAL CUSTOM SECTION COMPONENTS
 import Section2 from "../section-2";
 import Home_banner from "../home_banner";
 import Section4 from "../section-4";
-import {useShopData} from "@/contexts/ShopDataProvider";
+import EmptyPage from "@/components/EmptyPage";
+
+import { useShopData } from "@/contexts/ShopDataProvider";
+import { hasHomePageContent } from "../../../../utils/pageGuards";
 
 export default function GadgetTwoPageView() {
     const { shopData, loading } = useShopData();
 
+    const heroSlides = shopData?.hero_slider ?? [];
+    const faqs = shopData?.faqs ?? [];
+    const posts = shopData?.blog_posts ?? [];
+
+    const showHero = loading || heroSlides.length > 0;
+    const showFaq = faqs.length > 0;
+    const showBlog = posts.length > 0;
+
+    if (!loading && !hasHomePageContent(shopData)) {
+        return <EmptyPage />;
+    }
+
     return (
         <>
-            {/* HERO SLIDER SECTION */}
-            <Container sx={{ pt: 2 }}>
-                <HeroSlider slides={shopData?.hero_slider || []} loading={loading} />
-            </Container>
+            {showHero && (
+                <Container sx={{ pt: 2 }}>
+                    <HeroSlider slides={heroSlides} loading={loading} />
+                </Container>
+            )}
 
-            {/* BEST SELLER PRODUCTS SECTION */}
             <Section2 />
-
-            {/* APPLE WATCH BANNER SECTION */}
             <Home_banner />
-
-            {/* NEW ARRIVAL PRODUCTS SECTION */}
             <Section4 />
 
-            {/* FAQ SECTION */}
-            <FAQSection faqs={shopData?.faqs || []} />
-
-            {/* BLOG SECTION */}
-            <BlogSection posts={shopData?.blog_posts || []} />
-
-            {/* NEWSLETTER SECTION */}
+            {showFaq && <FAQSection faqs={faqs} />}
+            {showBlog && <BlogSection posts={posts} />}
         </>
     );
 }

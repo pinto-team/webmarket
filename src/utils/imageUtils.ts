@@ -1,4 +1,3 @@
-// src/utils/imageUtils.ts
 export const PLACEHOLDER_IMAGE_URL = "/placeholder.png";
 
 function parseSize(size?: string) {
@@ -15,7 +14,9 @@ function parseSize(size?: string) {
 function fillProxyTemplate(url: string, size?: string, quality = 80) {
     if (!url || !url.trim()) return "";
     const hasTemplate =
-        url.includes("{WIDTH}") || url.includes("{HEIGHT}") || url.includes("{QUALITY}");
+        url.includes("{WIDTH}") ||
+        url.includes("{HEIGHT}") ||
+        url.includes("{QUALITY}");
     if (!hasTemplate) return url;
 
     const { width, height } = parseSize(size);
@@ -35,12 +36,11 @@ export function getServerImageUrl(entityOrProxy: any, size?: string, quality = 8
             entityOrProxy?.icon?.proxy_url ||
             "";
 
-    if (!raw || (typeof raw === "string" && !raw.trim())) return PLACEHOLDER_IMAGE_URL;
+    if (!raw || (typeof raw === "string" && !raw.trim())) return "";
 
     const finalUrl = fillProxyTemplate(raw, size, quality);
-    return finalUrl && finalUrl.trim() ? finalUrl : PLACEHOLDER_IMAGE_URL;
+    return finalUrl && finalUrl.trim() ? finalUrl : "";
 }
-
 
 export function isPlaceholderProductImage(url?: string | null) {
     if (!url) return true;
@@ -49,8 +49,8 @@ export function isPlaceholderProductImage(url?: string | null) {
 
 export function getLogoImageUrl(entityOrProxy: any, size?: string, quality = 80): string {
     const raw = getServerImageUrl(entityOrProxy, size, quality);
+    if (!raw) return "";
 
-    if (!raw) return raw;
     if (raw.includes("/rs:fill:")) {
         return raw.replace("/rs:fill:", "/rs:fit:");
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, PropsWithChildren, useEffect, useRef, useMemo } from "react";
+import { Fragment, PropsWithChildren, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
@@ -16,6 +16,8 @@ import {
     FooterSocialLinks,
 } from "components/footer";
 
+import FooterCopyrightBar from "components/footer/FooterCopyrightBar";
+
 import { NavigationList } from "components/navbar";
 import CategoryMenu from "components/navigation/CategoryMenu";
 import { MobileMenu } from "components/mobile-navbar";
@@ -23,7 +25,13 @@ import { SecondaryHeader } from "components/secondary-header";
 import { MobileNavigationBar } from "components/mobile-navigation";
 import UniversalSearchBar from "components/search/UniversalSearchBar";
 import { Topbar, TopbarSocialLinks } from "components/topbar";
-import { Header, HeaderCart, HeaderLogin, MobileHeader, HeaderSearch } from "components/header";
+import {
+    Header,
+    HeaderCart,
+    HeaderLogin,
+    MobileHeader,
+    HeaderSearch,
+} from "components/header";
 
 import LayoutModel from "models/Layout.model";
 
@@ -33,7 +41,7 @@ import ProductImage from "@/components/common/ProductImage";
 import { useShopData } from "@/contexts/ShopDataProvider";
 import { getLogoImageUrl } from "@/utils/imageUtils";
 import { safeArr, safeObj, safeStr } from "@/utils/nullSafe";
-import {TopbarConfig} from "@/types/shopData.types";
+import { TopbarConfig } from "@/types/shopData.types";
 
 interface Props extends PropsWithChildren {
     data?: LayoutModel;
@@ -92,16 +100,15 @@ export default function ShopHome({ children, data }: Props) {
     const footer = safeObj(layout.footer, FALLBACK_LAYOUT.footer);
     const header = safeObj(layout.header, FALLBACK_LAYOUT.header);
     const topbar = safeObj(layout.topbar, FALLBACK_LAYOUT.topbar);
-    const mobileNavigation = safeObj(layout.mobileNavigation, FALLBACK_LAYOUT.mobileNavigation);
 
-    // ✅ images: placeholder-safe via getLogoImageUrl()
-    const headerLogo = getLogoImageUrl(shopData?.header_logo, "240x80", 80) || header.logo;
-    const mobileLogo = getLogoImageUrl(shopData?.mobile_logo, "240x80", 80) || mobileNavigation.logo;
-    const footerLogo = getLogoImageUrl(shopData?.footer_logo, "240x120", 80) || footer.logo;
+    // ✅ images: ONLY from shopData
+    const headerLogo = (getLogoImageUrl(shopData?.header_logo, "240x80", 80) || "").trim();
+    const mobileLogo = (getLogoImageUrl(shopData?.mobile_logo, "240x80", 80) || "").trim();
+    const footerLogo = (getLogoImageUrl(shopData?.footer_logo, "240x120", 80) || "").trim();
 
     const topbarData: TopbarConfig = shopData?.topbar ?? {
-        label: topbar.label ?? " ",
-        title: topbar.title ?? " ",
+        label: safeStr(topbar.label, " "),
+        title: safeStr(topbar.title, " "),
         link: "",
         is_active: false,
     };
@@ -124,23 +131,53 @@ export default function ShopHome({ children, data }: Props) {
         }))
         : safeArr(header.navigation);
 
-    // ✅ socials: prefer shopData.social_links
+    // ✅ socials: prefer shopData.social_links (for FooterSocialLinks component)
     const socialLinks = shopData?.social_links?.length
         ? shopData.social_links.reduce((acc, link) => {
             const platform = (link?.platform || "").toLowerCase();
-            const url = safeStr(link?.url, "");
+            const url = safeStr(link?.url, "").trim();
             if (!platform || !url) return acc;
             (acc as any)[platform] = url;
             return acc;
         }, {} as { google?: string; twitter?: string; youtube?: string; facebook?: string; instagram?: string })
         : footer.socials;
 
+    // ✅ socials: for TopbarSocialLinks component
     const topbarSocialLinks = shopData?.social_links?.length
         ? shopData.social_links.reduce((acc, link) => {
-            acc[link.platform as keyof typeof acc] = link.url;
+            const url = safeStr(link?.url, "").trim();
+            if (!url) return acc;
+            acc[link.platform as keyof typeof acc] = url;
             return acc;
         }, {} as { twitter?: string; facebook?: string; instagram?: string; telegram?: string; whatsapp?: string; linkedin?: string })
         : topbar.socials;
+
+    // ----------------------------
+// ✅ Topbar visibility (meaningful check)
+// ----------------------------
+    const topbarLabelMeaningful = safeStr(topbarData.label, "").trim();
+    const topbarTitleMeaningful = safeStr(topbarData.title, "").trim();
+
+    const hasTopbarText = Boolean(topbarLabelMeaningful) || Boolean(topbarTitleMeaningful);
+
+    const hasTopbarSocials = Boolean(
+        Object.values(topbarSocialLinks || {}).some(
+            (v) => safeStr(v as any, "").trim().length > 0
+        )
+    );
+
+    const showTopbar = hasTopbarText || hasTopbarSocials;
+
+// Persian digits only if meaningful
+    const topbarLabel = topbarLabelMeaningful
+        ? toPersianNumber(topbarLabelMeaningful)
+        : "";
+
+    const topbarTitle = topbarTitleMeaningful
+        ? toPersianNumber(topbarTitleMeaningful)
+        : "";
+
+
 
     const mobileNav = useMemo(
         () => [
@@ -171,6 +208,9 @@ export default function ShopHome({ children, data }: Props) {
         </MobileHeader>
     );
 
+    // ----------------------------
+    // Sticky offset calc for chrome
+    // ----------------------------
     const chromeRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -195,53 +235,101 @@ export default function ShopHome({ children, data }: Props) {
     }, []);
 
     // ----------------------------
-    // Persian digit safety layer
+    // Footer: content from shopData first
     // ----------------------------
-    const topbarLabelRaw = safeStr(topbarData.label, " ");
-    const topbarTitleRaw = safeStr(topbarData.title, " ");
-
-    const topbarLabel = topbarLabelRaw ? toPersianNumber(topbarLabelRaw) : " ";
-    const topbarTitle = topbarTitleRaw ? toPersianNumber(topbarTitleRaw) : " ";
-
     const footerDescriptionRaw = shopData?.footer_description
-        ? safeStr(shopData.footer_description, " ")
-        : safeStr(footer.description, " ");
+        ? safeStr(shopData.footer_description, "").trim()
+        : safeStr(footer.description, "").trim();
 
-    const footerDescriptionText = footerDescriptionRaw ? toPersianNumber(footerDescriptionRaw) : " ";
+    const footerDescriptionText = footerDescriptionRaw ? toPersianNumber(footerDescriptionRaw) : "";
 
-    const phoneRaw = safeStr(shopData?.contact_info?.phone, "") || safeStr(footer.contact.phone, "");
-    const phoneFa = phoneRaw ? toPersianNumber(phoneRaw) : " ";
+    const phoneRaw =
+        safeStr(shopData?.contact_info?.phone, "").trim() || safeStr(footer.contact.phone, "").trim();
+    const phoneFa = phoneRaw ? toPersianNumber(phoneRaw) : "";
 
+    const email =
+        safeStr(shopData?.contact_info?.email, "").trim() || safeStr(footer.contact.email, "").trim();
+
+    const address =
+        safeStr(shopData?.contact_info?.address, "").trim() || safeStr(footer.contact.address, "").trim();
+
+    // Copyright always exists
     const yearFa = toPersianNumber(new Date().getFullYear());
-    const fallbackCopyright =
-        `© ${t("footer.copyright")} ${yearFa} ${t("footer.brandName")}, ${t("footer.allRightsReserved")}`;
+    const fallbackCopyright = `© ${t("footer.copyright")} ${yearFa} ${t("footer.brandName")}, ${t("footer.allRightsReserved")}`;
 
     const footerCopyrightRaw = shopData?.footer_copyright
         ? safeStr(shopData.footer_copyright, "")
         : safeStr(fallbackCopyright, "");
 
-    const footerCopyrightText =
-        footerCopyrightRaw ? toPersianNumber(footerCopyrightRaw) : " ";
+    const footerCopyrightText = footerCopyrightRaw ? toPersianNumber(footerCopyrightRaw) : " ";
 
-    const playStoreUrl = safeStr(shopData?.app_links?.google_play, "") || safeStr(footer.playStoreUrl, "");
-    const appleStoreUrl = safeStr(shopData?.app_links?.app_store, "") || safeStr(footer.appStoreUrl, "");
+    // App links
+    const playStoreUrl =
+        safeStr(shopData?.app_links?.google_play, "").trim() || safeStr(footer.playStoreUrl, "").trim();
+    const appleStoreUrl =
+        safeStr(shopData?.app_links?.app_store, "").trim() || safeStr(footer.appStoreUrl, "").trim();
+    const showApps = Boolean(playStoreUrl) || Boolean(appleStoreUrl);
 
-    const email = safeStr(shopData?.contact_info?.email, "") || safeStr(footer.contact.email, "") || " ";
-    const address = safeStr(shopData?.contact_info?.address, "") || safeStr(footer.contact.address, "") || " ";
+    // ----------------------------
+    // ✅ Footer sections (Meaningful check)
+    // ----------------------------
+    const footerSections = safeArr(shopData?.footer_sections);
 
-    const hasFooterSections = !!shopData?.footer_sections?.length;
+    const normalizedFooterSections = footerSections
+        .map((s) => {
+            const title = safeStr((s as any)?.title, "").trim();
+            const links = safeArr((s as any)?.links)
+                .map((l) => ({
+                    title: safeStr((l as any)?.title, "").trim(),
+                    url: safeStr((l as any)?.url, "").trim(),
+                }))
+                .filter((l) => l.title.length > 0 && l.url.length > 0);
+
+            return { title, links };
+        })
+        .filter((s) => s.title.length > 0 || s.links.length > 0);
+
+    const hasFooterSections = normalizedFooterSections.length > 0;
+
+    // Contact presence (meaningful)
+    const hasContact = Boolean(phoneRaw) || Boolean(email) || Boolean(address);
+
+    // Social presence (meaningful)
+    const hasSocialLinks = Boolean(
+        safeArr(shopData?.social_links).some((l) => safeStr((l as any)?.url, "").trim().length > 0)
+    );
+
+    // Brand bits presence
+    const hasBrandBits = Boolean(footerLogo) || Boolean(footerDescriptionRaw) || showApps;
+
+    /**
+     * ✅ FINAL RULE:
+     * If absolutely nothing meaningful exists => show ONLY minimal copyright bar.
+     */
+    const hasAnyFooterData = hasBrandBits || hasFooterSections || hasContact || hasSocialLinks;
 
     return (
         <SnackbarProvider>
             <ErrorHandler />
             <Fragment>
                 <div ref={chromeRef}>
-                    <Topbar>
-                        <Topbar.Left label={topbarLabel} title={topbarTitle} />
-                        <Topbar.Right>
-                            <TopbarSocialLinks links={topbarSocialLinks} />
-                        </Topbar.Right>
-                    </Topbar>
+                    {showTopbar ? (
+                        <Topbar>
+                            {hasTopbarText ? (
+                                <Topbar.Left label={topbarLabel || " "} title={topbarTitle || " "} />
+                            ) : (
+                                <div />
+                            )}
+
+                            {hasTopbarSocials ? (
+                                <Topbar.Right>
+                                    <TopbarSocialLinks links={topbarSocialLinks} />
+                                </Topbar.Right>
+                            ) : (
+                                <div />
+                            )}
+                        </Topbar>
+                    ) : null}
 
                     <Header mobileHeader={MOBILE_VERSION_HEADER}>
                         <Header.Left>
@@ -273,80 +361,80 @@ export default function ShopHome({ children, data }: Props) {
 
                 <MobileNavigationBar navigation={mobileNav} />
 
-                <Footer1>
-                    <Footer1.Brand>
-                        <Link href="/" style={{ display: "inline-block" }}>
-                            <ProductImage
-                                src={footerLogo}
-                                alt={t("common.logoAlt")}
-                                size="240x120"
-                                quality={80}
-                                fallback="icon"
-                                noWrapper
-                                style={{
-                                    objectFit: "contain",
-                                    maxHeight: "50px",
-                                    width: "auto",
-                                    height: "50px",
-                                    display: "block",
-                                }}
-                            />
-                        </Link>
+                {/* ---------------- FOOTER ---------------- */}
+                {hasAnyFooterData ? (
+                    <Footer1>
+                        <Footer1.Brand>
+                            {footerLogo ? (
+                                <Link href="/" style={{ display: "inline-block" }}>
+                                    <ProductImage
+                                        src={footerLogo}
+                                        alt={t("common.logoAlt")}
+                                        size="240x120"
+                                        quality={80}
+                                        noWrapper
+                                        style={{
+                                            objectFit: "contain",
+                                            maxHeight: "50px",
+                                            width: "auto",
+                                            height: "50px",
+                                            display: "block",
+                                        }}
+                                    />
+                                </Link>
+                            ) : null}
 
-                        <Typography
-                            variant="body1"
-                            sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}
-                        >
-                            {footerDescriptionText}
-                        </Typography>
+                            {footerDescriptionText ? (
+                                <Typography
+                                    variant="body1"
+                                    sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}
+                                >
+                                    {footerDescriptionText}
+                                </Typography>
+                            ) : null}
 
-                        <FooterApps playStoreUrl={playStoreUrl} appleStoreUrl={appleStoreUrl} />
-                    </Footer1.Brand>
+                            {showApps ? (
+                                <FooterApps playStoreUrl={playStoreUrl} appleStoreUrl={appleStoreUrl} />
+                            ) : null}
+                        </Footer1.Brand>
 
-                    {shopData?.footer_sections?.[0] && (
-                        <Footer1.Widget1>
-                            <FooterLinksWidget
-                                title={safeStr(shopData.footer_sections[0]?.title, " ")}
-                                links={safeArr(shopData.footer_sections[0]?.links)}
-                            />
-                        </Footer1.Widget1>
-                    )}
-
-                    {shopData?.footer_sections?.[1] && (
-                        <Footer1.Widget2>
-                            <FooterLinksWidget
-                                title={safeStr(shopData.footer_sections[1]?.title, " ")}
-                                links={safeArr(shopData.footer_sections[1]?.links)}
-                            />
-                        </Footer1.Widget2>
-                    )}
-
-                    {!hasFooterSections && (
-                        <>
+                        {normalizedFooterSections?.[0] ? (
                             <Footer1.Widget1>
-                                <FooterLinksWidget title={t("footer.aboutTitle")} links={safeArr(footer.about)} />
+                                <FooterLinksWidget
+                                    title={normalizedFooterSections[0].title || " "}
+                                    links={normalizedFooterSections[0].links}
+                                />
                             </Footer1.Widget1>
+                        ) : null}
 
+                        {normalizedFooterSections?.[1] ? (
                             <Footer1.Widget2>
-                                <FooterLinksWidget title={t("footer.customerServicesTitle")} links={safeArr(footer.customers)} />
+                                <FooterLinksWidget
+                                    title={normalizedFooterSections[1].title || " "}
+                                    links={normalizedFooterSections[1].links}
+                                />
                             </Footer1.Widget2>
-                        </>
-                    )}
+                        ) : null}
 
-                    <Footer1.Contact>
-                        <FooterContact phone={phoneFa} email={email} address={address} />
-                        <FooterSocialLinks links={socialLinks} />
-                    </Footer1.Contact>
+                        <Footer1.Contact>
+                            {hasContact ? (
+                                <FooterContact phone={phoneFa || " "} email={email || " "} address={address || " "} />
+                            ) : null}
 
-                    <Footer1.Copyright>
-                        <Divider sx={{ borderColor: "grey.800" }} />
-                        <Typography variant="body2" sx={{ py: 3, textAlign: "center", span: { fontWeight: 500 } }}>
-                            {footerCopyrightText}
-                        </Typography>
-                    </Footer1.Copyright>
-                </Footer1>
+                            {hasSocialLinks ? <FooterSocialLinks links={socialLinks} /> : null}
+                        </Footer1.Contact>
+
+                        <Footer1.Copyright>
+                            <Divider sx={{ borderColor: "grey.800" }} />
+                            <Typography variant="body2" sx={{ py: 3, textAlign: "center" }}>
+                                {footerCopyrightText}
+                            </Typography>
+                        </Footer1.Copyright>
+                    </Footer1>
+                ) : (
+                    <FooterCopyrightBar text={footerCopyrightText} />
+                )}
             </Fragment>
         </SnackbarProvider>
-
     );
 }
