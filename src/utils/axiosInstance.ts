@@ -6,9 +6,9 @@ const isServer = typeof window === "undefined";
 const shouldVerifyTLS = process.env.NODE_ENV === "production";
 
 const axiosInstance = axios.create({
-    baseURL:
-        process.env.NEXT_PUBLIC_API_BASE_URL ||
-        "https://api.taavoni.online/api/front",
+    baseURL: isServer
+        ? (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.taavoni.online/api/front")
+        : "/api/front",
     timeout: 30000,
     headers: {
         "Content-Type": "application/json",

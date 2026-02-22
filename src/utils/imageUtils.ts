@@ -13,7 +13,7 @@ function parseSize(size?: string) {
 }
 
 function fillProxyTemplate(url: string, size?: string, quality = 80) {
-    if (!url) return "";
+    if (!url || !url.trim()) return "";
     const hasTemplate =
         url.includes("{WIDTH}") || url.includes("{HEIGHT}") || url.includes("{QUALITY}");
     if (!hasTemplate) return url;
@@ -25,9 +25,6 @@ function fillProxyTemplate(url: string, size?: string, quality = 80) {
         .replaceAll("{QUALITY}", String(quality));
 }
 
-/**
- * ✅ Canonical: ONLY proxy_url for image rendering.
- */
 export function getServerImageUrl(entityOrProxy: any, size?: string, quality = 80): string {
     const raw =
         typeof entityOrProxy === "string"
@@ -38,11 +35,12 @@ export function getServerImageUrl(entityOrProxy: any, size?: string, quality = 8
             entityOrProxy?.icon?.proxy_url ||
             "";
 
-    if (!raw) return PLACEHOLDER_IMAGE_URL;
+    if (!raw || (typeof raw === "string" && !raw.trim())) return PLACEHOLDER_IMAGE_URL;
 
     const finalUrl = fillProxyTemplate(raw, size, quality);
-    return finalUrl || PLACEHOLDER_IMAGE_URL;
+    return finalUrl && finalUrl.trim() ? finalUrl : PLACEHOLDER_IMAGE_URL;
 }
+
 
 export function isPlaceholderProductImage(url?: string | null) {
     if (!url) return true;

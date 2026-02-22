@@ -2,7 +2,6 @@
 
 import { Fragment, PropsWithChildren, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
-import { getLogoImageUrl } from "@/utils/imageUtils";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 
@@ -32,47 +31,111 @@ import { t } from "@/i18n/t";
 import { toPersianNumber } from "@/utils/persian";
 import ProductImage from "@/components/common/ProductImage";
 import { useShopData } from "@/contexts/ShopDataProvider";
+import { getLogoImageUrl } from "@/utils/imageUtils";
+import { safeArr, safeObj, safeStr } from "@/utils/nullSafe";
+import {TopbarConfig} from "@/types/shopData.types";
 
 interface Props extends PropsWithChildren {
     data?: LayoutModel;
 }
 
+// ✅ Minimal safe fallback: no mock content, just crash-proof structure.
+const FALLBACK_LAYOUT: LayoutModel = {
+    header: {
+        logo: "",
+        categories: [],
+        categoryMenus: [],
+        navigation: [],
+    },
+    mobileNavigation: {
+        logo: "",
+        version1: [],
+        version2: [],
+    },
+    topbar: {
+        title: "",
+        label: "",
+        socials: {},
+        languageOptions: {},
+    },
+    footer: {
+        logo: "",
+        description: "",
+        appStoreUrl: "",
+        playStoreUrl: "",
+        about: [],
+        customers: [],
+        socials: {
+            google: "",
+            twitter: "",
+            youtube: "",
+            facebook: "",
+            instagram: "",
+        },
+        contact: {
+            phone: "",
+            email: "",
+            address: "",
+        },
+    },
+};
+
 export default function ShopHome({ children, data }: Props) {
     const { shopData } = useShopData();
 
-    const { footer, header, topbar, mobileNavigation } =
-    (data as LayoutModel) ?? (shopData as unknown as LayoutModel);
+    // ✅ Prefer explicit layout data, else fallback to shopData-as-layout (legacy), else hard fallback
+    const layout = safeObj<LayoutModel>(
+        (data as LayoutModel) ?? (shopData as unknown as LayoutModel),
+        FALLBACK_LAYOUT
+    );
 
+    const footer = safeObj(layout.footer, FALLBACK_LAYOUT.footer);
+    const header = safeObj(layout.header, FALLBACK_LAYOUT.header);
+    const topbar = safeObj(layout.topbar, FALLBACK_LAYOUT.topbar);
+    const mobileNavigation = safeObj(layout.mobileNavigation, FALLBACK_LAYOUT.mobileNavigation);
+
+    // ✅ images: placeholder-safe via getLogoImageUrl()
     const headerLogo = getLogoImageUrl(shopData?.header_logo, "240x80", 80) || header.logo;
     const mobileLogo = getLogoImageUrl(shopData?.mobile_logo, "240x80", 80) || mobileNavigation.logo;
     const footerLogo = getLogoImageUrl(shopData?.footer_logo, "240x120", 80) || footer.logo;
-    const topbarData = shopData?.topbar || topbar;
 
-    const navigation = shopData?.main_navigation
+    const topbarData: TopbarConfig = shopData?.topbar ?? {
+        label: topbar.label ?? " ",
+        title: topbar.title ?? " ",
+        link: "",
+        is_active: false,
+    };
+
+    // ✅ navigation: prefer shopData.main_navigation
+    const navigation = shopData?.main_navigation?.length
         ? shopData.main_navigation.map((item) => ({
-            title: item.title,
-            url: item.url,
+            title: safeStr(item?.title, " "),
+            url: safeStr(item?.url, "/"),
             megaMenu: false as const,
             megaMenuWithSub: false as const,
-            child: (item.children || []).map((child) => ({
-                title: child.title,
-                url: child.url,
-                child: child.children?.map((subChild) => ({
-                    title: subChild.title,
-                    url: subChild.url,
+            child: safeArr(item?.children).map((child) => ({
+                title: safeStr(child?.title, " "),
+                url: safeStr(child?.url, "/"),
+                child: safeArr(child?.children).map((subChild) => ({
+                    title: safeStr(subChild?.title, " "),
+                    url: safeStr(subChild?.url, "/"),
                 })),
             })),
         }))
-        : header.navigation;
+        : safeArr(header.navigation);
 
-    const socialLinks = shopData?.social_links
+    // ✅ socials: prefer shopData.social_links
+    const socialLinks = shopData?.social_links?.length
         ? shopData.social_links.reduce((acc, link) => {
-            acc[link.platform as keyof typeof acc] = link.url;
+            const platform = (link?.platform || "").toLowerCase();
+            const url = safeStr(link?.url, "");
+            if (!platform || !url) return acc;
+            (acc as any)[platform] = url;
             return acc;
         }, {} as { google?: string; twitter?: string; youtube?: string; facebook?: string; instagram?: string })
         : footer.socials;
 
-    const topbarSocialLinks = shopData?.social_links
+    const topbarSocialLinks = shopData?.social_links?.length
         ? shopData.social_links.reduce((acc, link) => {
             acc[link.platform as keyof typeof acc] = link.url;
             return acc;
@@ -95,7 +158,6 @@ export default function ShopHome({ children, data }: Props) {
                 <MobileMenu navigation={navigation} />
             </MobileHeader.Left>
 
-            {/* ✅ already expects a url string, now proxy-only */}
             <MobileHeader.Logo logoUrl={mobileLogo} />
 
             <MobileHeader.Right>
@@ -135,24 +197,39 @@ export default function ShopHome({ children, data }: Props) {
     // ----------------------------
     // Persian digit safety layer
     // ----------------------------
-    const topbarLabel = topbarData?.label ? toPersianNumber(topbarData.label) : topbarData?.label;
-    const topbarTitle = topbarData?.title ? toPersianNumber(topbarData.title) : topbarData?.title;
+    const topbarLabelRaw = safeStr(topbarData.label, " ");
+    const topbarTitleRaw = safeStr(topbarData.title, " ");
 
-    const footerDescriptionText =
-        shopData?.footer_description
-            ? toPersianNumber(shopData.footer_description)
-            : footer.description;
+    const topbarLabel = topbarLabelRaw ? toPersianNumber(topbarLabelRaw) : " ";
+    const topbarTitle = topbarTitleRaw ? toPersianNumber(topbarTitleRaw) : " ";
 
-    const phoneFa = toPersianNumber(shopData?.contact_info?.phone || footer.contact.phone);
+    const footerDescriptionRaw = shopData?.footer_description
+        ? safeStr(shopData.footer_description, " ")
+        : safeStr(footer.description, " ");
+
+    const footerDescriptionText = footerDescriptionRaw ? toPersianNumber(footerDescriptionRaw) : " ";
+
+    const phoneRaw = safeStr(shopData?.contact_info?.phone, "") || safeStr(footer.contact.phone, "");
+    const phoneFa = phoneRaw ? toPersianNumber(phoneRaw) : " ";
 
     const yearFa = toPersianNumber(new Date().getFullYear());
     const fallbackCopyright =
         `© ${t("footer.copyright")} ${yearFa} ${t("footer.brandName")}, ${t("footer.allRightsReserved")}`;
 
+    const footerCopyrightRaw = shopData?.footer_copyright
+        ? safeStr(shopData.footer_copyright, "")
+        : safeStr(fallbackCopyright, "");
+
     const footerCopyrightText =
-        shopData?.footer_copyright
-            ? toPersianNumber(shopData.footer_copyright)
-            : fallbackCopyright;
+        footerCopyrightRaw ? toPersianNumber(footerCopyrightRaw) : " ";
+
+    const playStoreUrl = safeStr(shopData?.app_links?.google_play, "") || safeStr(footer.playStoreUrl, "");
+    const appleStoreUrl = safeStr(shopData?.app_links?.app_store, "") || safeStr(footer.appStoreUrl, "");
+
+    const email = safeStr(shopData?.contact_info?.email, "") || safeStr(footer.contact.email, "") || " ";
+    const address = safeStr(shopData?.contact_info?.address, "") || safeStr(footer.contact.address, "") || " ";
+
+    const hasFooterSections = !!shopData?.footer_sections?.length;
 
     return (
         <SnackbarProvider>
@@ -168,7 +245,6 @@ export default function ShopHome({ children, data }: Props) {
 
                     <Header mobileHeader={MOBILE_VERSION_HEADER}>
                         <Header.Left>
-                            {/* ✅ already expects url string, now proxy-only */}
                             <Header.Logo url={headerLogo} />
                         </Header.Left>
 
@@ -200,7 +276,6 @@ export default function ShopHome({ children, data }: Props) {
                 <Footer1>
                     <Footer1.Brand>
                         <Link href="/" style={{ display: "inline-block" }}>
-                            {/* ✅ replace next/image with ProductImage (UI image) */}
                             <ProductImage
                                 src={footerLogo}
                                 alt={t("common.logoAlt")}
@@ -225,17 +300,14 @@ export default function ShopHome({ children, data }: Props) {
                             {footerDescriptionText}
                         </Typography>
 
-                        <FooterApps
-                            playStoreUrl={shopData?.app_links?.google_play || footer.playStoreUrl}
-                            appleStoreUrl={shopData?.app_links?.app_store || footer.appStoreUrl}
-                        />
+                        <FooterApps playStoreUrl={playStoreUrl} appleStoreUrl={appleStoreUrl} />
                     </Footer1.Brand>
 
                     {shopData?.footer_sections?.[0] && (
                         <Footer1.Widget1>
                             <FooterLinksWidget
-                                title={shopData.footer_sections[0].title}
-                                links={shopData.footer_sections[0].links}
+                                title={safeStr(shopData.footer_sections[0]?.title, " ")}
+                                links={safeArr(shopData.footer_sections[0]?.links)}
                             />
                         </Footer1.Widget1>
                     )}
@@ -243,37 +315,31 @@ export default function ShopHome({ children, data }: Props) {
                     {shopData?.footer_sections?.[1] && (
                         <Footer1.Widget2>
                             <FooterLinksWidget
-                                title={shopData.footer_sections[1].title}
-                                links={shopData.footer_sections[1].links}
+                                title={safeStr(shopData.footer_sections[1]?.title, " ")}
+                                links={safeArr(shopData.footer_sections[1]?.links)}
                             />
                         </Footer1.Widget2>
                     )}
 
-                    {!shopData?.footer_sections && (
+                    {!hasFooterSections && (
                         <>
                             <Footer1.Widget1>
-                                <FooterLinksWidget title={t("footer.aboutTitle")} links={footer.about} />
+                                <FooterLinksWidget title={t("footer.aboutTitle")} links={safeArr(footer.about)} />
                             </Footer1.Widget1>
 
                             <Footer1.Widget2>
-                                <FooterLinksWidget title={t("footer.customerServicesTitle")} links={footer.customers} />
+                                <FooterLinksWidget title={t("footer.customerServicesTitle")} links={safeArr(footer.customers)} />
                             </Footer1.Widget2>
                         </>
                     )}
 
                     <Footer1.Contact>
-                        <FooterContact
-                            phone={phoneFa}
-                            email={shopData?.contact_info?.email || footer.contact.email}
-                            address={shopData?.contact_info?.address || footer.contact.address}
-                        />
-
+                        <FooterContact phone={phoneFa} email={email} address={address} />
                         <FooterSocialLinks links={socialLinks} />
                     </Footer1.Contact>
 
                     <Footer1.Copyright>
                         <Divider sx={{ borderColor: "grey.800" }} />
-
                         <Typography variant="body2" sx={{ py: 3, textAlign: "center", span: { fontWeight: 500 } }}>
                             {footerCopyrightText}
                         </Typography>
@@ -281,5 +347,6 @@ export default function ShopHome({ children, data }: Props) {
                 </Footer1>
             </Fragment>
         </SnackbarProvider>
+
     );
 }

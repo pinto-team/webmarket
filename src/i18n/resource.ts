@@ -292,7 +292,7 @@ export const resources = {
             footer: {
                 aboutTitle: "درباره ما",
                 allRightsReserved: "کلیه حقوق محفوظ است",
-                brandName: "تاوونی",
+                brandName: "تاوونی آنلاین",
                 contactTitle: "تماس با ما",
                 copyright: "کپی‌رایت",
                 copyrightLine: "© Copyright {{year}} {{brand}}، {{rights}}.",

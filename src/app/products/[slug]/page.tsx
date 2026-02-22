@@ -116,7 +116,6 @@ export default async function ProductDetails({ params }: SlugParams) {
         "@type": "Product",
         name: product?.title,
         description: product?.excerpt || product?.description,
-        // ✅ proxy-only for JSON-LD image
         image:
             getServerImageUrl(product?.upload, "1200x630", 80) ||
             getServerImageUrl(product?.attaches?.[0], "1200x630", 80) ||
