@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import { GoogleAnalytics } from "@next/third-parties/google";
 import { Vazirmatn } from "next/font/google";
 
 import "overlayscrollbars/overlayscrollbars.css";
@@ -92,7 +91,6 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
                                         <LayoutWrapper>{children}</LayoutWrapper>
                                     </ShopDataLoader>
                                 </RTL>
-
                                 <ProgressBar />
                             </ThemeProvider>
                         </ShopDataProvider>
@@ -100,8 +98,6 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
                 </CartProvider>
             </AuthProvider>
         </QueryProvider>
-
-        <GoogleAnalytics gaId="G-XKPD36JXY0" />
         </body>
         </html>
     );
