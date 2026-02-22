@@ -96,6 +96,44 @@ import TireRuggedLight from "./TireRuggedLight";
 
 // furniture shop page icons
 import Home from "./Home";
+import Sofa from "./furniture-shop/Sofa";
+import Chair from "./furniture-shop/Chair";
+import Stool from "./furniture-shop/Stool";
+import Dining from "./furniture-shop/Dining";
+import Living from "./furniture-shop/Living";
+import Popular from "./furniture-shop/Popular";
+import RoomSet from "./furniture-shop/RoomSet";
+import Trending from "./furniture-shop/Trending";
+import Products from "./furniture-shop/Products";
+import Interior from "./furniture-shop/Interior";
+import Wardrobe from "./furniture-shop/Wardrobe";
+import Furniture from "./furniture-shop/Furniture";
+import Decoration from "./furniture-shop/Decoration";
+import RoundTable from "./furniture-shop/RoundTable";
+// gift shop page icon
+import Toys from "./gift-shop/Toys";
+import Robot from "./gift-shop/Robot";
+import Flower from "./gift-shop/Flower";
+import Children from "./gift-shop/Children";
+import BabyToys from "./gift-shop/BabyToys";
+import Football from "./gift-shop/Football";
+import Christmas from "./gift-shop/Christmas";
+import TeddyBear from "./gift-shop/TeddyBear";
+import WeddingGift from "./gift-shop/WeddingGift";
+import NewYearGift from "./gift-shop/NewYearGift";
+import BirthdayCake from "./gift-shop/BirthdayCake";
+import ValentineGift from "./gift-shop/ValentineGift";
+// health and beauty homepage icons
+import Powder from "./health-and-beauty/Powder";
+import Lotion from "./health-and-beauty/Lotion";
+import Mascara from "./health-and-beauty/Mascara";
+import Lipstick from "./health-and-beauty/Lipstick";
+import FaceMask from "./health-and-beauty/FaceMask";
+import LenseCase from "./health-and-beauty/LenseCase";
+import AutoMotive from "./health-and-beauty/Automotive";
+import OxygenPump from "./health-and-beauty/OxygenPump";
+import Thermometer from "./health-and-beauty/Thermometer";
+import HealthBeauty from "./health-and-beauty/HealthBeauty";
 import TeddyBearLight from "./TeddyBearLight";
 import BasketShopping from "./BasketShopping";
 import PawSimple from "./PawSimple";
@@ -144,6 +182,49 @@ const appIcons = {
   CustomerService,
   FeedbackThumbsUp,
   CreditCardVerified,
+
+  // furniture-shop-icons
+  Home,
+  Sofa,
+  Chair,
+  Stool,
+  Dining,
+  Living,
+  Popular,
+  RoomSet,
+  Trending,
+  Products,
+  Interior,
+  Wardrobe,
+  Furniture,
+  Decoration,
+  RoundTable,
+
+  // gift-shop-page-icons
+  Toys,
+  Robot,
+  Flower,
+  BabyToys,
+  Children,
+  Football,
+  Chirstmas: Christmas,
+  TeddyBear,
+  WeddingGift,
+  NewYearGift,
+  BirthdayCake,
+  ValentineGift,
+
+  // health-and-beauty-page-icons
+  Powder,
+  Lotion,
+  Mascara,
+  Lipstick,
+  FaceMask,
+  LenseCase,
+  OxygenPump,
+  AutoMotive,
+  Thermometer,
+  HealthBeauty,
 
   Car,
   Watch,
