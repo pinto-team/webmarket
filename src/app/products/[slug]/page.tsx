@@ -4,7 +4,7 @@ import { cache } from "react";
 
 import { ProductDetailsPageView } from "pages-sections/product-details/page-view";
 import { productService } from "@/services/product.service";
-import { getOrigin } from "@/utils/getOrigin";
+import { getServerApi, getServerOrigin } from "@/utils/serverApi";
 
 import type { SlugParams } from "models/Common";
 import { t } from "@/i18n/t";
@@ -27,12 +27,13 @@ function safeTitles(list: any[] | undefined): string[] {
 }
 
 const getProductCached = cache(async (slug: string, origin?: string) => {
-    return productService.getProduct(slug, origin);
+    const api = await getServerApi(origin);
+    return productService.getProduct(slug, api);
 });
 
 export async function generateMetadata({ params }: SlugParams): Promise<Metadata> {
     const { slug } = await params;
-    const origin = await getOrigin();
+    const origin = await getServerOrigin();
 
     const shopName = t("meta.pageName.shop", t("nav.shops"));
 
@@ -83,7 +84,7 @@ export async function generateMetadata({ params }: SlugParams): Promise<Metadata
 
 export default async function ProductDetails({ params }: SlugParams) {
     const { slug } = await params;
-    const origin = await getOrigin();
+    const origin = await getServerOrigin();
 
     let product: any;
     try {

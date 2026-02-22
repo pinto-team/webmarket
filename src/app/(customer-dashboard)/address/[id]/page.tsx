@@ -6,12 +6,13 @@ import { AddressDetailsPageView } from "pages-sections/customer-dashboard/addres
 import type { IdParams } from "models/Common";
 import type Address from "models/Address.model";
 
-import axiosInstance from "@/utils/axiosInstance";
+import { getServerApi } from "@/utils/serverApi";
 import { tServer } from "@/i18n/serverT";
 
 async function getAddress(id: string): Promise<Address | null> {
     try {
-        const res = await axiosInstance.get(`/addresses/${id}`);
+        const api = await getServerApi();
+        const res = await api.get(`/addresses/${id}`);
         return (res.data?.data ?? res.data ?? null) as Address | null;
     } catch {
         return null;
