@@ -25,7 +25,7 @@ export default function EmptyPage({
         <Container>
             <Box
                 sx={{
-                    minHeight: "60vh", // 👈 مهم: جلوگیری از collapse شدن صفحه
+                    minHeight: "auto",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",

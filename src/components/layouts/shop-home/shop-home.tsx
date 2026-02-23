@@ -16,7 +16,7 @@ import {
     FooterSocialLinks,
 } from "components/footer";
 
-import FooterCopyrightBar from "components/footer/FooterCopyrightBar";
+import FooterCopyrightBar from "@/components/footer/footer-copyright-bar";
 
 import { NavigationList } from "components/navbar";
 import CategoryMenu from "components/navigation/CategoryMenu";
@@ -312,128 +312,141 @@ export default function ShopHome({ children, data }: Props) {
         <SnackbarProvider>
             <ErrorHandler />
             <Fragment>
-                <div ref={chromeRef}>
-                    {showTopbar ? (
-                        <Topbar>
-                            {hasTopbarText ? (
-                                <Topbar.Left label={topbarLabel || " "} title={topbarTitle || " "} />
-                            ) : (
-                                <div />
-                            )}
+                {/* ✅ Page shell: sticky footer */}
+                <div
+                    style={{
+                        minHeight: "100vh",
+                        display: "flex",
+                        flexDirection: "column",
+                    }}
+                >
+                    {/* Header chrome (topbar + headers) */}
+                    <div ref={chromeRef}>
+                        {showTopbar ? (
+                            <Topbar>
+                                {hasTopbarText ? (
+                                    <Topbar.Left label={topbarLabel || " "} title={topbarTitle || " "} />
+                                ) : (
+                                    <div />
+                                )}
 
-                            {hasTopbarSocials ? (
-                                <Topbar.Right>
-                                    <TopbarSocialLinks links={topbarSocialLinks} />
-                                </Topbar.Right>
-                            ) : (
-                                <div />
-                            )}
-                        </Topbar>
-                    ) : null}
+                                {hasTopbarSocials ? (
+                                    <Topbar.Right>
+                                        <TopbarSocialLinks links={topbarSocialLinks} />
+                                    </Topbar.Right>
+                                ) : (
+                                    <div />
+                                )}
+                            </Topbar>
+                        ) : null}
 
-                    <Header mobileHeader={MOBILE_VERSION_HEADER}>
-                        <Header.Left>
-                            <Header.Logo url={headerLogo} />
-                        </Header.Left>
+                        <Header mobileHeader={MOBILE_VERSION_HEADER}>
+                            <Header.Left>
+                                <Header.Logo url={headerLogo} />
+                            </Header.Left>
 
-                        <Header.Mid>
-                            <NavigationList navigation={navigation} />
-                        </Header.Mid>
+                            <Header.Mid>
+                                <NavigationList navigation={navigation} />
+                            </Header.Mid>
 
-                        <Header.Right>
-                            <HeaderLogin />
-                            <HeaderCart />
-                        </Header.Right>
-                    </Header>
+                            <Header.Right>
+                                <HeaderLogin />
+                                <HeaderCart />
+                            </Header.Right>
+                        </Header>
 
-                    <SecondaryHeader elevation={0}>
-                        <SecondaryHeader.Left>
-                            <CategoryMenu />
-                        </SecondaryHeader.Left>
+                        <SecondaryHeader elevation={0}>
+                            <SecondaryHeader.Left>
+                                <CategoryMenu />
+                            </SecondaryHeader.Left>
 
-                        <SecondaryHeader.Right>
-                            <UniversalSearchBar />
-                        </SecondaryHeader.Right>
-                    </SecondaryHeader>
-                </div>
+                            <SecondaryHeader.Right>
+                                <UniversalSearchBar />
+                            </SecondaryHeader.Right>
+                        </SecondaryHeader>
+                    </div>
 
-                {children}
+                    {/* ✅ Main content grows and pushes footer down */}
+                    <main style={{ flex: 1 }}>
+                        {children}
+                    </main>
 
-                <MobileNavigationBar navigation={mobileNav} />
+                    <MobileNavigationBar navigation={mobileNav} />
 
-                {/* ---------------- FOOTER ---------------- */}
-                {hasAnyFooterData ? (
-                    <Footer1>
-                        <Footer1.Brand>
-                            {footerLogo ? (
-                                <Link href="/" style={{ display: "inline-block" }}>
-                                    <ProductImage
-                                        src={footerLogo}
-                                        alt={t("common.logoAlt")}
-                                        size="240x120"
-                                        quality={80}
-                                        noWrapper
-                                        style={{
-                                            objectFit: "contain",
-                                            maxHeight: "50px",
-                                            width: "auto",
-                                            height: "50px",
-                                            display: "block",
-                                        }}
+                    {/* ---------------- FOOTER ---------------- */}
+                    {hasAnyFooterData ? (
+                        <Footer1>
+                            <Footer1.Brand>
+                                {footerLogo ? (
+                                    <Link href="/" style={{ display: "inline-block" }}>
+                                        <ProductImage
+                                            src={footerLogo}
+                                            alt={t("common.logoAlt")}
+                                            size="240x120"
+                                            quality={80}
+                                            noWrapper
+                                            style={{
+                                                objectFit: "contain",
+                                                maxHeight: "50px",
+                                                width: "auto",
+                                                height: "50px",
+                                                display: "block",
+                                            }}
+                                        />
+                                    </Link>
+                                ) : null}
+
+                                {footerDescriptionText ? (
+                                    <Typography
+                                        variant="body1"
+                                        sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}
+                                    >
+                                        {footerDescriptionText}
+                                    </Typography>
+                                ) : null}
+
+                                {showApps ? (
+                                    <FooterApps playStoreUrl={playStoreUrl} appleStoreUrl={appleStoreUrl} />
+                                ) : null}
+                            </Footer1.Brand>
+
+                            {normalizedFooterSections?.[0] ? (
+                                <Footer1.Widget1>
+                                    <FooterLinksWidget
+                                        title={normalizedFooterSections[0].title || " "}
+                                        links={normalizedFooterSections[0].links}
                                     />
-                                </Link>
+                                </Footer1.Widget1>
                             ) : null}
 
-                            {footerDescriptionText ? (
-                                <Typography
-                                    variant="body1"
-                                    sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}
-                                >
-                                    {footerDescriptionText}
+                            {normalizedFooterSections?.[1] ? (
+                                <Footer1.Widget2>
+                                    <FooterLinksWidget
+                                        title={normalizedFooterSections[1].title || " "}
+                                        links={normalizedFooterSections[1].links}
+                                    />
+                                </Footer1.Widget2>
+                            ) : null}
+
+                            <Footer1.Contact>
+                                {hasContact ? (
+                                    <FooterContact phone={phoneFa || " "} email={email || " "} address={address || " "} />
+                                ) : null}
+
+                                {hasSocialLinks ? <FooterSocialLinks links={socialLinks} /> : null}
+                            </Footer1.Contact>
+
+                            <Footer1.Copyright>
+                                <Divider sx={{ borderColor: "grey.800" }} />
+                                <Typography variant="body2" sx={{ py: 3, textAlign: "center" }}>
+                                    {footerCopyrightText}
                                 </Typography>
-                            ) : null}
-
-                            {showApps ? (
-                                <FooterApps playStoreUrl={playStoreUrl} appleStoreUrl={appleStoreUrl} />
-                            ) : null}
-                        </Footer1.Brand>
-
-                        {normalizedFooterSections?.[0] ? (
-                            <Footer1.Widget1>
-                                <FooterLinksWidget
-                                    title={normalizedFooterSections[0].title || " "}
-                                    links={normalizedFooterSections[0].links}
-                                />
-                            </Footer1.Widget1>
-                        ) : null}
-
-                        {normalizedFooterSections?.[1] ? (
-                            <Footer1.Widget2>
-                                <FooterLinksWidget
-                                    title={normalizedFooterSections[1].title || " "}
-                                    links={normalizedFooterSections[1].links}
-                                />
-                            </Footer1.Widget2>
-                        ) : null}
-
-                        <Footer1.Contact>
-                            {hasContact ? (
-                                <FooterContact phone={phoneFa || " "} email={email || " "} address={address || " "} />
-                            ) : null}
-
-                            {hasSocialLinks ? <FooterSocialLinks links={socialLinks} /> : null}
-                        </Footer1.Contact>
-
-                        <Footer1.Copyright>
-                            <Divider sx={{ borderColor: "grey.800" }} />
-                            <Typography variant="body2" sx={{ py: 3, textAlign: "center" }}>
-                                {footerCopyrightText}
-                            </Typography>
-                        </Footer1.Copyright>
-                    </Footer1>
-                ) : (
-                    <FooterCopyrightBar text={footerCopyrightText} />
-                )}
+                            </Footer1.Copyright>
+                        </Footer1>
+                    ) : (
+                        <FooterCopyrightBar text={footerCopyrightText} />
+                    )}
+                </div>
             </Fragment>
         </SnackbarProvider>
     );
