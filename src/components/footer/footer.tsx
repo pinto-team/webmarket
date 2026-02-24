@@ -7,7 +7,7 @@ import Container from "@mui/material/Container";
 interface Footer1Props extends ComponentProps<typeof Box> {}
 // ==============================================================
 
-export function Footer1({
+export function Footer({
   children,
   color = "white",
   bgcolor = "grey.900",
@@ -37,7 +37,7 @@ export function Footer1({
 interface Footer1BrandProps extends ComponentProps<typeof Grid> {}
 // ==================================================================
 
-Footer1.Brand = function ({
+Footer.Brand = function ({
   children,
   size = { lg: 4, sm: 6, xs: 12 },
   ...props
@@ -53,7 +53,7 @@ Footer1.Brand = function ({
 interface Footer1Widget1Props extends ComponentProps<typeof Grid> {}
 // ==================================================================
 
-Footer1.Widget1 = function ({
+Footer.Widget1 = function ({
   children,
   size = { lg: 2, sm: 6, xs: 12 },
   ...props
@@ -69,7 +69,7 @@ Footer1.Widget1 = function ({
 interface Footer1Widget2Props extends ComponentProps<typeof Grid> {}
 // ==================================================================
 
-Footer1.Widget2 = function ({
+Footer.Widget2 = function ({
   children,
   size = { lg: 3, sm: 6, xs: 12 },
   ...props
@@ -85,7 +85,7 @@ Footer1.Widget2 = function ({
 interface Footer1ContactProps extends ComponentProps<typeof Grid> {}
 // ==================================================================
 
-Footer1.Contact = function ({
+Footer.Contact = function ({
   children,
   size = { lg: 3, sm: 6, xs: 12 },
   ...props
@@ -101,7 +101,7 @@ Footer1.Contact = function ({
 interface Footer1CopyrightProps extends ComponentProps<typeof Grid> {}
 // ==================================================================
 
-Footer1.Copyright = function ({ children, size = 12, ...props }: Footer1CopyrightProps) {
+Footer.Copyright = function ({ children, size = 12, ...props }: Footer1CopyrightProps) {
   return (
     <Grid size={size} {...props}>
       {children}

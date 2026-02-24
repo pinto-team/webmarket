@@ -1,4 +1,4 @@
-export * from "./footer-1";
+export * from "./footer";
 
 export * from "./footer-apps";
 export * from "./footer-contact";

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Badge from "@mui/material/Badge";
 import SvgIcon from "@mui/material/SvgIcon";
 import IconButton from "@mui/material/IconButton";
@@ -9,12 +8,18 @@ import { useCart } from "@/contexts/CartContext";
 import { formatPersianNumber } from "@/utils/persian";
 
 export function HeaderCart() {
-    const { cart } = useCart();
+    const { cart, openMiniCart } = useCart();
+
+    // If your cart items have quantity, you might prefer itemCount from context
     const itemCount = cart?.length ?? 0;
 
     return (
         <Badge badgeContent={itemCount > 0 ? formatPersianNumber(itemCount) : null} color="primary">
-            <IconButton component={Link} href="/mini-cart">
+            <IconButton
+                type="button"
+                onClick={openMiniCart}
+                aria-label="سبد خرید"
+            >
                 <SvgIcon fontSize="small">
                     <svg viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor" strokeWidth="1.5">

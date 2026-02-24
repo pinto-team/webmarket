@@ -1,9 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
 import ShopHome from "./shop-home";
-import {useShopData} from "@/contexts/ShopDataProvider";
+import { useShopData } from "@/contexts/ShopDataProvider";
+import MiniCartDrawer from "@/app/@modal/(.)mini-cart/page";
 
 interface Props {
     children: ReactNode;
@@ -17,14 +19,22 @@ export default function LayoutWrapper({ children }: Props) {
 
     const isAuthPage = AUTH_PAGES.includes(pathname);
 
-    if (isAuthPage) {
-        return <>{children}</>;
-    }
+    // ✅ Always mount the drawer so it can open instantly (no route navigation)
+    // ✅ Works even if shopData is not ready yet
+    const content = isAuthPage ? (
+        <>{children}</>
+    ) : shopData ? (
+        <ShopHome>{children}</ShopHome>
+    ) : (
+        // Instead of returning null (blank screen), render children minimally.
+        // ShopDataLoader will refetch and fill in ShopHome once shopData arrives.
+        <>{children}</>
+    );
 
-    if (!shopData) {
-        return null;
-    }
-
-    return <ShopHome>{children}</ShopHome>;
-
+    return (
+        <>
+            {content}
+            <MiniCartDrawer />
+        </>
+    );
 }

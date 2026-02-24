@@ -9,7 +9,7 @@ import SnackbarProvider from "components/SnackbarProvider";
 import ErrorHandler from "components/ErrorHandler";
 
 import {
-    Footer1,
+    Footer,
     FooterApps,
     FooterContact,
     FooterLinksWidget,
@@ -206,8 +206,8 @@ export default function ShopHome({ children, data }: Props) {
 
                     {/* Footer */}
                     {chrome.footer.showFullFooter ? (
-                        <Footer1>
-                            <Footer1.Brand>
+                        <Footer>
+                            <Footer.Brand>
                                 {chrome.footerLogo ? (
                                     <Link href="/" style={{ display: "inline-block" }}>
                                         <ProductImage
@@ -236,21 +236,21 @@ export default function ShopHome({ children, data }: Props) {
                                 {showApps ? (
                                     <FooterApps playStoreUrl={chrome.footer.playStoreUrl} appleStoreUrl={chrome.footer.appleStoreUrl} />
                                 ) : null}
-                            </Footer1.Brand>
+                            </Footer.Brand>
 
                             {section1 ? (
-                                <Footer1.Widget1>
+                                <Footer.Widget1>
                                     <FooterLinksWidget title={section1.title || " "} links={section1.links ?? []} />
-                                </Footer1.Widget1>
+                                </Footer.Widget1>
                             ) : null}
 
                             {section2 ? (
-                                <Footer1.Widget2>
+                                <Footer.Widget2>
                                     <FooterLinksWidget title={section2.title || " "} links={section2.links ?? []} />
-                                </Footer1.Widget2>
+                                </Footer.Widget2>
                             ) : null}
 
-                            <Footer1.Contact>
+                            <Footer.Contact>
                                 {hasContact ? (
                                     <FooterContact
                                         phone={phoneFa || " "}
@@ -260,15 +260,15 @@ export default function ShopHome({ children, data }: Props) {
                                 ) : null}
 
                                 {hasFooterSocials ? <FooterSocialLinks links={chrome.footer.socials as any} /> : null}
-                            </Footer1.Contact>
+                            </Footer.Contact>
 
-                            <Footer1.Copyright>
+                            <Footer.Copyright>
                                 <Divider sx={{ borderColor: "grey.800" }} />
                                 <Typography variant="body2" sx={{ py: 3, textAlign: "center" }}>
                                     {copyrightFa}
                                 </Typography>
-                            </Footer1.Copyright>
-                        </Footer1>
+                            </Footer.Copyright>
+                        </Footer>
                     ) : (
                         <FooterCopyrightBar text={copyrightFa} />
                     )}
