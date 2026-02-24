@@ -1,12 +1,13 @@
 "use client";
 
-import React, { ComponentProps, PropsWithChildren, ReactNode, useMemo, useState } from "react";
-import Link from "next/link";
+// src/components/header/header.tsx
+import React, { ComponentProps, PropsWithChildren, ReactNode } from "react";
 import Box from "@mui/material/Box";
 
 import { HeaderCategoryDropdown } from "./header-category-dropdown";
 import { HeaderWrapper, StyledContainer } from "./styles";
-import { t } from "@/i18n/t";
+
+import LogoImage from "@/components/common/LogoImage";
 
 interface HeaderProps extends ComponentProps<typeof HeaderWrapper> {
     mobileHeader: ReactNode;
@@ -37,39 +38,14 @@ interface HeaderLogoProps {
     url?: string;
 }
 
-Header.Logo = function HeaderLogo({ url = "" }: HeaderLogoProps) {
-    const [imgError, setImgError] = useState(false);
-
-    const fallbackLogo = "/assets/images/logo2.svg";
-    const cleanUrl = useMemo(() => (url || "").trim(), [url]);
-
-    const finalSrc = cleanUrl && !imgError ? cleanUrl : fallbackLogo;
-
-    return (
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center" }}>
-            <img
-                src={finalSrc}
-                alt={t("common.logoAlt")}
-                width={105}
-                height={50}
-                style={{
-                    objectFit: "contain",
-                    maxHeight: 50,
-                    width: "auto",
-                    display: "block",
-                }}
-                loading="lazy"
-                onError={() => {
-                    if (finalSrc !== fallbackLogo) {
-                        setImgError(true);
-                    }
-                }}
-            />
-        </Link>
-    );
+Header.Logo = function HeaderLogo({ url }: HeaderLogoProps) {
+    // ✅ Single source of truth for logo rendering (fallback, null-safe, error-safe)
+    return <LogoImage src={url} width={90} height={50} maxHeight={44} />;
 };
 
-Header.CategoryDropdown = function HeaderCategoryDropdownSlot({ children }: PropsWithChildren) {
+Header.CategoryDropdown = function HeaderCategoryDropdownSlot({
+                                                                  children,
+                                                              }: PropsWithChildren) {
     return <HeaderCategoryDropdown>{children}</HeaderCategoryDropdown>;
 };
 

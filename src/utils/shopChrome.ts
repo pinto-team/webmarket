@@ -1,26 +1,18 @@
 // src/utils/shopChrome.ts
-
 import LayoutModel from "@/models/Layout.model";
-import type {
-    ShopData,
-    TopbarConfig,
-    FooterSection,
-    SocialLink,
-} from "@/types/shopData.types";
+import type { ShopData, TopbarConfig, FooterSection } from "@/types/shopData.types";
 
-import { safeArr, safeObj, safeStr } from "@/utils/nullSafe";
+import { safeArr, safeStr } from "@/utils/nullSafe";
 import {
     hasAny,
     hasAnyMeaningfulString,
     normalizeFooterSections,
     socialLinksToMap,
+    safeTrim,
+    isMeaningfulString,
 } from "@/utils/render";
-
 import { getLogoImageUrl } from "@/utils/imageUtils";
 
-/**
- * Chrome model returned to ShopHome
- */
 export interface ShopChrome {
     headerLogo: string;
     mobileLogo: string;
@@ -32,6 +24,7 @@ export interface ShopChrome {
         show: boolean;
         label: string;
         title: string;
+        link: string; // ✅ NEW
         socials: Record<string, string>;
     };
 
@@ -51,31 +44,28 @@ export interface ShopChrome {
     };
 }
 
+function filterMeaningfulMap(input?: Record<string, unknown> | null): Record<string, string> {
+    if (!input) return {};
+    return Object.fromEntries(
+        Object.entries(input).filter(([k, v]) => isMeaningfulString(k) && isMeaningfulString(v))
+    ) as Record<string, string>;
+}
+
 /**
- * Build shop chrome model from shopData + optional layout
+ * Build shop chrome model from shopData + optional layout (legacy fallback)
+ * ✅ Always returns stable shapes (strings, arrays, objects) to prevent crashes
  */
-export function buildShopChrome(
-    shopData?: ShopData | null,
-    layout?: LayoutModel
-): ShopChrome {
-    const headerLogo = safeStr(
-        getLogoImageUrl(shopData?.header_logo, "240x80", 80),
-        ""
-    ).trim();
+export function buildShopChrome(shopData?: ShopData | null, layout?: LayoutModel): ShopChrome {
+    // ----------------------------
+    // Logos (ONLY from shopData images)
+    // ----------------------------
+    const headerLogo = safeTrim(getLogoImageUrl(shopData?.header_logo, "640x240", 100), "");
+    const mobileLogo = safeTrim(getLogoImageUrl(shopData?.mobile_logo, "640x240", 100), "");
+    const footerLogo = safeTrim(getLogoImageUrl(shopData?.footer_logo, "640x240", 100), "");
 
-    const mobileLogo = safeStr(
-        getLogoImageUrl(shopData?.mobile_logo, "240x80", 80),
-        ""
-    ).trim();
-
-    const footerLogo = safeStr(
-        getLogoImageUrl(shopData?.footer_logo, "240x120", 80),
-        ""
-    ).trim();
-
-    /**
-     * Navigation
-     */
+    // ----------------------------
+    // Navigation
+    // ----------------------------
     const navigation = hasAny(shopData?.main_navigation)
         ? safeArr(shopData?.main_navigation).map((item) => ({
             title: safeStr(item?.title, " "),
@@ -93,36 +83,42 @@ export function buildShopChrome(
         }))
         : safeArr(layout?.header?.navigation);
 
-    /**
-     * Topbar
-     */
+    // ----------------------------
+    // Socials (compute once)
+    // ----------------------------
+    const socialFromShop = socialLinksToMap(shopData?.social_links); // already filters empty urls
+    const topbarSocialFromLayout = filterMeaningfulMap((layout?.topbar?.socials ?? {}) as any);
+    const footerSocialFromLayout = filterMeaningfulMap((layout?.footer?.socials ?? {}) as any);
+
+    // ----------------------------
+    // Topbar
+    // ----------------------------
     const topbarConfig: TopbarConfig | undefined = shopData?.topbar;
+    const topbarLink = safeTrim(topbarConfig?.link, safeTrim(layout?.topbar?.link, ""));
+    const topbarLabel = safeTrim(topbarConfig?.label, safeTrim(layout?.topbar?.label, ""));
+    const topbarTitle = safeTrim(topbarConfig?.title, safeTrim(layout?.topbar?.title, ""));
 
-    const topbarLabel = safeStr(topbarConfig?.label, "").trim();
-    const topbarTitle = safeStr(topbarConfig?.title, "").trim();
+    const topbarSocials =
+        Object.keys(socialFromShop).length > 0 ? socialFromShop : topbarSocialFromLayout;
 
-    const topbarSocials = socialLinksToMap(shopData?.social_links);
+    const showTopbar = hasAnyMeaningfulString([topbarLabel, topbarTitle, topbarLink]);
+    // ----------------------------
+    // Footer
+    // ----------------------------
+    const footerDescription = safeTrim(shopData?.footer_description, safeTrim(layout?.footer?.description, ""));
 
-    const hasTopbarText = hasAnyMeaningfulString([topbarLabel, topbarTitle]);
-    const hasTopbarSocials = Object.values(topbarSocials).length > 0;
+    // ✅ always stable: []
+    const sections = normalizeFooterSections(shopData?.footer_sections) ?? [];
 
-    const showTopbar = hasTopbarText || hasTopbarSocials;
+    const footerSocials =
+        Object.keys(socialFromShop).length > 0 ? socialFromShop : footerSocialFromLayout;
 
-    /**
-     * Footer
-     */
-    const footerDescription = safeStr(shopData?.footer_description, "").trim();
+    const phone = safeTrim(shopData?.contact_info?.phone, safeTrim(layout?.footer?.contact?.phone, ""));
+    const email = safeTrim(shopData?.contact_info?.email, safeTrim(layout?.footer?.contact?.email, ""));
+    const address = safeTrim(shopData?.contact_info?.address, safeTrim(layout?.footer?.contact?.address, ""));
 
-    const sections = normalizeFooterSections(shopData?.footer_sections);
-
-    const footerSocials = socialLinksToMap(shopData?.social_links);
-
-    const phone = safeStr(shopData?.contact_info?.phone, "").trim();
-    const email = safeStr(shopData?.contact_info?.email, "").trim();
-    const address = safeStr(shopData?.contact_info?.address, "").trim();
-
-    const playStoreUrl = safeStr(shopData?.app_links?.google_play, "").trim();
-    const appleStoreUrl = safeStr(shopData?.app_links?.app_store, "").trim();
+    const playStoreUrl = safeTrim(shopData?.app_links?.google_play, safeTrim(layout?.footer?.playStoreUrl, ""));
+    const appleStoreUrl = safeTrim(shopData?.app_links?.app_store, safeTrim(layout?.footer?.appStoreUrl, ""));
 
     const hasContact = hasAnyMeaningfulString([phone, email, address]);
 
@@ -133,13 +129,10 @@ export function buildShopChrome(
         appleStoreUrl.length > 0;
 
     const showFullFooter =
-        hasBrandBits ||
-        hasAny(sections) ||
-        hasContact ||
-        Object.keys(footerSocials).length > 0;
+        hasBrandBits || hasAny(sections) || hasContact || Object.keys(footerSocials).length > 0;
 
     const copyright =
-        safeStr(shopData?.footer_copyright, "").trim() || " ";
+        safeTrim(shopData?.footer_copyright, safeTrim((layout as any)?.footer?.copyright, "")) || " ";
 
     return {
         headerLogo,
@@ -151,7 +144,8 @@ export function buildShopChrome(
             show: showTopbar,
             label: topbarLabel,
             title: topbarTitle,
-            socials: topbarSocials,
+            link: topbarLink, // ✅ fixed
+            socials: {}, // ✅ topbar never shows socials (keep stable shape)
         },
 
         footer: {
@@ -159,11 +153,7 @@ export function buildShopChrome(
             description: footerDescription,
             sections,
             socials: footerSocials,
-            contact: {
-                phone,
-                email,
-                address,
-            },
+            contact: {phone, email, address},
             playStoreUrl,
             appleStoreUrl,
             copyright,

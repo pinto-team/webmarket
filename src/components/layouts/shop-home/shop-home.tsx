@@ -24,14 +24,8 @@ import { MobileMenu } from "components/mobile-navbar";
 import { SecondaryHeader } from "components/secondary-header";
 import { MobileNavigationBar } from "components/mobile-navigation";
 import UniversalSearchBar from "components/search/UniversalSearchBar";
-import { Topbar, TopbarSocialLinks } from "components/topbar";
-import {
-    Header,
-    HeaderCart,
-    HeaderLogin,
-    MobileHeader,
-    HeaderSearch,
-} from "components/header";
+import { Topbar } from "components/topbar"; // ✅ no socials in topbar
+import { Header, HeaderCart, HeaderLogin, MobileHeader, HeaderSearch } from "components/header";
 
 import LayoutModel from "models/Layout.model";
 
@@ -40,24 +34,19 @@ import { toPersianNumber } from "@/utils/persian";
 import ProductImage from "@/components/common/ProductImage";
 import { useShopData } from "@/contexts/ShopDataProvider";
 import { buildShopChrome } from "@/utils/shopChrome";
-import { renderIf } from "@/utils/render";
 
 interface Props extends PropsWithChildren {
     data?: LayoutModel;
 }
 
-/**
- * Keep this file dumb:
- * - compute chrome model once
- * - render sections only when meaningful
- * - sticky footer shell
- */
 export default function ShopHome({ children, data }: Props) {
     const { shopData } = useShopData();
 
     const chrome = useMemo(() => buildShopChrome(shopData, data), [shopData, data]);
 
-    // Mobile navigation is constant
+    // ----------------------------
+    // Mobile nav must be inside component (t() dependency)
+    // ----------------------------
     const mobileNav = useMemo(
         () => [
             { title: t("nav.home"), href: "/", icon: "Home", badge: false },
@@ -68,8 +57,52 @@ export default function ShopHome({ children, data }: Props) {
         []
     );
 
+    // ----------------------------
+    // SAFE derived values
+    // ----------------------------
+    const footerSections = chrome.footer?.sections ?? [];
+    const section1 = footerSections[0] ?? null;
+    const section2 = footerSections[1] ?? null;
+
+    const hasContact =
+        Boolean(chrome.footer.contact.phone) ||
+        Boolean(chrome.footer.contact.email) ||
+        Boolean(chrome.footer.contact.address);
+
+    const hasFooterSocials = Object.keys(chrome.footer.socials ?? {}).length > 0;
+    const showApps = Boolean(chrome.footer.playStoreUrl) || Boolean(chrome.footer.appleStoreUrl);
+
+    // ----------------------------
+    // ✅ TOPBAR RULE: show if ANY of label/title/link exist
+    // ----------------------------
+    const topbarLabel = chrome.topbar.label?.trim() ?? "";
+    const topbarTitle = chrome.topbar.title?.trim() ?? "";
+    const topbarLink = chrome.topbar.link?.trim() ?? "";
+    const showTopbar = Boolean(topbarLabel || topbarTitle || topbarLink);
+
+    // ----------------------------
+    // Persian digit formatting only where needed
+    // ----------------------------
+    const topbarLabelFa = topbarLabel ? toPersianNumber(topbarLabel) : "";
+    const topbarTitleFa = topbarTitle ? toPersianNumber(topbarTitle) : "";
+
+    const footerDescriptionFa = chrome.footer.description ? toPersianNumber(chrome.footer.description) : "";
+    const phoneFa = chrome.footer.contact.phone ? toPersianNumber(chrome.footer.contact.phone) : "";
+
+    const yearFa = toPersianNumber(new Date().getFullYear());
+    const fallbackCopyright = `© ${t("footer.copyright")} ${yearFa} ${t("footer.brandName")}, ${t(
+        "footer.allRightsReserved"
+    )}`;
+
+    const copyrightFa =
+        chrome.footer.copyright?.trim().length
+            ? toPersianNumber(chrome.footer.copyright)
+            : toPersianNumber(fallbackCopyright);
+
+    // ----------------------------
     // Mobile header depends on nav + logo
-    const MOBILE_VERSION_HEADER = useMemo(
+    // ----------------------------
+    const mobileHeader = useMemo(
         () => (
             <MobileHeader>
                 <MobileHeader.Left>
@@ -91,7 +124,9 @@ export default function ShopHome({ children, data }: Props) {
         [chrome.navigation, chrome.mobileLogo]
     );
 
+    // ----------------------------
     // Sticky offset calc for chrome
+    // ----------------------------
     const chromeRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -115,68 +150,29 @@ export default function ShopHome({ children, data }: Props) {
         };
     }, []);
 
-    // Persian digit formatting only where needed
-    const topbarLabelFa = chrome.topbar.label ? toPersianNumber(chrome.topbar.label) : "";
-    const topbarTitleFa = chrome.topbar.title ? toPersianNumber(chrome.topbar.title) : "";
-
-    const footerDescriptionFa = chrome.footer.description ? toPersianNumber(chrome.footer.description) : "";
-
-    const phoneFa = chrome.footer.contact.phone ? toPersianNumber(chrome.footer.contact.phone) : "";
-
-    // Copyright must always show something
-    const yearFa = toPersianNumber(new Date().getFullYear());
-    const fallbackCopyright = `© ${t("footer.copyright")} ${yearFa} ${t("footer.brandName")}, ${t("footer.allRightsReserved")}`;
-
-    const copyrightFa =
-        chrome.footer.copyright?.trim().length
-            ? toPersianNumber(chrome.footer.copyright)
-            : toPersianNumber(fallbackCopyright);
-
-    const showApps = Boolean(chrome.footer.playStoreUrl) || Boolean(chrome.footer.appleStoreUrl);
-
-    const hasFooterSections = chrome.footer.sections.length > 0;
-
-    const hasContact = Boolean(chrome.footer.contact.phone) || Boolean(chrome.footer.contact.email) || Boolean(chrome.footer.contact.address);
-
-    const hasFooterSocials = Object.keys(chrome.footer.socials).length > 0;
-
-    const hasTopbarText = Boolean(chrome.topbar.label) || Boolean(chrome.topbar.title);
-    const hasTopbarSocials = Object.keys(chrome.topbar.socials).length > 0;
-
     return (
         <SnackbarProvider>
             <ErrorHandler />
             <Fragment>
-                {/* ✅ Page shell: sticky footer */}
-                <div
-                    style={{
-                        minHeight: "100vh",
-                        display: "flex",
-                        flexDirection: "column",
-                    }}
-                >
-                    {/* Header chrome (topbar + headers) */}
+                <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+                    {/* Header chrome */}
                     <div ref={chromeRef}>
-                        {renderIf(
-                            chrome.topbar.show,
-                            <Topbar>
-                                {hasTopbarText ? (
+                        {showTopbar ? (
+                            // ✅ Topbar can be clickable via href (see refactor you did/should do on Topbar)
+                            <Topbar href={topbarLink || undefined}>
+                                {(topbarLabelFa || topbarTitleFa) ? (
                                     <Topbar.Left label={topbarLabelFa || " "} title={topbarTitleFa || " "} />
                                 ) : (
+                                    // اگر فقط لینک داریم و متن نداریم، یه جای خالی بذاریم که layout نشکنه
                                     <div />
                                 )}
 
-                                {hasTopbarSocials ? (
-                                    <Topbar.Right>
-                                        <TopbarSocialLinks links={chrome.topbar.socials as any} />
-                                    </Topbar.Right>
-                                ) : (
-                                    <div />
-                                )}
+                                {/* ✅ no socials in topbar */}
+                                <Topbar.Right />
                             </Topbar>
-                        )}
+                        ) : null}
 
-                        <Header mobileHeader={MOBILE_VERSION_HEADER}>
+                        <Header mobileHeader={mobileHeader}>
                             <Header.Left>
                                 <Header.Logo url={chrome.headerLogo} />
                             </Header.Left>
@@ -202,87 +198,68 @@ export default function ShopHome({ children, data }: Props) {
                         </SecondaryHeader>
                     </div>
 
-                    {/* ✅ Main content grows and pushes footer down */}
-                    <main style={{ flex: 1 }}>
-                        {children}
-                    </main>
+                    {/* Main */}
+                    <main style={{ flex: 1 }}>{children}</main>
 
+                    {/* Bottom Nav */}
                     <MobileNavigationBar navigation={mobileNav} />
 
-                    {/* ---------------- FOOTER ---------------- */}
+                    {/* Footer */}
                     {chrome.footer.showFullFooter ? (
                         <Footer1>
                             <Footer1.Brand>
-                                {renderIf(
-                                    Boolean(chrome.footerLogo),
+                                {chrome.footerLogo ? (
                                     <Link href="/" style={{ display: "inline-block" }}>
                                         <ProductImage
                                             src={chrome.footerLogo}
                                             alt={t("common.logoAlt")}
                                             size="240x120"
-                                            quality={80}
+                                            quality={100}
                                             noWrapper
                                             style={{
                                                 objectFit: "contain",
-                                                maxHeight: "50px",
+                                                maxHeight: "44px",
                                                 width: "auto",
-                                                height: "50px",
+                                                height: "44px",
                                                 display: "block",
                                             }}
                                         />
                                     </Link>
-                                )}
+                                ) : null}
 
-                                {renderIf(
-                                    Boolean(footerDescriptionFa),
-                                    <Typography
-                                        variant="body1"
-                                        sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}
-                                    >
+                                {footerDescriptionFa ? (
+                                    <Typography variant="body1" sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}>
                                         {footerDescriptionFa}
                                     </Typography>
-                                )}
+                                ) : null}
 
-                                {renderIf(
-                                    showApps,
+                                {showApps ? (
                                     <FooterApps playStoreUrl={chrome.footer.playStoreUrl} appleStoreUrl={chrome.footer.appleStoreUrl} />
-                                )}
+                                ) : null}
                             </Footer1.Brand>
 
-                            {renderIf(
-                                Boolean(chrome.footer.sections?.[0]),
+                            {section1 ? (
                                 <Footer1.Widget1>
-                                    <FooterLinksWidget
-                                        title={chrome.footer.sections[0].title || " "}
-                                        links={chrome.footer.sections[0].links}
-                                    />
+                                    <FooterLinksWidget title={section1.title || " "} links={section1.links ?? []} />
                                 </Footer1.Widget1>
-                            )}
+                            ) : null}
 
-                            {renderIf(
-                                Boolean(chrome.footer.sections?.[1]),
+                            {section2 ? (
                                 <Footer1.Widget2>
-                                    <FooterLinksWidget
-                                        title={chrome.footer.sections[1].title || " "}
-                                        links={chrome.footer.sections[1].links}
-                                    />
+                                    <FooterLinksWidget title={section2.title || " "} links={section2.links ?? []} />
                                 </Footer1.Widget2>
-                            )}
+                            ) : null}
 
                             <Footer1.Contact>
-                                {renderIf(
-                                    hasContact,
+                                {hasContact ? (
                                     <FooterContact
                                         phone={phoneFa || " "}
                                         email={chrome.footer.contact.email || " "}
                                         address={chrome.footer.contact.address || " "}
                                     />
-                                )}
+                                ) : null}
 
-                                {renderIf(
-                                    hasFooterSocials,
-                                    <FooterSocialLinks links={chrome.footer.socials as any} />
-                                )}
+                                {hasFooterSocials ? <FooterSocialLinks links={chrome.footer.socials as any} /> : null}
                             </Footer1.Contact>
 
                             <Footer1.Copyright>

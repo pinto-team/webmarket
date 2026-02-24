@@ -48,10 +48,11 @@ export interface Footer {
 }
 
 export interface Topbar {
-  title: string;
-  label: string;
-  socials: Partial<Socials>;
-  languageOptions: LanguageOptions;
+    title: string;
+    label: string;
+    link?: string;
+    socials?: Partial<Socials>;
+    languageOptions: LanguageOptions;
 }
 
 export interface Header {
