@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef } from "react";
 import Button from "@mui/material/Button";
 
 import { useShopData } from "@/contexts/ShopDataProvider";
+import { t } from "@/i18n/t";
 
 /**
  * ShopDataLoader
@@ -29,19 +30,16 @@ export default function ShopDataLoader({ children }: { children: React.ReactNode
     }, []);
 
     useEffect(() => {
-        // If we already have data, do nothing.
         if (shopData) {
             if (debugEnabled) console.log("[ShopDataLoader] shopData exists → no refetch");
             return;
         }
 
-        // If currently loading, wait.
         if (loading) {
             if (debugEnabled) console.log("[ShopDataLoader] loading=true → wait");
             return;
         }
 
-        // Only try once automatically.
         if (attemptedAutoRefetchRef.current) {
             if (debugEnabled) console.log("[ShopDataLoader] auto-refetch already attempted → stop");
             return;
@@ -50,7 +48,6 @@ export default function ShopDataLoader({ children }: { children: React.ReactNode
         attemptedAutoRefetchRef.current = true;
         if (debugEnabled) console.log("[ShopDataLoader] auto-refetch starting...");
 
-        // Use latest refetch without depending on its identity
         void refetchRef.current();
     }, [shopData, loading, debugEnabled]);
 
@@ -66,20 +63,18 @@ export default function ShopDataLoader({ children }: { children: React.ReactNode
                             gap: 12,
                         }}
                     >
-                        <span>اطلاعات فروشگاه بارگذاری نشد. لطفاً دوباره تلاش کنید.</span>
+                        <span>{t("shopData.loadFailed")}</span>
 
                         <Button
                             variant="outlined"
                             size="small"
                             onClick={() => {
-                                // Allow another auto attempt after manual retry
-                                attemptedAutoRefetchRef.current = false;
+                                attemptedAutoRefetchRef.current = false; // allow retry
                                 if (debugEnabled) console.log("[ShopDataLoader] manual retry clicked");
-
                                 void refetchRef.current();
                             }}
                         >
-                            تلاش مجدد
+                            {t("shopData.retry")}
                         </Button>
                     </div>
                 </div>

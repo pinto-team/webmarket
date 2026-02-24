@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-
+import { getShopDataServer } from "@/utils/shopDataCache";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -26,35 +26,67 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const api = await getServerApi();
 
     try {
-        const post = await contentService.getPost(code, api);
+        const [post, shopData] = await Promise.all([
+            contentService.getPost(code, api),
+            getShopDataServer(),
+        ]);
 
+        const shopTitle = (shopData?.title?.trim() || tServer<string>("meta.defaultShopTitle")).trim();
         const blogTitle = tServer<string>("nav.blog");
         const notFoundTitle = tServer<string>("blog.post.notFoundTitle");
 
-        const title = post?.title ? `${post.title} | ${blogTitle}` : notFoundTitle;
+        const postTitle = (post?.title ? String(post.title).trim() : "").trim();
+
+        // ✅ title format: "Post | Blog - Shop"
+        const title = postTitle
+            ? `${postTitle} | ${blogTitle} - ${shopTitle}`
+            : `${notFoundTitle} - ${shopTitle}`;
+
+        const description =
+            (post?.excerpt ? String(post.excerpt).trim() : "") ||
+            tServer<string>("meta.defaultDescription");
 
         const ogImage = getServerImageUrl(post, "1200x630", 80);
 
+        const keywords = Array.from(
+            new Set(
+                [
+                    postTitle,
+                    blogTitle,
+                    shopTitle,
+                    tServer<string>("meta.keywords.onlineShop"),
+                    tServer<string>("meta.keywords.ecommerce"),
+                ].filter(Boolean)
+            )
+        );
+
         return {
             title,
-            description: post.excerpt,
+            description,
+            authors: [{ name: shopTitle }],
+            keywords,
+
             openGraph: {
-                title: post.title,
-                description: post.excerpt,
-                images: ogImage ? [{ url: ogImage }] : [],
+                title,
+                description,
+                siteName: shopTitle,
                 type: "article",
+                images: ogImage ? [{ url: ogImage }] : undefined,
             },
+
             twitter: {
-                card: "summary_large_image",
-                title: post.title,
-                description: post.excerpt,
-                images: ogImage ? [ogImage] : [],
+                card: ogImage ? "summary_large_image" : "summary",
+                title,
+                description,
+                images: ogImage ? [ogImage] : undefined,
             },
         };
     } catch {
-        return { title: tServer<string>("blog.post.notFoundTitle") };
+        const shopTitle = tServer<string>("meta.defaultShopTitle");
+        return { title: `${tServer<string>("blog.post.notFoundTitle")} - ${shopTitle}` };
     }
 }
+
 
 export default async function BlogPostPage({ params }: PageProps) {
     const { code } = await params;

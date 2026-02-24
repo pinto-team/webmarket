@@ -1,6 +1,10 @@
 export const resources = {
     fa: {
         translation: {
+            shopData: {
+                loadFailed: "اطلاعات فروشگاه بارگذاری نشد. لطفاً دوباره تلاش کنید.",
+                retry: "تلاش مجدد",
+            },
             addresses: {
                 addNew: "افزودن آدرس جدید",
                 addNewFull: "افزودن آدرس جدید",
@@ -330,11 +334,18 @@ export const resources = {
                 removedFromWishlist: "محصول از علاقه‌مندی‌ها حذف شد"
             },
             meta: {
+                blog: {
+                    label: "بلاگ",
+                    titleFormat: "{{post}} | {{blog}} - {{shop}}",
+                    descriptionFormat: "{{post}} در {{shop}}",
+                },
                 defaultDescription: "فروشگاه آنلاین با بهترین محصولات",
                 defaultKeywords: ["فروشگاه آنلاین", "خرید اینترنتی"],
                 defaultShopTitle: "فروشگاه",
                 defaultTitle: "فروشگاه آنلاین",
                 home: {
+                    titleFormat: "{{shop}}",
+                    descriptionFormat: "{{shop}}",
                     authorName: "Taavoni",
                     authorUrl: "https://taavoni.online",
                     description: "خرید آنلاین محصولات با بهترین قیمت و کیفیت",
@@ -350,7 +361,7 @@ export const resources = {
                     titleFormat: "{{page}} - {{shop}}"
                 },
                 pageName: {
-                    shop: "فروشگاه"
+                    shop: "خانه"
                 },
                 pages: {
                     cart: "سبد خرید",

@@ -1,33 +1,73 @@
-import { Metadata } from "next";
-import { ShopData } from "@/types/shopData.types";
-import { t } from "@/i18n/t";
+import type { Metadata } from "next";
+import type { ShopData } from "@/types/shopData.types";
+import { tServer } from "@/i18n/serverT";
+
+type InterpolationValues = Record<string, string | number>;
+
+function interpolate(template: string, values?: InterpolationValues): string {
+    if (!values) return template;
+
+    return template.replace(/\{\{(.*?)\}\}/g, (_, rawKey) => {
+        const key = String(rawKey).trim();
+        const value = values[key];
+        return value == null ? "" : String(value);
+    });
+}
 
 export function generatePageMetadata(
     pageTitle: string,
     shopData?: ShopData | null
 ): Metadata {
+    const shopTitle = (shopData?.title?.trim() ||
+        tServer<string>("meta.defaultShopTitle")).trim();
 
-    const shopTitle = shopData?.title || t("meta.defaultShopTitle");
+    const cleanPageTitle = pageTitle?.trim();
 
-    const title = t("meta.page.titleFormat", {
-        page: pageTitle,
-        shop: shopTitle,
-    });
+    const titleFormat = tServer<string>(
+        "meta.page.titleFormat",
+        "{{page}} - {{shop}}"
+    );
 
-    const description = t("meta.page.descriptionFormat", {
-        page: pageTitle,
-        shop: shopTitle,
-    });
+    const descFormat = tServer<string>(
+        "meta.page.descriptionFormat",
+        "{{page}} در {{shop}}"
+    );
+
+    const finalTitle =
+        cleanPageTitle && cleanPageTitle !== shopTitle
+            ? interpolate(titleFormat, {
+                page: cleanPageTitle,
+                shop: shopTitle,
+            })
+            : shopTitle;
+
+    const finalDescription = cleanPageTitle
+        ? interpolate(descFormat, {
+            page: cleanPageTitle,
+            shop: shopTitle,
+        })
+        : shopTitle;
+
+    const onlineShop = tServer<string>("meta.keywords.onlineShop");
+    const ecommerce = tServer<string>("meta.keywords.ecommerce");
+
+    const keywords = Array.from(
+        new Set(
+            [cleanPageTitle, shopTitle, onlineShop, ecommerce].filter(Boolean)
+        )
+    );
 
     return {
-        title,
-        description,
+        title: finalTitle,
+        description: finalDescription,
         authors: [{ name: shopTitle }],
-        keywords: [
-            pageTitle,
-            shopTitle,
-            t("meta.keywords.onlineShop"),
-            t("meta.keywords.ecommerce"),
-        ],
+        keywords,
+
+        openGraph: {
+            title: finalTitle,
+            description: finalDescription,
+            siteName: shopTitle,
+            type: "website",
+        },
     };
 }

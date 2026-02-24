@@ -55,10 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
             : [];
 
     return {
-        title: {
-            default: title,
-            template: `%s - ${title}`,
-        },
+        title,          // ✅ no template here
         description,
         keywords,
     };
