@@ -52,12 +52,12 @@ export default function HeroSlider({ slides, loading }: HeroSliderProps) {
         >
             <Container>
                 <Box maxWidth={600} textAlign="center">
-                    <Typography variant="h6" mb={1}>
-                        {slide.subtitle}
+                    <Typography variant="h1" mb={1}>
+                        {slide.title}
                     </Typography>
 
-                    <Typography variant="h2" fontWeight={700} mb={2}>
-                        {slide.title}
+                    <Typography variant="h3" fontWeight={700} mb={2}>
+                        {slide.subtitle}
                     </Typography>
 
                     <Typography variant="body1" mb={3}>
