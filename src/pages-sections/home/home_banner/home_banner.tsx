@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -12,11 +13,19 @@ import { toPersianNumber } from "@/utils/persian";
 
 import { bannerSx, overlaySx, contentSx, titleSx, subtitleSx, buttonSx } from "./banner.styles";
 
-export default function Home_banner() {
+type Props = {
+    /**
+     * Called once when banner has meaningful content.
+     * Used by Home page to decide whether to show EmptyPage.
+     */
+    onHasContent?: () => void;
+};
+
+export default function Home_banner({ onHasContent }: Props) {
     const { shopData } = useShopData();
     const banner = shopData?.home_banner;
 
-    // اگر آبجکت نیست => هیچ
+    // if missing => render nothing
     if (!banner) return null;
 
     const title = banner.title ? toPersianNumber(banner.title) : "";
@@ -26,16 +35,26 @@ export default function Home_banner() {
 
     const imageUrl = banner.image ? getServerImageUrl(banner.image, "1400x400", 80) : "";
 
-    // ✅ شرط اصلی: اگر هیچ محتوایی نداره => اصلاً رندر نشه
     const hasAnything =
         Boolean(imageUrl) ||
-        Boolean(title?.trim()) ||
-        Boolean(subtitle?.trim()) ||
-        Boolean(buttonText?.trim());
+        Boolean(title.trim()) ||
+        Boolean(subtitle.trim()) ||
+        Boolean(buttonText.trim());
+
+    // signal once if we have content
+    const signaledRef = useRef(false);
+
+    useEffect(() => {
+        if (!hasAnything) return;
+        if (signaledRef.current) return;
+
+        signaledRef.current = true;
+        onHasContent?.();
+    }, [hasAnything, onHasContent]);
 
     if (!hasAnything) return null;
 
-    const isExternal = /^https?:\/\//i.test(buttonLink);
+    const isExternal = useMemo(() => /^https?:\/\//i.test(buttonLink), [buttonLink]);
 
     return (
         <Container sx={{ mt: { xs: 3, sm: 5 } }}>
@@ -44,11 +63,11 @@ export default function Home_banner() {
 
                 <Box sx={contentSx}>
                     <Box sx={{ minWidth: 0 }}>
-                        {title && <Typography sx={titleSx}>{title}</Typography>}
-                        {subtitle && <Typography sx={subtitleSx}>{subtitle}</Typography>}
+                        {title ? <Typography sx={titleSx}>{title}</Typography> : null}
+                        {subtitle ? <Typography sx={subtitleSx}>{subtitle}</Typography> : null}
                     </Box>
 
-                    {buttonText && (
+                    {buttonText ? (
                         <Button
                             component={Link}
                             href={buttonLink}
@@ -59,7 +78,7 @@ export default function Home_banner() {
                         >
                             {buttonText}
                         </Button>
-                    )}
+                    ) : null}
                 </Box>
             </Box>
         </Container>

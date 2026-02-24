@@ -39,146 +39,25 @@ import { t } from "@/i18n/t";
 import { toPersianNumber } from "@/utils/persian";
 import ProductImage from "@/components/common/ProductImage";
 import { useShopData } from "@/contexts/ShopDataProvider";
-import { getLogoImageUrl } from "@/utils/imageUtils";
-import { safeArr, safeObj, safeStr } from "@/utils/nullSafe";
-import { TopbarConfig } from "@/types/shopData.types";
+import { buildShopChrome } from "@/utils/shopChrome";
+import { renderIf } from "@/utils/render";
 
 interface Props extends PropsWithChildren {
     data?: LayoutModel;
 }
 
-// ✅ Minimal safe fallback: no mock content, just crash-proof structure.
-const FALLBACK_LAYOUT: LayoutModel = {
-    header: {
-        logo: "",
-        categories: [],
-        categoryMenus: [],
-        navigation: [],
-    },
-    mobileNavigation: {
-        logo: "",
-        version1: [],
-        version2: [],
-    },
-    topbar: {
-        title: "",
-        label: "",
-        socials: {},
-        languageOptions: {},
-    },
-    footer: {
-        logo: "",
-        description: "",
-        appStoreUrl: "",
-        playStoreUrl: "",
-        about: [],
-        customers: [],
-        socials: {
-            google: "",
-            twitter: "",
-            youtube: "",
-            facebook: "",
-            instagram: "",
-        },
-        contact: {
-            phone: "",
-            email: "",
-            address: "",
-        },
-    },
-};
-
+/**
+ * Keep this file dumb:
+ * - compute chrome model once
+ * - render sections only when meaningful
+ * - sticky footer shell
+ */
 export default function ShopHome({ children, data }: Props) {
     const { shopData } = useShopData();
 
-    // ✅ Prefer explicit layout data, else fallback to shopData-as-layout (legacy), else hard fallback
-    const layout = safeObj<LayoutModel>(
-        (data as LayoutModel) ?? (shopData as unknown as LayoutModel),
-        FALLBACK_LAYOUT
-    );
+    const chrome = useMemo(() => buildShopChrome(shopData, data), [shopData, data]);
 
-    const footer = safeObj(layout.footer, FALLBACK_LAYOUT.footer);
-    const header = safeObj(layout.header, FALLBACK_LAYOUT.header);
-    const topbar = safeObj(layout.topbar, FALLBACK_LAYOUT.topbar);
-
-    // ✅ images: ONLY from shopData
-    const headerLogo = (getLogoImageUrl(shopData?.header_logo, "240x80", 80) || "").trim();
-    const mobileLogo = (getLogoImageUrl(shopData?.mobile_logo, "240x80", 80) || "").trim();
-    const footerLogo = (getLogoImageUrl(shopData?.footer_logo, "240x120", 80) || "").trim();
-
-    const topbarData: TopbarConfig = shopData?.topbar ?? {
-        label: safeStr(topbar.label, " "),
-        title: safeStr(topbar.title, " "),
-        link: "",
-        is_active: false,
-    };
-
-    // ✅ navigation: prefer shopData.main_navigation
-    const navigation = shopData?.main_navigation?.length
-        ? shopData.main_navigation.map((item) => ({
-            title: safeStr(item?.title, " "),
-            url: safeStr(item?.url, "/"),
-            megaMenu: false as const,
-            megaMenuWithSub: false as const,
-            child: safeArr(item?.children).map((child) => ({
-                title: safeStr(child?.title, " "),
-                url: safeStr(child?.url, "/"),
-                child: safeArr(child?.children).map((subChild) => ({
-                    title: safeStr(subChild?.title, " "),
-                    url: safeStr(subChild?.url, "/"),
-                })),
-            })),
-        }))
-        : safeArr(header.navigation);
-
-    // ✅ socials: prefer shopData.social_links (for FooterSocialLinks component)
-    const socialLinks = shopData?.social_links?.length
-        ? shopData.social_links.reduce((acc, link) => {
-            const platform = (link?.platform || "").toLowerCase();
-            const url = safeStr(link?.url, "").trim();
-            if (!platform || !url) return acc;
-            (acc as any)[platform] = url;
-            return acc;
-        }, {} as { google?: string; twitter?: string; youtube?: string; facebook?: string; instagram?: string })
-        : footer.socials;
-
-    // ✅ socials: for TopbarSocialLinks component
-    const topbarSocialLinks = shopData?.social_links?.length
-        ? shopData.social_links.reduce((acc, link) => {
-            const url = safeStr(link?.url, "").trim();
-            if (!url) return acc;
-            acc[link.platform as keyof typeof acc] = url;
-            return acc;
-        }, {} as { twitter?: string; facebook?: string; instagram?: string; telegram?: string; whatsapp?: string; linkedin?: string })
-        : topbar.socials;
-
-    // ----------------------------
-// ✅ Topbar visibility (meaningful check)
-// ----------------------------
-    const topbarLabelMeaningful = safeStr(topbarData.label, "").trim();
-    const topbarTitleMeaningful = safeStr(topbarData.title, "").trim();
-
-    const hasTopbarText = Boolean(topbarLabelMeaningful) || Boolean(topbarTitleMeaningful);
-
-    const hasTopbarSocials = Boolean(
-        Object.values(topbarSocialLinks || {}).some(
-            (v) => safeStr(v as any, "").trim().length > 0
-        )
-    );
-
-    const showTopbar = hasTopbarText || hasTopbarSocials;
-
-// Persian digits only if meaningful
-    const topbarLabel = topbarLabelMeaningful
-        ? toPersianNumber(topbarLabelMeaningful)
-        : "";
-
-    const topbarTitle = topbarTitleMeaningful
-        ? toPersianNumber(topbarTitleMeaningful)
-        : "";
-
-
-
+    // Mobile navigation is constant
     const mobileNav = useMemo(
         () => [
             { title: t("nav.home"), href: "/", icon: "Home", badge: false },
@@ -189,28 +68,30 @@ export default function ShopHome({ children, data }: Props) {
         []
     );
 
-    const MOBILE_VERSION_HEADER = (
-        <MobileHeader>
-            <MobileHeader.Left>
-                <MobileMenu navigation={navigation} />
-            </MobileHeader.Left>
+    // Mobile header depends on nav + logo
+    const MOBILE_VERSION_HEADER = useMemo(
+        () => (
+            <MobileHeader>
+                <MobileHeader.Left>
+                    <MobileMenu navigation={chrome.navigation} />
+                </MobileHeader.Left>
 
-            <MobileHeader.Logo logoUrl={mobileLogo} />
+                <MobileHeader.Logo logoUrl={chrome.mobileLogo} />
 
-            <MobileHeader.Right>
-                <HeaderSearch>
-                    <UniversalSearchBar />
-                </HeaderSearch>
+                <MobileHeader.Right>
+                    <HeaderSearch>
+                        <UniversalSearchBar />
+                    </HeaderSearch>
 
-                <HeaderLogin />
-                <HeaderCart />
-            </MobileHeader.Right>
-        </MobileHeader>
+                    <HeaderLogin />
+                    <HeaderCart />
+                </MobileHeader.Right>
+            </MobileHeader>
+        ),
+        [chrome.navigation, chrome.mobileLogo]
     );
 
-    // ----------------------------
     // Sticky offset calc for chrome
-    // ----------------------------
     const chromeRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -234,79 +115,33 @@ export default function ShopHome({ children, data }: Props) {
         };
     }, []);
 
-    // ----------------------------
-    // Footer: content from shopData first
-    // ----------------------------
-    const footerDescriptionRaw = shopData?.footer_description
-        ? safeStr(shopData.footer_description, "").trim()
-        : safeStr(footer.description, "").trim();
+    // Persian digit formatting only where needed
+    const topbarLabelFa = chrome.topbar.label ? toPersianNumber(chrome.topbar.label) : "";
+    const topbarTitleFa = chrome.topbar.title ? toPersianNumber(chrome.topbar.title) : "";
 
-    const footerDescriptionText = footerDescriptionRaw ? toPersianNumber(footerDescriptionRaw) : "";
+    const footerDescriptionFa = chrome.footer.description ? toPersianNumber(chrome.footer.description) : "";
 
-    const phoneRaw =
-        safeStr(shopData?.contact_info?.phone, "").trim() || safeStr(footer.contact.phone, "").trim();
-    const phoneFa = phoneRaw ? toPersianNumber(phoneRaw) : "";
+    const phoneFa = chrome.footer.contact.phone ? toPersianNumber(chrome.footer.contact.phone) : "";
 
-    const email =
-        safeStr(shopData?.contact_info?.email, "").trim() || safeStr(footer.contact.email, "").trim();
-
-    const address =
-        safeStr(shopData?.contact_info?.address, "").trim() || safeStr(footer.contact.address, "").trim();
-
-    // Copyright always exists
+    // Copyright must always show something
     const yearFa = toPersianNumber(new Date().getFullYear());
     const fallbackCopyright = `© ${t("footer.copyright")} ${yearFa} ${t("footer.brandName")}, ${t("footer.allRightsReserved")}`;
 
-    const footerCopyrightRaw = shopData?.footer_copyright
-        ? safeStr(shopData.footer_copyright, "")
-        : safeStr(fallbackCopyright, "");
+    const copyrightFa =
+        chrome.footer.copyright?.trim().length
+            ? toPersianNumber(chrome.footer.copyright)
+            : toPersianNumber(fallbackCopyright);
 
-    const footerCopyrightText = footerCopyrightRaw ? toPersianNumber(footerCopyrightRaw) : " ";
+    const showApps = Boolean(chrome.footer.playStoreUrl) || Boolean(chrome.footer.appleStoreUrl);
 
-    // App links
-    const playStoreUrl =
-        safeStr(shopData?.app_links?.google_play, "").trim() || safeStr(footer.playStoreUrl, "").trim();
-    const appleStoreUrl =
-        safeStr(shopData?.app_links?.app_store, "").trim() || safeStr(footer.appStoreUrl, "").trim();
-    const showApps = Boolean(playStoreUrl) || Boolean(appleStoreUrl);
+    const hasFooterSections = chrome.footer.sections.length > 0;
 
-    // ----------------------------
-    // ✅ Footer sections (Meaningful check)
-    // ----------------------------
-    const footerSections = safeArr(shopData?.footer_sections);
+    const hasContact = Boolean(chrome.footer.contact.phone) || Boolean(chrome.footer.contact.email) || Boolean(chrome.footer.contact.address);
 
-    const normalizedFooterSections = footerSections
-        .map((s) => {
-            const title = safeStr((s as any)?.title, "").trim();
-            const links = safeArr((s as any)?.links)
-                .map((l) => ({
-                    title: safeStr((l as any)?.title, "").trim(),
-                    url: safeStr((l as any)?.url, "").trim(),
-                }))
-                .filter((l) => l.title.length > 0 && l.url.length > 0);
+    const hasFooterSocials = Object.keys(chrome.footer.socials).length > 0;
 
-            return { title, links };
-        })
-        .filter((s) => s.title.length > 0 || s.links.length > 0);
-
-    const hasFooterSections = normalizedFooterSections.length > 0;
-
-    // Contact presence (meaningful)
-    const hasContact = Boolean(phoneRaw) || Boolean(email) || Boolean(address);
-
-    // Social presence (meaningful)
-    const hasSocialLinks = Boolean(
-        safeArr(shopData?.social_links).some((l) => safeStr((l as any)?.url, "").trim().length > 0)
-    );
-
-    // Brand bits presence
-    const hasBrandBits = Boolean(footerLogo) || Boolean(footerDescriptionRaw) || showApps;
-
-    /**
-     * ✅ FINAL RULE:
-     * If absolutely nothing meaningful exists => show ONLY minimal copyright bar.
-     */
-    const hasAnyFooterData = hasBrandBits || hasFooterSections || hasContact || hasSocialLinks;
+    const hasTopbarText = Boolean(chrome.topbar.label) || Boolean(chrome.topbar.title);
+    const hasTopbarSocials = Object.keys(chrome.topbar.socials).length > 0;
 
     return (
         <SnackbarProvider>
@@ -322,31 +157,32 @@ export default function ShopHome({ children, data }: Props) {
                 >
                     {/* Header chrome (topbar + headers) */}
                     <div ref={chromeRef}>
-                        {showTopbar ? (
+                        {renderIf(
+                            chrome.topbar.show,
                             <Topbar>
                                 {hasTopbarText ? (
-                                    <Topbar.Left label={topbarLabel || " "} title={topbarTitle || " "} />
+                                    <Topbar.Left label={topbarLabelFa || " "} title={topbarTitleFa || " "} />
                                 ) : (
                                     <div />
                                 )}
 
                                 {hasTopbarSocials ? (
                                     <Topbar.Right>
-                                        <TopbarSocialLinks links={topbarSocialLinks} />
+                                        <TopbarSocialLinks links={chrome.topbar.socials as any} />
                                     </Topbar.Right>
                                 ) : (
                                     <div />
                                 )}
                             </Topbar>
-                        ) : null}
+                        )}
 
                         <Header mobileHeader={MOBILE_VERSION_HEADER}>
                             <Header.Left>
-                                <Header.Logo url={headerLogo} />
+                                <Header.Logo url={chrome.headerLogo} />
                             </Header.Left>
 
                             <Header.Mid>
-                                <NavigationList navigation={navigation} />
+                                <NavigationList navigation={chrome.navigation} />
                             </Header.Mid>
 
                             <Header.Right>
@@ -374,13 +210,14 @@ export default function ShopHome({ children, data }: Props) {
                     <MobileNavigationBar navigation={mobileNav} />
 
                     {/* ---------------- FOOTER ---------------- */}
-                    {hasAnyFooterData ? (
+                    {chrome.footer.showFullFooter ? (
                         <Footer1>
                             <Footer1.Brand>
-                                {footerLogo ? (
+                                {renderIf(
+                                    Boolean(chrome.footerLogo),
                                     <Link href="/" style={{ display: "inline-block" }}>
                                         <ProductImage
-                                            src={footerLogo}
+                                            src={chrome.footerLogo}
                                             alt={t("common.logoAlt")}
                                             size="240x120"
                                             quality={80}
@@ -394,57 +231,69 @@ export default function ShopHome({ children, data }: Props) {
                                             }}
                                         />
                                     </Link>
-                                ) : null}
+                                )}
 
-                                {footerDescriptionText ? (
+                                {renderIf(
+                                    Boolean(footerDescriptionFa),
                                     <Typography
                                         variant="body1"
                                         sx={{ mt: 1, mb: 3, maxWidth: 370, color: "white", lineHeight: 1.7 }}
                                     >
-                                        {footerDescriptionText}
+                                        {footerDescriptionFa}
                                     </Typography>
-                                ) : null}
+                                )}
 
-                                {showApps ? (
-                                    <FooterApps playStoreUrl={playStoreUrl} appleStoreUrl={appleStoreUrl} />
-                                ) : null}
+                                {renderIf(
+                                    showApps,
+                                    <FooterApps playStoreUrl={chrome.footer.playStoreUrl} appleStoreUrl={chrome.footer.appleStoreUrl} />
+                                )}
                             </Footer1.Brand>
 
-                            {normalizedFooterSections?.[0] ? (
+                            {renderIf(
+                                Boolean(chrome.footer.sections?.[0]),
                                 <Footer1.Widget1>
                                     <FooterLinksWidget
-                                        title={normalizedFooterSections[0].title || " "}
-                                        links={normalizedFooterSections[0].links}
+                                        title={chrome.footer.sections[0].title || " "}
+                                        links={chrome.footer.sections[0].links}
                                     />
                                 </Footer1.Widget1>
-                            ) : null}
+                            )}
 
-                            {normalizedFooterSections?.[1] ? (
+                            {renderIf(
+                                Boolean(chrome.footer.sections?.[1]),
                                 <Footer1.Widget2>
                                     <FooterLinksWidget
-                                        title={normalizedFooterSections[1].title || " "}
-                                        links={normalizedFooterSections[1].links}
+                                        title={chrome.footer.sections[1].title || " "}
+                                        links={chrome.footer.sections[1].links}
                                     />
                                 </Footer1.Widget2>
-                            ) : null}
+                            )}
 
                             <Footer1.Contact>
-                                {hasContact ? (
-                                    <FooterContact phone={phoneFa || " "} email={email || " "} address={address || " "} />
-                                ) : null}
+                                {renderIf(
+                                    hasContact,
+                                    <FooterContact
+                                        phone={phoneFa || " "}
+                                        email={chrome.footer.contact.email || " "}
+                                        address={chrome.footer.contact.address || " "}
+                                    />
+                                )}
 
-                                {hasSocialLinks ? <FooterSocialLinks links={socialLinks} /> : null}
+                                {renderIf(
+                                    hasFooterSocials,
+                                    <FooterSocialLinks links={chrome.footer.socials as any} />
+                                )}
                             </Footer1.Contact>
 
                             <Footer1.Copyright>
                                 <Divider sx={{ borderColor: "grey.800" }} />
                                 <Typography variant="body2" sx={{ py: 3, textAlign: "center" }}>
-                                    {footerCopyrightText}
+                                    {copyrightFa}
                                 </Typography>
                             </Footer1.Copyright>
                         </Footer1>
                     ) : (
-                        <FooterCopyrightBar text={footerCopyrightText} />
+                        <FooterCopyrightBar text={copyrightFa} />
                     )}
                 </div>
             </Fragment>
