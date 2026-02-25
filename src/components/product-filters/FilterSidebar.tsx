@@ -4,43 +4,52 @@ import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
+import Skeleton from "@mui/material/Skeleton";
+import Box from "@mui/material/Box";
 
 import PriceRangeFilter from "./PriceRangeFilter";
 import BrandFilter from "./BrandFilter";
 import CategoryFilter from "./CategoryFilter";
 
 import type { BrandResource, CategoryResource } from "@/types/product.types";
-import type { ProductSearchFilters } from "@/types/search.types";
 import { t } from "@/i18n/t";
+
+type UiFilters = {
+    minPrice?: number;
+    maxPrice?: number;
+    brand?: string;    // brand code
+    category?: string; // category slug
+};
 
 interface Props {
     brands: BrandResource[];
     categories?: CategoryResource[];
-    filters: ProductSearchFilters;
-    onFilterChange: (patch: Partial<ProductSearchFilters>) => void;
+    filters: UiFilters;
+    onFilterChange: (patch: Partial<UiFilters>) => void;
+    loading?: boolean;
 }
 
-export default function FilterSidebar({ brands, categories, filters, onFilterChange }: Props) {
+export default function FilterSidebar({ brands, categories, filters, onFilterChange, loading }: Props) {
     const handlePriceChange = (min: number, max: number) => {
-        onFilterChange({ minPrice: min, maxPrice: max, paged: 1 });
+        onFilterChange({ minPrice: min, maxPrice: max });
     };
 
+    // ✅ انتخاب برند → category پاک شود (طبق محدودیت بکند)
     const handleBrandChange = (brandCode?: string) => {
-        onFilterChange({ brand: brandCode, paged: 1 });
+        onFilterChange({ brand: brandCode, category: undefined });
     };
 
-    const handleCategoryChange = (category: string) => {
-        onFilterChange({ categories: [category], paged: 1 });
+    // ✅ انتخاب دسته → brand پاک شود (طبق محدودیت بکند)
+    const handleCategoryChange = (categorySlug: string) => {
+        onFilterChange({ category: categorySlug, brand: undefined });
     };
 
     const handleClearAll = () => {
         onFilterChange({
-            paged: 1,
             minPrice: undefined,
             maxPrice: undefined,
             brand: undefined,
-            categories: undefined,
-            sort: undefined,
+            category: undefined,
         });
     };
 
@@ -60,16 +69,34 @@ export default function FilterSidebar({ brands, categories, filters, onFilterCha
 
             <Divider sx={{ my: 2 }} />
 
-            <BrandFilter brands={brands} selected={filters.brand} onChange={handleBrandChange} />
+            {loading ? (
+                <Box>
+                    <Skeleton height={24} width="60%" />
+                    <Skeleton height={32} />
+                    <Skeleton height={32} />
+                    <Skeleton height={32} />
+                </Box>
+            ) : (
+                <BrandFilter brands={brands} selected={filters.brand} onChange={handleBrandChange} />
+            )}
 
             {Array.isArray(categories) && categories.length > 0 ? (
                 <>
                     <Divider sx={{ my: 2 }} />
-                    <CategoryFilter
-                        categories={categories}
-                        selected={filters.categories?.[0]}
-                        onChange={handleCategoryChange}
-                    />
+
+                    {loading ? (
+                        <Box>
+                            <Skeleton height={24} width="60%" />
+                            <Skeleton height={36} />
+                            <Skeleton height={220} />
+                        </Box>
+                    ) : (
+                        <CategoryFilter
+                            categories={categories}
+                            selected={filters.category}
+                            onChange={handleCategoryChange}
+                        />
+                    )}
                 </>
             ) : null}
         </Card>

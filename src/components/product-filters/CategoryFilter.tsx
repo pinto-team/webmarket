@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Typography from "@mui/material/Typography";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -17,68 +17,85 @@ import { t } from "@/i18n/t";
 interface Props {
     categories: CategoryResource[];
     selected?: string;
-    onChange: (categoryCode: string) => void;
+    onChange: (categorySlug: string) => void;
+}
+
+function normalizeTitle(cat: CategoryResource): string {
+    return (cat.title || cat.name || "").toString();
+}
+
+function normalizeSlug(cat: CategoryResource): string {
+    return (cat.slug || cat.code || "").toString();
+}
+
+// ✅ سرچ صحیح روی درخت: children هم prune می‌شود
+function filterTree(cats: CategoryResource[], q: string): CategoryResource[] {
+    if (!q) return cats;
+
+    const query = q.toLowerCase();
+
+    return cats
+        .map((cat) => {
+            const title = normalizeTitle(cat).toLowerCase();
+            const children = Array.isArray(cat.children) ? filterTree(cat.children, q) : [];
+
+            if (title.includes(query) || children.length > 0) {
+                return { ...cat, children };
+            }
+            return null;
+        })
+        .filter(Boolean) as CategoryResource[];
 }
 
 export default function CategoryFilter({ categories, selected, onChange }: Props) {
     const [expanded, setExpanded] = useState<string[]>([]);
     const [search, setSearch] = useState("");
 
-    const toggleExpand = (code: string) => {
-        setExpanded((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+    const toggleExpand = (slug: string) => {
+        setExpanded((prev) => (prev.includes(slug) ? prev.filter((c) => c !== slug) : [...prev, slug]));
     };
 
-    const filterCategories = (cats: CategoryResource[]): CategoryResource[] => {
-        if (!search) return cats;
-
-        return cats.filter((cat) => {
-            const title = (cat.title || cat.name || "").toString();
-            const matches = title.toLowerCase().includes(search.toLowerCase());
-            const childMatches = cat.children ? filterCategories(cat.children).length > 0 : false;
-            return matches || childMatches;
-        });
-    };
+    const filteredCategories = useMemo(() => filterTree(categories || [], search), [categories, search]);
 
     const renderCategory = (category: CategoryResource, level = 0) => {
-        const displayTitle = category.title || category.name;
-        const categoryCode = category.code || category.slug;
+        const title = normalizeTitle(category);
+        const slug = normalizeSlug(category);
+
+        if (!slug) return null;
+
+        const hasChildren = Array.isArray(category.children) && category.children.length > 0;
+        const isOpen = expanded.includes(slug);
 
         return (
-            <div key={`${categoryCode}-${category.id}`}>
+            <div key={`${slug}-${category.id}`}>
                 <ListItemButton
                     sx={{ pl: 2 + level * 2 }}
-                    selected={selected === categoryCode}
-                    onClick={() => onChange(categoryCode)}
+                    selected={selected === slug}
+                    onClick={() => onChange(slug)}
                 >
-                    <ListItemText primary={displayTitle} />
-                    {category.children && category.children.length > 0 && (
+                    <ListItemText primary={title} />
+                    {hasChildren ? (
                         <div
                             onClick={(e) => {
                                 e.stopPropagation();
-                                toggleExpand(categoryCode);
+                                toggleExpand(slug);
                             }}
                         >
-                            {expanded.includes(categoryCode) ? <ExpandLess /> : <ExpandMore />}
+                            {isOpen ? <ExpandLess /> : <ExpandMore />}
                         </div>
-                    )}
+                    ) : null}
                 </ListItemButton>
 
-                {category.children && category.children.length > 0 && (
-                    <Collapse in={expanded.includes(categoryCode)} timeout="auto" unmountOnExit>
+                {hasChildren ? (
+                    <Collapse in={isOpen} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            {category.children.map((child) => (
-                                <div key={`${child.code || child.slug}-${child.id}`}>
-                                    {renderCategory(child, level + 1)}
-                                </div>
-                            ))}
+                            {category.children!.map((child) => renderCategory(child, level + 1))}
                         </List>
                     </Collapse>
-                )}
+                ) : null}
             </div>
         );
     };
-
-    const filteredCategories = filterCategories(categories || []);
 
     return (
         <div>
@@ -101,9 +118,7 @@ export default function CategoryFilter({ categories, selected, onChange }: Props
                 </Typography>
             ) : (
                 <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
-                    <List dense>
-                        {filteredCategories.map((category) => renderCategory(category))}
-                    </List>
+                    <List dense>{filteredCategories.map((c) => renderCategory(c))}</List>
                 </Box>
             )}
         </div>

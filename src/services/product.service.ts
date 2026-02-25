@@ -8,10 +8,65 @@ import type {
     TagWithProducts,
     ProductFilters as ProductFiltersType,
     CategoryResource,
+    BrandResource,
 } from "@/types/product.types";
 import axiosInstance from "@/utils/axiosInstance";
 
 const isDev = process.env.NODE_ENV !== "production";
+
+// ✅ client-only cache (keyed by origin)
+const clientCache = {
+    categories: new Map<string, Promise<CategoryResource[]>>(),
+    brands: new Map<string, Promise<BrandResource[]>>(),
+};
+
+function cacheKey(): string {
+    if (typeof window === "undefined") return "server";
+    return window.location.origin;
+}
+
+function normalizeCategoryTree(input: any[]): CategoryResource[] {
+    if (!Array.isArray(input) || input.length === 0) return [];
+
+    const looksNested = input.some((c) => Array.isArray(c?.children));
+    const normalizeNode = (c: any): CategoryResource => ({
+        ...c,
+        title: c.title ?? c.name,
+        code: c.code ?? c.slug,
+        children: Array.isArray(c.children) ? c.children.map(normalizeNode) : undefined,
+    });
+
+    if (looksNested) return input.map(normalizeNode);
+
+    // flat -> tree by id/parent_id
+    const map = new Map<number, CategoryResource>();
+    input.forEach((c) => {
+        if (typeof c?.id !== "number") return;
+        map.set(c.id, normalizeNode(c));
+    });
+
+    const roots: CategoryResource[] = [];
+    input.forEach((c) => {
+        const node = map.get(c.id);
+        if (!node) return;
+
+        const parentId = c.parent_id;
+        if (parentId == null) {
+            roots.push(node);
+        } else {
+            const parent = map.get(parentId);
+            if (parent) {
+                parent.children = parent.children ?? [];
+                parent.children.push(node);
+            } else {
+                // fallback اگر parent پیدا نشد
+                roots.push(node);
+            }
+        }
+    });
+
+    return roots;
+}
 
 export const productService = {
     async getProducts(
@@ -53,8 +108,22 @@ export const productService = {
     },
 
     async getCategories(api: AxiosInstance = axiosInstance): Promise<CategoryResource[]> {
-        const response = await api.get<ApiResponse<CategoryResource[]>>("/product-cats");
-        return response.data.data;
+        // ✅ cache only in browser
+        if (typeof window !== "undefined") {
+            const key = cacheKey();
+            if (!clientCache.categories.has(key)) {
+                clientCache.categories.set(
+                    key,
+                    api
+                        .get<ApiResponse<any[]>>("/product-cats")
+                        .then((res) => normalizeCategoryTree(res.data.data))
+                );
+            }
+            return clientCache.categories.get(key)!;
+        }
+
+        const response = await api.get<ApiResponse<any[]>>("/product-cats");
+        return normalizeCategoryTree(response.data.data);
     },
 
     async getCategory(
@@ -68,8 +137,19 @@ export const productService = {
         return response.data.data;
     },
 
-    async getBrands(api: AxiosInstance = axiosInstance) {
-        const response = await api.get("/brands");
+    async getBrands(api: AxiosInstance = axiosInstance): Promise<BrandResource[]> {
+        if (typeof window !== "undefined") {
+            const key = cacheKey();
+            if (!clientCache.brands.has(key)) {
+                clientCache.brands.set(
+                    key,
+                    api.get<ApiResponse<BrandResource[]>>("/brands").then((res) => res.data.data)
+                );
+            }
+            return clientCache.brands.get(key)!;
+        }
+
+        const response = await api.get<ApiResponse<BrandResource[]>>("/brands");
         return response.data.data;
     },
 

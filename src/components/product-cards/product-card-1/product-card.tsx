@@ -20,7 +20,7 @@ interface Props {
 }
 // ========================================================
 
-export default function ProductCard1({ product, showProductSize, showRating = true }: Props) {
+export default function ProductCard1({ product, showProductSize, showRating = false  }: Props) {
   const slug = product.slug || product.code;
   const title = product.title;
   const price = product.price || product.skus?.[0]?.price || 0;
@@ -30,20 +30,6 @@ export default function ProductCard1({ product, showProductSize, showRating = tr
   return (
     <StyledCard>
       <ImageWrapper>
-        {/* DISCOUNT PERCENT CHIP IF AVAILABLE */}
-        <DiscountChip discount={discount} />
-
-        {/* HOVER ACTION ICONS */}
-        <HoverIconWrapper className="hover-box">
-          <Link href={`/products/${slug}/view`} scroll={false}>
-            <IconButton color="inherit">
-              <RemoveRedEye fontSize="small" color="inherit" />
-            </IconButton>
-          </Link>
-
-          <FavoriteButton />
-        </HoverIconWrapper>
-
         {/* PRODUCT IMAGE / THUMBNAIL */}
         <Link href={`/products/${slug}`}>
           <ProductImage
