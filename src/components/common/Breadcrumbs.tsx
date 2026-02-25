@@ -3,9 +3,9 @@
 import MuiBreadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NextLink from "next/link";
 import { t } from "@/i18n/t";
+import { NavigateBefore } from "@mui/icons-material";
 
 export interface BreadcrumbItem {
     label: string;
@@ -19,7 +19,7 @@ interface Props {
 export default function Breadcrumbs({ items }: Props) {
     return (
         <MuiBreadcrumbs
-            separator={<NavigateNextIcon fontSize="small" />}
+            separator={<NavigateBefore fontSize="small" />}
             sx={{ mb: 3 }}
         >
             <Link

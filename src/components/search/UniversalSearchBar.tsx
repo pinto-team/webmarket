@@ -244,21 +244,35 @@ export default function UniversalSearchBar({ placeholder, size = "medium" }: Pro
         }
     };
 
+    const CONTROL_HEIGHT = 48;
+
     const INPUT_PROPS = {
         inputRef,
         sx: {
-            border: 0,
-            padding: 0,
-            borderRadius: 1,
-            borderColor: "transparent",
-            overflow: "hidden",
+            height: CONTROL_HEIGHT,
             backgroundColor: "grey.50",
+            borderRadius: 1,
+
+            // ✅ force the outlined input to the same height as button
+            "&.MuiInputBase-root, & .MuiOutlinedInput-root": {
+                height: CONTROL_HEIGHT,
+                padding: 0,
+            },
+
+            "& .MuiOutlinedInput-input": {
+                height: CONTROL_HEIGHT,
+                boxSizing: "border-box",
+                py: 0,
+                px: 4,
+            },
+
             "& .MuiOutlinedInput-notchedOutline": {
                 border: 1,
                 borderRadius: 1,
-                borderColor: "transparent",
+                borderColor: "transparent", // ✅ مثل قبل
             },
         },
+
         endAdornment: (
             <Box
                 ml={2}
@@ -268,8 +282,8 @@ export default function UniversalSearchBar({ placeholder, size = "medium" }: Pro
                 justifyContent="center"
                 borderLeft="1px solid"
                 borderColor="grey.200"
-                sx={{ cursor: "pointer" }}
-                onMouseDown={(e) => e.preventDefault()} // ✅ prevent blur before click
+                sx={{ cursor: "pointer", height: 28 }} // ✅ same height
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleSearch(query)}
             >
                 <Search sx={{ fontSize: 17, color: "grey.400" }} />

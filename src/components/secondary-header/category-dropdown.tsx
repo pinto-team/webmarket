@@ -23,7 +23,7 @@ export default function CategoryDropdown({ children }: PropsWithChildren) {
                             </svg>
                         </SvgIcon>
 
-                        <Typography variant="h6">
+                        <Typography variant="body1" fontWeight={500} noWrap>
                             {t("categories.dropdownTitle")}
                         </Typography>
                     </div>
