@@ -5,7 +5,7 @@ import { PostResource } from '@/types/content.types';
 import { ProductSearchFilters, PostSearchFilters, SearchSuggestion, UniversalSearchResult } from '@/types/search.types';
 
 class SearchService {
-  async searchProducts(filters: ProductSearchFilters): Promise<PaginatedResponse<ProductResource>> {
+  async searchProducts(filters: ProductSearchFilters, p0: any): Promise<PaginatedResponse<ProductResource>> {
     const params = new URLSearchParams();
     
     if (filters.keyword) params.append('keyword', filters.keyword);

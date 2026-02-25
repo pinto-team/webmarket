@@ -4,14 +4,13 @@ import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import { useRouter } from "next/navigation";
 
 import PriceRangeFilter from "./PriceRangeFilter";
 import BrandFilter from "./BrandFilter";
 import CategoryFilter from "./CategoryFilter";
 
-import { BrandResource, CategoryResource } from "@/types/product.types";
-import { ProductSearchFilters } from "@/types/search.types";
+import type { BrandResource, CategoryResource } from "@/types/product.types";
+import type { ProductSearchFilters } from "@/types/search.types";
 import { t } from "@/i18n/t";
 
 interface Props {
@@ -21,9 +20,12 @@ interface Props {
     onFilterChange: (filters: ProductSearchFilters) => void;
 }
 
-export default function FilterSidebar({ brands, categories, filters, onFilterChange }: Props) {
-    const router = useRouter();
-
+export default function FilterSidebar({
+                                          brands,
+                                          categories,
+                                          filters,
+                                          onFilterChange,
+                                      }: Props) {
     const handlePriceChange = (min: number, max: number) => {
         onFilterChange({ ...filters, minPrice: min, maxPrice: max });
     };
@@ -33,7 +35,7 @@ export default function FilterSidebar({ brands, categories, filters, onFilterCha
     };
 
     const handleCategoryChange = (category: string) => {
-        router.push(`/category/${category}`);
+        onFilterChange({ ...filters, categories: [category] });
     };
 
     const handleClearAll = () => {
@@ -42,7 +44,7 @@ export default function FilterSidebar({ brands, categories, filters, onFilterCha
             minPrice: undefined,
             maxPrice: undefined,
             brand: undefined,
-            categories: [],
+            category: undefined,
         });
     };
 
@@ -58,22 +60,30 @@ export default function FilterSidebar({ brands, categories, filters, onFilterCha
 
             <Divider sx={{ my: 2 }} />
 
-            <PriceRangeFilter min={filters.minPrice} max={filters.maxPrice} onChange={handlePriceChange} />
+            <PriceRangeFilter
+                min={filters.minPrice}
+                max={filters.maxPrice}
+                onChange={handlePriceChange}
+            />
 
             <Divider sx={{ my: 2 }} />
 
-            <BrandFilter brands={brands} selected={filters.brand} onChange={handleBrandChange} />
+            <BrandFilter
+                brands={brands}
+                selected={filters.brand}
+                onChange={handleBrandChange}
+            />
 
-            {categories && categories.length > 0 && (
+            {Array.isArray(categories) && categories.length > 0 ? (
                 <>
                     <Divider sx={{ my: 2 }} />
                     <CategoryFilter
                         categories={categories}
-                        selected={filters.categories?.[0]}
+                        selected={filters.category ?? filters.categories?.[0]}
                         onChange={handleCategoryChange}
                     />
                 </>
-            )}
+            ) : null}
         </Card>
     );
 }

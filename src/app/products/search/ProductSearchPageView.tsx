@@ -16,9 +16,10 @@ import ProductCard1 from "components/product-cards/product-card-1";
 import KeywordHighlight from "@/components/search/KeywordHighlight";
 import FilterSidebar from "@/components/product-filters/FilterSidebar";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
+
 import { useProductSearch } from "@/hooks/useProductSearch";
 import { productService } from "@/services/product.service";
-import { BrandResource, CategoryResource } from "@/types/product.types";
+import type { BrandResource, CategoryResource } from "@/types/product.types";
 import { t } from "@/i18n/t";
 
 interface Props {
@@ -29,16 +30,18 @@ export default function ProductSearchPageView({ searchQuery }: Props) {
     const [brands, setBrands] = useState<BrandResource[]>([]);
     const [categories, setCategories] = useState<CategoryResource[]>([]);
 
-    const { results, loading, error, filters, updateFilters, search } = useProductSearch({
+    const { results, loading, error, filters, updateFilters } = useProductSearch({
         keyword: searchQuery,
         count: 20,
         paged: 1,
     });
 
+    // ✅ When URL query changes, just update filters. Hook will auto-search.
     useEffect(() => {
-        search({ keyword: searchQuery, paged: 1 });
-    }, [searchQuery]);
+        updateFilters({ keyword: searchQuery, paged: 1 });
+    }, [searchQuery, updateFilters]);
 
+    // ✅ Fetch filter data once
     useEffect(() => {
         const fetchFilters = async () => {
             try {
@@ -57,7 +60,7 @@ export default function ProductSearchPageView({ searchQuery }: Props) {
     }, []);
 
     const handlePageChange = (page: number) => updateFilters({ paged: page });
-    const handleSortChange = (sort: string) => updateFilters({ sort: sort as any });
+    const handleSortChange = (sort: string) => updateFilters({ sort: sort as any, paged: 1 });
 
     if (loading && results.items.length === 0) {
         return (
@@ -90,7 +93,7 @@ export default function ProductSearchPageView({ searchQuery }: Props) {
                     </Typography>
                 </Typography>
 
-                <FormControl size="small" sx={{ minWidth: 120 }}>
+                <FormControl size="small" sx={{ minWidth: 160 }}>
                     <InputLabel>{t("products.sort.label")}</InputLabel>
                     <Select
                         value={filters.sort || ""}
@@ -106,11 +109,11 @@ export default function ProductSearchPageView({ searchQuery }: Props) {
                 </FormControl>
             </Box>
 
-            {error && (
+            {error ? (
                 <Typography color="error" textAlign="center" mb={3}>
                     {t("products.searchError", { error })}
                 </Typography>
-            )}
+            ) : null}
 
             <Grid container spacing={3}>
                 <Grid size={{ xs: 12, md: 3 }}>
@@ -137,7 +140,7 @@ export default function ProductSearchPageView({ searchQuery }: Props) {
                                 ))}
                             </Grid>
 
-                            {results.pagination.last_page > 1 && (
+                            {results.pagination.last_page > 1 ? (
                                 <Box display="flex" justifyContent="center" mt={4}>
                                     <Pagination
                                         count={results.pagination.last_page}
@@ -146,7 +149,7 @@ export default function ProductSearchPageView({ searchQuery }: Props) {
                                         color="primary"
                                     />
                                 </Box>
-                            )}
+                            ) : null}
                         </>
                     )}
                 </Grid>

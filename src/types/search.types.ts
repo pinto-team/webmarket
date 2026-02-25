@@ -3,15 +3,16 @@ import { ProductResource } from './product.types';
 import { PostResource } from './content.types';
 
 export interface ProductSearchFilters {
-  keyword?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  brand?: string;
-  categories?: string[];
-  sort?: 'lowest' | 'highest' | 'most_visited' | 'most_sales';
-  inStock?: boolean;
-  count?: number;
-  paged?: number;
+
+    keyword?: string;
+    count?: number;
+    paged?: number;
+    sort?: "lowest" | "highest" | "most_visited" | "most_sales" | string;
+    minPrice?: number;
+    maxPrice?: number;
+    brand?: string;
+    category?: string;
+    categories?: string[];
 }
 
 export interface PostSearchFilters {
