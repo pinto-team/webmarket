@@ -38,7 +38,16 @@ export default function ProductSearchPageView({ searchQuery }: Props) {
 
     // ✅ When URL query changes, just update filters. Hook will auto-search.
     useEffect(() => {
-        updateFilters({ keyword: searchQuery, paged: 1 });
+        updateFilters({
+            keyword: searchQuery,
+            paged: 1,
+
+            categories: undefined,
+            brand: undefined,
+            minPrice: undefined,
+            maxPrice: undefined,
+            sort: undefined,
+        });
     }, [searchQuery, updateFilters]);
 
     // ✅ Fetch filter data once

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
@@ -13,7 +13,7 @@ import Search from "icons/Search";
 
 import { searchService } from "@/services/search.service";
 import { useSearchHistory } from "@/hooks/useSearchHistory";
-import { SearchSuggestion } from "@/types/search.types";
+import type { SearchSuggestion } from "@/types/search.types";
 import { t } from "@/i18n/t";
 
 interface Props {
@@ -26,85 +26,226 @@ export default function UniversalSearchBar({ placeholder, size = "medium" }: Pro
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
     const [loading, setLoading] = useState(false);
+    const [activeIndex, setActiveIndex] = useState<number>(-1);
 
     const { recentSearches, addSearch } = useSearchHistory();
     const router = useRouter();
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const rootRef = useRef<HTMLDivElement | null>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const abortRef = useRef<AbortController | null>(null);
 
     const effectivePlaceholder = placeholder || t("search.placeholderUniversal");
 
-    useEffect(() => {
-        if (query.length >= 2) {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    const goProductSearch = useCallback(
+        (q: string) => {
+            router.push(`/products/search?q=${encodeURIComponent(q)}`);
+        },
+        [router]
+    );
 
-            timeoutRef.current = setTimeout(async () => {
-                setLoading(true);
-                try {
-                    const results = await searchService.getSearchSuggestions(query);
-                    setSuggestions(results);
-                    setShowSuggestions(true);
-                } catch (error) {
-                    console.error(t("search.suggestionsFetchError"), error);
-                } finally {
-                    setLoading(false);
+    // recent suggestions (when query < 2)
+    const recentSuggestions: SearchSuggestion[] = useMemo(() => {
+        return recentSearches.map((text) => ({ text, type: "recent" as const }));
+    }, [recentSearches]);
+
+    const displaySuggestions: SearchSuggestion[] = useMemo(() => {
+        const q = query.trim();
+        if (q.length >= 2) return suggestions;
+        if (q.length < 2) return recentSuggestions;
+        return [];
+    }, [query, suggestions, recentSuggestions]);
+
+    const closeSuggestions = useCallback(() => {
+        setShowSuggestions(false);
+        setActiveIndex(-1);
+    }, []);
+
+    const openSuggestions = useCallback(() => {
+        setShowSuggestions(true);
+    }, []);
+
+    const handleSearch = useCallback(
+        (searchQuery: string) => {
+            const q = searchQuery.trim();
+            if (!q) return;
+
+            addSearch(q);
+            setQuery("");
+            closeSuggestions();
+
+            goProductSearch(q);
+        },
+        [addSearch, closeSuggestions, goProductSearch]
+    );
+
+    const handleSuggestionClick = useCallback(
+        (suggestion: SearchSuggestion) => {
+            addSearch(suggestion.text);
+            setQuery("");
+            closeSuggestions();
+
+            switch (suggestion.type) {
+                case "product": {
+                    // ✅ MUST use product code/slug, NOT title
+                    if (suggestion.code) {
+                        router.push(`/products/${encodeURIComponent(suggestion.code)}`);
+                    } else {
+                        goProductSearch(suggestion.text);
+                    }
+                    break;
                 }
-            }, 300);
-        } else {
+
+                case "category": {
+                    if (suggestion.code) {
+                        // ⚠️ اگر پروژه‌ت با categories[] کار می‌کنه، این رو عوض کن
+                        router.push(`/products?category=${encodeURIComponent(suggestion.code)}`);
+                    } else {
+                        goProductSearch(suggestion.text);
+                    }
+                    break;
+                }
+
+                case "brand": {
+                    if (suggestion.code) {
+                        router.push(`/products?brand=${encodeURIComponent(suggestion.code)}`);
+                    } else {
+                        goProductSearch(suggestion.text);
+                    }
+                    break;
+                }
+
+                case "recent":
+                default:
+                    goProductSearch(suggestion.text);
+                    break;
+            }
+        },
+        [addSearch, closeSuggestions, goProductSearch, router]
+    );
+
+    // Debounced suggestions fetch
+    useEffect(() => {
+        const q = query.trim();
+
+        // reset selection on input change
+        setActiveIndex(-1);
+
+        // if short query => clear fetched suggestions
+        if (q.length < 2) {
             setSuggestions([]);
+            setLoading(false);
+            return;
         }
+
+        // debounce
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+        timeoutRef.current = setTimeout(async () => {
+            // cancel previous
+            abortRef.current?.abort();
+            const controller = new AbortController();
+            abortRef.current = controller;
+
+            setLoading(true);
+
+            try {
+                const results = await searchService.getSearchSuggestions(q, controller.signal);
+                if (controller.signal.aborted) return;
+
+                setSuggestions(results);
+                setShowSuggestions(true);
+            } catch (err) {
+                if (controller.signal.aborted) return;
+                console.error(t("search.suggestionsFetchError"), err);
+            } finally {
+                if (!controller.signal.aborted) setLoading(false);
+            }
+        }, 300);
 
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            abortRef.current?.abort();
         };
     }, [query]);
 
-    const goProductSearch = (q: string) => {
-        router.push(`/products/search?q=${encodeURIComponent(q)}`);
-    };
+    // Close on outside click
+    useEffect(() => {
+        if (!showSuggestions) return;
 
-    const handleSearch = (searchQuery: string) => {
-        if (!searchQuery.trim()) return;
+        const onDown = (e: MouseEvent | TouchEvent) => {
+            const root = rootRef.current;
+            if (!root) return;
+            if (root.contains(e.target as Node)) return;
+            closeSuggestions();
+        };
 
-        addSearch(searchQuery);
-        setQuery("");
-        setShowSuggestions(false);
+        document.addEventListener("mousedown", onDown);
+        document.addEventListener("touchstart", onDown);
 
-        goProductSearch(searchQuery);
-    };
+        return () => {
+            document.removeEventListener("mousedown", onDown);
+            document.removeEventListener("touchstart", onDown);
+        };
+    }, [showSuggestions, closeSuggestions]);
 
-    const handleSuggestionClick = (suggestion: SearchSuggestion) => {
-        addSearch(suggestion.text);
-        setQuery("");
-        setShowSuggestions(false);
+    const chipLabel = (type: SearchSuggestion["type"]) =>
+        type === "recent"
+            ? t("search.types.recent")
+            : type === "product"
+                ? t("search.types.product")
+                : type === "category"
+                    ? t("search.types.category")
+                    : t("search.types.brand");
 
-        switch (suggestion.type) {
-            case "product":
-                router.push(`/products/${encodeURIComponent(suggestion.text)}`);
-                break;
+    const onKeyDown = (e: React.KeyboardEvent) => {
+        const items = displaySuggestions;
 
-            case "category":
-                router.push(`/products?category=${encodeURIComponent(suggestion.text)}`);
-                break;
+        if (e.key === "Escape") {
+            closeSuggestions();
+            return;
+        }
 
-            case "brand":
-                router.push(`/products?brand=${encodeURIComponent(suggestion.text)}`);
-                break;
+        if (e.key === "Enter") {
+            // If suggestions open and one is selected => choose it
+            if (showSuggestions && activeIndex >= 0 && activeIndex < items.length) {
+                e.preventDefault();
+                handleSuggestionClick(items[activeIndex]);
+                return;
+            }
 
-            case "recent":
-            default:
-                goProductSearch(suggestion.text);
-                break;
+            // Otherwise normal search
+            e.preventDefault();
+            handleSearch(query);
+            return;
+        }
+
+        if (!showSuggestions) return;
+        if (!items.length) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActiveIndex((prev) => {
+                const next = prev + 1;
+                return next >= items.length ? 0 : next;
+            });
+            return;
+        }
+
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActiveIndex((prev) => {
+                const next = prev - 1;
+                return next < 0 ? items.length - 1 : next;
+            });
+            return;
         }
     };
 
-    const displaySuggestions =
-        query.length >= 2 && suggestions.length > 0
-            ? suggestions
-            : query.length < 2 && recentSearches.length > 0
-                ? recentSearches.map((text) => ({ text, type: "recent" as const }))
-                : [];
-
     const INPUT_PROPS = {
+        inputRef,
         sx: {
             border: 0,
             padding: 0,
@@ -128,6 +269,7 @@ export default function UniversalSearchBar({ placeholder, size = "medium" }: Pro
                 borderLeft="1px solid"
                 borderColor="grey.200"
                 sx={{ cursor: "pointer" }}
+                onMouseDown={(e) => e.preventDefault()} // ✅ prevent blur before click
                 onClick={() => handleSearch(query)}
             >
                 <Search sx={{ fontSize: 17, color: "grey.400" }} />
@@ -135,25 +277,15 @@ export default function UniversalSearchBar({ placeholder, size = "medium" }: Pro
         ),
     };
 
-    const chipLabel = (type: SearchSuggestion["type"]) =>
-        type === "recent"
-            ? t("search.types.recent")
-            : type === "product"
-                ? t("search.types.product")
-                : type === "category"
-                    ? t("search.types.category")
-                    : t("search.types.brand");
-
     return (
-        <Box position="relative">
+        <Box ref={rootRef} position="relative">
             <TextField
                 fullWidth
                 value={query}
                 variant="outlined"
                 onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch(query)}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                onKeyDown={onKeyDown}
+                onFocus={openSuggestions}
                 placeholder={effectivePlaceholder}
                 slotProps={{ input: INPUT_PROPS }}
                 aria-label={t("search.ariaLabel")}
@@ -176,7 +308,13 @@ export default function UniversalSearchBar({ placeholder, size = "medium" }: Pro
                 >
                     <List dense>
                         {displaySuggestions.map((suggestion, i) => (
-                            <ListItemButton key={i} onClick={() => handleSuggestionClick(suggestion)}>
+                            <ListItemButton
+                                key={`${suggestion.type}-${suggestion.code ?? suggestion.text}-${i}`}
+                                selected={i === activeIndex}
+                                onMouseDown={(e) => e.preventDefault()} // ✅ prevent blur before click
+                                onMouseEnter={() => setActiveIndex(i)}
+                                onClick={() => handleSuggestionClick(suggestion)}
+                            >
                                 <ListItemText
                                     primary={suggestion.text}
                                     secondary={

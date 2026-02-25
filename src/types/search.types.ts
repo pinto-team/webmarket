@@ -25,9 +25,11 @@ export interface PostSearchFilters {
 }
 
 export interface SearchSuggestion {
-  text: string;
-  type: 'product' | 'category' | 'brand' | 'recent';
-  count?: number;
+    text: string;
+    type: "product" | "category" | "brand" | "recent";
+    count?: number;
+    code?: string;
+    slug?: string;
 }
 
 export interface UniversalSearchResult {

@@ -1,152 +1,190 @@
-import axiosInstance from '@/utils/axiosInstance';
-import { ApiResponse, PaginatedResponse } from '@/types/api.types';
-import { ProductResource, BrandResource, CategoryResource } from '@/types/product.types';
-import { PostResource } from '@/types/content.types';
-import { ProductSearchFilters, PostSearchFilters, SearchSuggestion, UniversalSearchResult } from '@/types/search.types';
+import axiosInstance from "@/utils/axiosInstance";
+import type { ApiResponse, PaginatedResponse } from "@/types/api.types";
+import type { ProductResource, BrandResource, CategoryResource } from "@/types/product.types";
+import type { PostResource } from "@/types/content.types";
+import type {
+    ProductSearchFilters,
+    PostSearchFilters,
+    SearchSuggestion,
+    UniversalSearchResult,
+} from "@/types/search.types";
 
 class SearchService {
-  async searchProducts(filters: ProductSearchFilters, p0: any): Promise<PaginatedResponse<ProductResource>> {
-    const params = new URLSearchParams();
-    
-    if (filters.keyword) params.append('keyword', filters.keyword);
-    if (filters.sort) params.append('sort', filters.sort);
-    if (filters.count) params.append('count', filters.count.toString());
-    if (filters.paged) params.append('paged', filters.paged.toString());
+    async searchProducts(
+        filters: ProductSearchFilters,
+        signal?: AbortSignal
+    ): Promise<PaginatedResponse<ProductResource>> {
+        const params = new URLSearchParams();
 
-    const response = await axiosInstance.get<ApiResponse<PaginatedResponse<ProductResource>>>(
-      `/products?${params.toString()}`
-    );
-    return response.data.data;
-  }
+        if (filters.keyword?.trim()) params.append("keyword", filters.keyword.trim());
+        if (filters.sort) params.append("sort", filters.sort);
+        if (filters.count) params.append("count", String(filters.count));
+        if (filters.paged) params.append("paged", String(filters.paged));
 
-  async searchPosts(filters: PostSearchFilters): Promise<PaginatedResponse<PostResource>> {
-    const params = new URLSearchParams();
-    
-    if (filters.keyword) params.append('keyword', filters.keyword);
-    if (filters.sort) params.append('sort', filters.sort);
-    if (filters.count) params.append('count', filters.count.toString());
-    if (filters.paged) params.append('paged', filters.paged.toString());
+        if (filters.brand) params.append("brand", filters.brand);
 
-    const response = await axiosInstance.get<ApiResponse<PaginatedResponse<PostResource>>>(
-      `/posts?${params.toString()}`
-    );
-    return response.data.data;
-  }
+        if (filters.minPrice != null) params.append("min_price", String(filters.minPrice));
+        if (filters.maxPrice != null) params.append("max_price", String(filters.maxPrice));
 
-  async searchInCategory(categoryCode: string, keyword: string): Promise<{ category: CategoryResource; products: PaginatedResponse<ProductResource> }> {
-    const params = new URLSearchParams();
-    if (keyword) params.append('keyword', keyword);
+        // ✅ unify category vs categories: prefer categories[]
+        const cats =
+            Array.isArray(filters.categories) && filters.categories.length > 0
+                ? filters.categories
+                : filters.category
+                    ? [filters.category]
+                    : [];
 
-    const response = await axiosInstance.get<ApiResponse<{ category: CategoryResource; products: PaginatedResponse<ProductResource> }>>(
-      `/product-cats/${categoryCode}?${params.toString()}`
-    );
-    return response.data.data;
-  }
+        cats.forEach((c) => params.append("categories[]", c));
 
-  async searchInBrand(brandCode: string, keyword: string): Promise<{ brand: BrandResource; products: PaginatedResponse<ProductResource> }> {
-    const params = new URLSearchParams();
-    if (keyword) params.append('keyword', keyword);
+        const response = await axiosInstance.get<ApiResponse<PaginatedResponse<ProductResource>>>(
+            `/products?${params.toString()}`,
+            { signal }
+        );
 
-    const response = await axiosInstance.get<ApiResponse<{ brand: BrandResource; products: PaginatedResponse<ProductResource> }>>(
-      `/brands/${brandCode}?${params.toString()}`
-    );
-    return response.data.data;
-  }
+        return response.data.data;
+    }
 
-  async getSearchSuggestions(query: string): Promise<SearchSuggestion[]> {
-    if (!query || query.length < 2) return [];
+    async searchPosts(filters: PostSearchFilters, signal?: AbortSignal): Promise<PaginatedResponse<PostResource>> {
+        const params = new URLSearchParams();
 
-    try {
-      const [productsRes, categoriesRes, brandsRes] = await Promise.all([
-        this.searchProducts({ keyword: query, count: 3 }),
-        axiosInstance.get<ApiResponse<CategoryResource[]>>('/product-cats'),
-        axiosInstance.get<ApiResponse<BrandResource[]>>('/brands')
-      ]);
+        if (filters.keyword?.trim()) params.append("keyword", filters.keyword.trim());
+        if (filters.sort) params.append("sort", filters.sort);
+        if (filters.count) params.append("count", String(filters.count));
+        if (filters.paged) params.append("paged", String(filters.paged));
 
-      const suggestions: SearchSuggestion[] = [];
+        const response = await axiosInstance.get<ApiResponse<PaginatedResponse<PostResource>>>(
+            `/posts?${params.toString()}`,
+            { signal }
+        );
 
-      // Add product suggestions
-      productsRes.items.slice(0, 3).forEach(product => {
-        suggestions.push({
-          text: product.title,
-          type: 'product'
-        });
-      });
+        return response.data.data;
+    }
 
-      // Add category suggestions
-      categoriesRes.data.data
-        .filter(cat => cat.title?.toLowerCase().includes(query.toLowerCase()))
-        .slice(0, 2)
-        .forEach(category => {
-          if (category.title) {
-            suggestions.push({
-              text: category.title,
-              type: 'category'
+    async searchInCategory(
+        categoryCode: string,
+        keyword: string,
+        signal?: AbortSignal
+    ): Promise<{ category: CategoryResource; products: PaginatedResponse<ProductResource> }> {
+        const params = new URLSearchParams();
+        if (keyword?.trim()) params.append("keyword", keyword.trim());
+
+        const response = await axiosInstance.get<
+            ApiResponse<{ category: CategoryResource; products: PaginatedResponse<ProductResource> }>
+        >(`/product-cats/${categoryCode}?${params.toString()}`, { signal });
+
+        return response.data.data;
+    }
+
+    async searchInBrand(
+        brandCode: string,
+        keyword: string,
+        signal?: AbortSignal
+    ): Promise<{ brand: BrandResource; products: PaginatedResponse<ProductResource> }> {
+        const params = new URLSearchParams();
+        if (keyword?.trim()) params.append("keyword", keyword.trim());
+
+        const response = await axiosInstance.get<
+            ApiResponse<{ brand: BrandResource; products: PaginatedResponse<ProductResource> }>
+        >(`/brands/${brandCode}?${params.toString()}`, { signal });
+
+        return response.data.data;
+    }
+
+    async getSearchSuggestions(query: string, signal?: AbortSignal): Promise<SearchSuggestion[]> {
+        if (!query || query.trim().length < 2) return [];
+
+        const q = query.trim();
+
+        try {
+            const [productsRes, categoriesRes, brandsRes] = await Promise.all([
+                this.searchProducts({ keyword: q, count: 3 }, signal),
+                axiosInstance.get<ApiResponse<CategoryResource[]>>("/product-cats", { signal }),
+                axiosInstance.get<ApiResponse<BrandResource[]>>("/brands", { signal }),
+            ]);
+
+            const suggestions: SearchSuggestion[] = [];
+
+            productsRes.items.slice(0, 3).forEach((p) => {
+                suggestions.push({
+                    text: p.title,
+                    type: "product",
+                    code: p.code, // ✅
+                });
             });
-          }
-        });
 
-      // Add brand suggestions
-      brandsRes.data.data
-        .filter(brand => brand.title?.toLowerCase().includes(query.toLowerCase()))
-        .slice(0, 2)
-        .forEach(brand => {
-          suggestions.push({
-            text: brand.title,
-            type: 'brand'
-          });
-        });
+            categoriesRes.data.data
+                .filter((c) => c.title?.toLowerCase().includes(q.toLowerCase()))
+                .slice(0, 2)
+                .forEach((c) => {
+                    suggestions.push({
+                        text: c.title!,
+                        type: "category",
+                        code: (c as any).code, // ✅ اگر فیلدش code نیست، عوض کن
+                    });
+                });
 
-      return suggestions;
-    } catch (error) {
-      console.error('Failed to get search suggestions:', error);
-      return [];
+            brandsRes.data.data
+                .filter((b) => b.title?.toLowerCase().includes(q.toLowerCase()))
+                .slice(0, 2)
+                .forEach((b) => {
+                    suggestions.push({
+                        text: b.title!,
+                        type: "brand",
+                        code: (b as any).code,
+                    });
+                });
+
+            return suggestions;
+        } catch (error) {
+            if (signal?.aborted) return [];
+            console.error("Failed to get search suggestions:", error);
+            return [];
+        }
     }
-  }
 
-  async searchAll(query: string): Promise<UniversalSearchResult> {
-    try {
-      const [productsRes, postsRes] = await Promise.all([
-        this.searchProducts({ keyword: query, count: 5 }),
-        this.searchPosts({ keyword: query, count: 5 })
-      ]);
+    async searchAll(query: string, signal?: AbortSignal): Promise<UniversalSearchResult> {
+        try {
+            const q = query.trim();
 
-      return {
-        products: productsRes.items,
-        posts: postsRes.items,
-        totalResults: productsRes.pagination.total + postsRes.pagination.total
-      };
-    } catch (error) {
-      console.error('Universal search failed:', error);
-      return {
-        products: [],
-        posts: [],
-        totalResults: 0
-      };
+            const [productsRes, postsRes] = await Promise.all([
+                this.searchProducts({ keyword: q, count: 5 }, signal),
+                this.searchPosts({ keyword: q, count: 5 }, signal),
+            ]);
+
+            return {
+                products: productsRes.items,
+                posts: postsRes.items,
+                totalResults: productsRes.pagination.total + postsRes.pagination.total,
+            };
+        } catch (error) {
+            if (signal?.aborted) {
+                return { products: [], posts: [], totalResults: 0 };
+            }
+            console.error("Universal search failed:", error);
+            return { products: [], posts: [], totalResults: 0 };
+        }
     }
-  }
 
-  trackSearch(query: string, resultCount: number): void {
-    try {
-      const searchData = {
-        query,
-        resultCount,
-        timestamp: new Date().toISOString()
-      };
-      
-      const searches = JSON.parse(localStorage.getItem('searchAnalytics') || '[]');
-      searches.push(searchData);
-      
-      // Keep only last 100 searches
-      if (searches.length > 100) {
-        searches.splice(0, searches.length - 100);
-      }
-      
-      localStorage.setItem('searchAnalytics', JSON.stringify(searches));
-    } catch (error) {
-      console.error('Failed to track search:', error);
+    trackSearch(query: string, resultCount: number): void {
+        try {
+            const searchData = {
+                query,
+                resultCount,
+                timestamp: new Date().toISOString(),
+            };
+
+            const searches = JSON.parse(localStorage.getItem("searchAnalytics") || "[]");
+            searches.push(searchData);
+
+            if (searches.length > 100) {
+                searches.splice(0, searches.length - 100);
+            }
+
+            localStorage.setItem("searchAnalytics", JSON.stringify(searches));
+        } catch (error) {
+            console.error("Failed to track search:", error);
+        }
     }
-  }
 }
 
 export const searchService = new SearchService();

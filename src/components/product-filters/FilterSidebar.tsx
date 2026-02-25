@@ -17,34 +17,30 @@ interface Props {
     brands: BrandResource[];
     categories?: CategoryResource[];
     filters: ProductSearchFilters;
-    onFilterChange: (filters: ProductSearchFilters) => void;
+    onFilterChange: (patch: Partial<ProductSearchFilters>) => void;
 }
 
-export default function FilterSidebar({
-                                          brands,
-                                          categories,
-                                          filters,
-                                          onFilterChange,
-                                      }: Props) {
+export default function FilterSidebar({ brands, categories, filters, onFilterChange }: Props) {
     const handlePriceChange = (min: number, max: number) => {
-        onFilterChange({ ...filters, minPrice: min, maxPrice: max });
+        onFilterChange({ minPrice: min, maxPrice: max, paged: 1 });
     };
 
     const handleBrandChange = (brandCode?: string) => {
-        onFilterChange({ ...filters, brand: brandCode });
+        onFilterChange({ brand: brandCode, paged: 1 });
     };
 
     const handleCategoryChange = (category: string) => {
-        onFilterChange({ ...filters, categories: [category] });
+        onFilterChange({ categories: [category], paged: 1 });
     };
 
     const handleClearAll = () => {
         onFilterChange({
-            ...filters,
+            paged: 1,
             minPrice: undefined,
             maxPrice: undefined,
             brand: undefined,
-            category: undefined,
+            categories: undefined,
+            sort: undefined,
         });
     };
 
@@ -60,26 +56,18 @@ export default function FilterSidebar({
 
             <Divider sx={{ my: 2 }} />
 
-            <PriceRangeFilter
-                min={filters.minPrice}
-                max={filters.maxPrice}
-                onChange={handlePriceChange}
-            />
+            <PriceRangeFilter min={filters.minPrice} max={filters.maxPrice} onChange={handlePriceChange} />
 
             <Divider sx={{ my: 2 }} />
 
-            <BrandFilter
-                brands={brands}
-                selected={filters.brand}
-                onChange={handleBrandChange}
-            />
+            <BrandFilter brands={brands} selected={filters.brand} onChange={handleBrandChange} />
 
             {Array.isArray(categories) && categories.length > 0 ? (
                 <>
                     <Divider sx={{ my: 2 }} />
                     <CategoryFilter
                         categories={categories}
-                        selected={filters.category ?? filters.categories?.[0]}
+                        selected={filters.categories?.[0]}
                         onChange={handleCategoryChange}
                     />
                 </>
