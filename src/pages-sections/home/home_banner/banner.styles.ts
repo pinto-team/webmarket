@@ -6,7 +6,12 @@ export const bannerSx: SxProps<Theme> = {
     overflow: "hidden",
     border: "1px solid",
     borderColor: "grey.200",
-    minHeight: { xs: 180, sm: 220, md: 260 },
+    minHeight: {
+        xs: 200,
+        sm: 260,
+        md: 340,
+        lg: 420
+    },
     display: "flex",
     alignItems: "center",
     px: { xs: 2, sm: 4 },

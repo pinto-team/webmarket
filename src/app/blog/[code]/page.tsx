@@ -185,7 +185,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                                 my: 2,
                             },
                         }}
-                        dangerouslySetInnerHTML={{ __html: toPersianNumber(post.description) }}
+                        dangerouslySetInnerHTML={{ __html: post.description }}
                     />
                 </Box>
             </Container>
