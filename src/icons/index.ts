@@ -25,12 +25,10 @@ import DeliveryBox from "./DeliveryBox";
 import DottedStar from "./DottedStar";
 import Dress from "./Dress";
 import DrillMachine from "./DrillMachine";
-import Eye from "./Eye";
 import Facebook from "./Facebook";
 import FacebookFilled from "./FacebookFilled";
 import FeedbackThumbsUp from "./FeedbackThumbsUp";
 import Figma from "./Figma";
-import Food from "./Food";
 import Gift from "./Gift";
 import GiftBox from "./GiftBox";
 import Globe from "./Globe";
@@ -249,11 +247,9 @@ const appIcons = {
   DeliveryBox,
   DottedStar,
   Dress,
-  Eye,
   Facebook,
   FacebookFilled,
   Figma,
-  Food,
   Gift,
   Globe,
   GoldPackageIcon,
