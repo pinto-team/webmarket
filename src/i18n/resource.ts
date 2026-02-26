@@ -144,6 +144,7 @@ export const resources = {
                 subcategories: "زیردسته‌ها"
             },
             checkout: {
+                items: "عدد کالا",
                 billingAddress: "آدرس صورت‌حساب",
                 continueToPayment: "ادامه به پرداخت",
                 discount: "تخفیف",
@@ -170,7 +171,7 @@ export const resources = {
                 total: "جمع کل",
                 trackOrder: "پیگیری سفارش",
                 warehouseLabel: "انبار",
-                weightLabel: "وزن"
+                weightLabel: "وزن",
             },
             checkoutStepper: {
                 cart: "سبد خرید",
