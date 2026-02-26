@@ -11,7 +11,6 @@ import ChevronLeft from "@mui/icons-material/ChevronLeft";
 
 import { useCart } from "@/contexts/CartContext";
 import { cartService } from "@/services/cart.service";
-import { currency } from "lib";
 
 import {
     ContentWrapper,
@@ -27,7 +26,7 @@ import {
 
 import type { CartItemResource } from "@/types/product.types";
 import { t } from "@/i18n/t";
-import { formatPersianDate, formatPersianNumber } from "@/utils/persian";
+import {formatPersianDate, formatPersianNumber, formatPersianPrice} from "@/utils/persian";
 import ProductImage from "@/components/common/ProductImage";
 
 type Props = { item: CartItemResource };
@@ -44,9 +43,12 @@ const calculateDeliveryDate = (days: number): string => {
 
 export default function CartItem({ item }: Props) {
     const { id, sku, quantity, product } = item;
-
+    const currencyLabel = t("products.currencyLabel");
+    const unitPrice = Number(sku.price) || 0;
     const deliveryDate = sku?.delivery ? calculateDeliveryDate(Number(sku.delivery)) : null;
-
+    const stock = Number(sku?.stock);
+    const hasStock = Number.isFinite(stock) && stock > 0;
+    const isAtMax = hasStock && quantity >= stock;
     const productCode =
         product?.code ||
         sku?.product?.code ||
@@ -106,7 +108,6 @@ export default function CartItem({ item }: Props) {
                         )}
                     </InfoRow>
                 </div>
-
                 <BottomSection>
                     <Link
                         href={`/products/${productCode}`}
@@ -123,20 +124,24 @@ export default function CartItem({ item }: Props) {
                         <ChevronLeft fontSize="small" />
                     </Link>
 
-                    <PriceSection>
-                        <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                            {t("cartItem.max")}
-                        </Typography>
-
-                        <Typography variant="h6" fontWeight={600}>
-                            {currency(Number(sku.price) || 0)}
-                        </Typography>
-                    </PriceSection>
-
                     <QuantityWrapper>
+                        {/* قیمت میاد جای + */}
+                        <PriceSection>
+                            {isAtMax && (
+                                <Typography variant="body2" color="error.main" sx={{ mr: 1, fontWeight: 500 }}>
+                                    {t("cartItem.maxQtyLabel", { qty: formatPersianNumber(stock) })}
+                                </Typography>
+                            )}
+
+                            <Typography variant="h6" fontWeight={600}>
+                                {formatPersianPrice(unitPrice)} {currencyLabel}
+                            </Typography>
+                        </PriceSection>
+
+                        {/* + میاد بعد از قیمت */}
                         <QuantityButton
                             onClick={handleCartAmountChange(quantity + 1)}
-                            disabled={Number.isFinite(sku.stock) && quantity >= Number(sku.stock)}
+                            disabled={hasStock && quantity >= stock}
                             aria-label={t("common.add")}
                         >
                             <Add fontSize="small" />

@@ -10,6 +10,8 @@ interface Props {
     phone: string;
     address: string;
 }
+const LRI = "\u2066"; // Left-to-Right Isolate
+const PDI = "\u2069"; // Pop Directional Isolate
 
 export function FooterContact({ email, phone, address }: Props) {
     return (
@@ -25,7 +27,7 @@ export function FooterContact({ email, phone, address }: Props) {
             </Typography>
 
             <Typography variant="body1" sx={{ py: 0.6, mb: 2 }}>
-                {t("footer.phoneLabel")}: {toPersianNumber(phone ?? "")}
+                {t("footer.phoneLabel")}: {LRI}{toPersianNumber(phone ?? "")}{PDI}
             </Typography>
         </Fragment>
     );

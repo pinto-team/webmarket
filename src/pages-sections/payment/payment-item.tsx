@@ -1,20 +1,32 @@
 import Typography from "@mui/material/Typography";
 import FlexBetween from "components/flex-box/flex-between";
-// CUSTOM UTILS LIBRARY FUNCTION
 import { currency } from "lib";
 
 // ==============================================================
-type Props = { title: string; amount?: number };
+type Props = { title: string; amount?: number; currencyLabel?: string };
 // ==============================================================
 
-export default function PaymentItem({ title, amount }: Props) {
-  return (
-    <FlexBetween mb={1}>
-      <Typography variant="body1" sx={{ color: "grey.600" }}>
-        {title}
-      </Typography>
+export default function PaymentItem({ title, amount, currencyLabel }: Props) {
+    const hasAmount = typeof amount === "number" && Number.isFinite(amount);
 
-      <Typography variant="h6">{amount ? currency(amount) : "-"}</Typography>
-    </FlexBetween>
-  );
+    return (
+        <FlexBetween mb={1}>
+            <Typography variant="body1" sx={{ color: "grey.600" }}>
+                {title}
+            </Typography>
+
+            {hasAmount ? (
+                <Typography variant="h6" sx={{ whiteSpace: "nowrap" }}>
+                    {currency(amount)}{" "}
+                    {currencyLabel ? (
+                        <Typography component="span" variant="body2" color="text.secondary">
+                            {currencyLabel}
+                        </Typography>
+                    ) : null}
+                </Typography>
+            ) : (
+                <Typography variant="h6">-</Typography>
+            )}
+        </FlexBetween>
+    );
 }

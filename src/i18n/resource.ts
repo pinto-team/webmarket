@@ -134,6 +134,7 @@ export const resources = {
                 details: "نمایش جزئیات",
                 inStock: "موجود",
                 max: "حداکثر",
+                maxQtyLabel: "حداکثر {{qty}} عدد",
                 quantityLabel: "تعداد: {{qty}}",
                 unknownDelivery: "نامشخص",
                 warranty: "گارانتی"

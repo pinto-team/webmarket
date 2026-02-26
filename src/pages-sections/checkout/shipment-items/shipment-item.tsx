@@ -44,7 +44,7 @@ export default function ShipmentItem({ item }: ShipmentItemProps) {
     const href = productCode ? `/products/${productCode}` : null;
 
     const deliveryDate = calculateDeliveryDate(deliveryDays);
-    const currency = t("products.currencyLabel");
+    const currencyLabel = t("products.currencyLabel");
 
     // entity preference: sku.product first, then sku
     const imageEntity = sku?.product || sku;
@@ -145,6 +145,8 @@ export default function ShipmentItem({ item }: ShipmentItemProps) {
                     </Box>
                 </div>
 
+
+
                 <Box
                     sx={{
                         display: "flex",
@@ -162,15 +164,9 @@ export default function ShipmentItem({ item }: ShipmentItemProps) {
                         {t("cartItem.quantityLabel", { qty: toPersianNumber(quantity) })}
                     </Typography>
 
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                            {t("cartItem.max")}
-                        </Typography>
-
-                        <Typography variant="h6" fontWeight={600}>
-                            {formatPersianPrice(total)} {currency}
-                        </Typography>
-                    </Box>
+                    <Typography variant="h6" fontWeight={600}>
+                        {formatPersianPrice(total)} {currencyLabel}
+                    </Typography>
                 </Box>
             </Box>
         </Card>

@@ -12,7 +12,6 @@ import ListItem from "./list-item";
 import { currency } from "lib";
 import { useCart } from "@/contexts/CartContext";
 import { t } from "@/i18n/t";
-import { toPersianNumber } from "@/utils/persian";
 
 interface CheckoutSummaryProps {
     onProceed?: () => void;
@@ -23,6 +22,7 @@ export default function CheckoutSummary({ onProceed, loading }: CheckoutSummaryP
     const { cart } = useCart();
 
     const total = cart.reduce((acc, item) => acc + item.sku.price * item.quantity, 0);
+    const currencyLabel = t("products.currencyLabel"); // "تومان"
 
     return (
         <Card
@@ -33,14 +33,20 @@ export default function CheckoutSummary({ onProceed, loading }: CheckoutSummaryP
                 border: `1px solid ${theme.palette.divider}`,
             })}
         >
-            <ListItem title={t("checkout.subtotal")} value={total} />
-            <ListItem title={t("checkout.shipping")} />
-            <ListItem title={t("checkout.tax")} value={0} />
-            <ListItem title={t("checkout.discount")} />
+            <ListItem title={t("checkout.subtotal")} value={total} currencyLabel={currencyLabel} />
+            <ListItem title={t("checkout.shipping")} value={0} currencyLabel={currencyLabel} />
+            <ListItem title={t("checkout.tax")} value={0} currencyLabel={currencyLabel} />
+            <ListItem title={t("checkout.discount")} value={0} currencyLabel={currencyLabel} />
 
             <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6">{toPersianNumber(currency(total))}</Typography>
+            {/* Total with currency label */}
+            <Typography variant="h6" sx={{ whiteSpace: "nowrap" }}>
+                {currency(total)}{" "}
+                <Typography component="span" variant="body2" color="text.secondary">
+                    {currencyLabel}
+                </Typography>
+            </Typography>
 
             <Stack direction="row" spacing={2} mt={3}>
                 <TextField size="small" placeholder={t("checkout.discountCode")} variant="outlined" fullWidth />
@@ -56,11 +62,11 @@ export default function CheckoutSummary({ onProceed, loading }: CheckoutSummaryP
                     color="primary"
                     variant="contained"
                     onClick={onProceed}
-                    disabled={loading}
+                    disabled={!!loading}
                     type="button"
-                    sx={{ mt: 2 }}
+                    sx={{ mt: 2, minHeight: 48 }}
                 >
-                    {loading ? <CircularProgress size={24} /> : t("checkout.proceedToCheckout")}
+                    {loading ? <CircularProgress size={24} color="inherit" /> : t("checkout.proceedToCheckout")}
                 </Button>
             )}
         </Card>

@@ -20,10 +20,20 @@ export default function CheckoutForm() {
     const { cart } = useCart();
     const { isAuthenticated } = useAuth();
 
-    const subtotal = cart.reduce((acc, item) => acc + item.sku.price * item.quantity, 0);
+    const currencyLabel = t("products.currencyLabel"); // مثلا: "تومان"
+
+    const subtotal = cart.reduce(
+        (acc, item) => acc + item.sku.price * item.quantity,
+        0
+    );
+
     const shipping = 0;
     const total = subtotal + shipping;
-    const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+    const itemCount = cart.reduce(
+        (acc, item) => acc + item.quantity,
+        0
+    );
 
     const handleProceed = () => {
         if (!isAuthenticated) {
@@ -49,28 +59,74 @@ export default function CheckoutForm() {
 
             <Divider sx={{ mb: 2 }} />
 
+            {/* Subtotal */}
             <FlexBetween mb={1}>
                 <Typography variant="body2" color="text.secondary">
-                    {t("checkout.subtotal")} ({toPersianNumber(itemCount)} {t("cart.items")})
+                    {t("checkout.subtotal")} (
+                    {toPersianNumber(itemCount)} {t("cart.items")})
                 </Typography>
-                <Typography variant="body2">{currency(subtotal)}</Typography>
+
+                <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+                    {currency(subtotal)}{" "}
+                    <Typography
+                        component="span"
+                        variant="body2"
+                        color="text.secondary"
+                    >
+                        {currencyLabel}
+                    </Typography>
+                </Typography>
             </FlexBetween>
 
+            {/* Shipping */}
             <FlexBetween mb={2}>
                 <Typography variant="body2" color="text.secondary">
                     {t("checkout.shipping")}
                 </Typography>
-                <Typography variant="body2" color="success.main">
-                    {shipping === 0 ? t("productDetail.freeExpressShipping") : currency(shipping)}
+
+                <Typography
+                    variant="body2"
+                    color={shipping === 0 ? "success.main" : "text.primary"}
+                    sx={{ whiteSpace: "nowrap" }}
+                >
+                    {shipping === 0 ? (
+                        t("productDetail.freeExpressShipping")
+                    ) : (
+                        <>
+                            {currency(shipping)}{" "}
+                            <Typography
+                                component="span"
+                                variant="body2"
+                                color="text.secondary"
+                            >
+                                {currencyLabel}
+                            </Typography>
+                        </>
+                    )}
                 </Typography>
             </FlexBetween>
 
             <Divider sx={{ mb: 2 }} />
 
+            {/* Total */}
             <FlexBetween mb={3}>
-                <Typography variant="h6">{t("checkout.total")}</Typography>
-                <Typography variant="h6" color="primary.main">
-                    {currency(total)}
+                <Typography variant="h6">
+                    {t("checkout.total")}
+                </Typography>
+
+                <Typography
+                    variant="h6"
+                    color="primary.main"
+                    sx={{ whiteSpace: "nowrap" }}
+                >
+                    {currency(total)}{" "}
+                    <Typography
+                        component="span"
+                        variant="body2"
+                        color="text.secondary"
+                    >
+                        {currencyLabel}
+                    </Typography>
                 </Typography>
             </FlexBetween>
 

@@ -30,10 +30,11 @@ export default function PaymentFinalization({
     const [selectedGatewayId, setSelectedGatewayId] = useState<number | null>(null);
 
     const handleSubmit = () => {
-        if (selectedGatewayId) onSubmit(selectedGatewayId);
+        if (selectedGatewayId == null) return;
+        onSubmit(selectedGatewayId);
     };
 
-    const currency = t("products.currencyLabel");
+    const currencyLabel = t("products.currencyLabel"); // مثلا: "تومان"
 
     return (
         <Box>
@@ -44,8 +45,17 @@ export default function PaymentFinalization({
                     {t("payment.orderLabel", { code: orderCode })}
                 </Typography>
 
-                <Typography variant="h5" fontWeight={700} color="primary" mb={3}>
-                    {t("payment.totalLabel")} {formatPersianPrice(totalPrice)} {currency}
+                <Typography
+                    variant="h5"
+                    fontWeight={700}
+                    color="primary"
+                    mb={3}
+                    sx={{ whiteSpace: "nowrap" }}
+                >
+                    {t("payment.totalLabel")} {formatPersianPrice(totalPrice)}{" "}
+                    <Typography component="span" variant="body2" color="text.secondary">
+                        {currencyLabel}
+                    </Typography>
                 </Typography>
 
                 <Typography variant="subtitle1" gutterBottom>
@@ -63,10 +73,10 @@ export default function PaymentFinalization({
                     size="large"
                     fullWidth
                     onClick={handleSubmit}
-                    disabled={!selectedGatewayId || !!loading}
-                    sx={{ mt: 3 }}
+                    disabled={selectedGatewayId == null || !!loading}
+                    sx={{ mt: 3, minHeight: 48 }}
                 >
-                    {loading ? <CircularProgress size={24} /> : t("payment.proceed")}
+                    {loading ? <CircularProgress size={24} color="inherit" /> : t("payment.proceed")}
                 </Button>
             </Card>
         </Box>

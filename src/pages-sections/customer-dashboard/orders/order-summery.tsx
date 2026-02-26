@@ -15,14 +15,10 @@ export default function OrderSummery({ order }: Props) {
     const address = order.customer_address;
 
     const addressText = address
-        ? [
-            address.region?.title,
-            address.district,
-            address.street,
-        ]
-            .filter(Boolean)
-            .join(" - ")
+        ? [address.region?.title, address.district, address.street].filter(Boolean).join(" - ")
         : t("common.unknown");
+
+    const currencyLabel = t("products.currencyLabel"); // "تومان"
 
     return (
         <Grid container spacing={3}>
@@ -39,15 +35,9 @@ export default function OrderSummery({ order }: Props) {
                         {t("checkout.shippingAddress")}
                     </Typography>
 
-                    <Typography variant="body1">
-                        {addressText}
-                    </Typography>
+                    <Typography variant="body1">{addressText}</Typography>
 
-                    <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        mt={1}
-                    >
+                    <Typography variant="body2" color="text.secondary" mt={1}>
                         {order.customer_name} - {order.customer_mobile}
                     </Typography>
                 </Card>
@@ -66,38 +56,27 @@ export default function OrderSummery({ order }: Props) {
                         {t("checkout.orderSummary")}
                     </Typography>
 
-                    <ListItem
-                        title={t("checkout.subtotal")}
-                        value={currency(order.total_price)}
-                    />
+                    <ListItem title={t("checkout.subtotal")} value={currency(order.total_price)} currencyLabel={currencyLabel} />
 
-                    <ListItem
-                        title={t("checkout.shipping")}
-                        value={currency(order.cargo_price)}
-                    />
+                    <ListItem title={t("checkout.shipping")} value={currency(order.cargo_price)} currencyLabel={currencyLabel} />
 
-                    <ListItem
-                        title={t("checkout.discount")}
-                        value={currency(order.off_price)}
-                    />
+                    <ListItem title={t("checkout.discount")} value={currency(order.off_price)} currencyLabel={currencyLabel} />
 
                     <Divider sx={{ mb: 1 }} />
 
                     <FlexBetween mb={2}>
-                        <Typography variant="h6">
-                            {t("checkout.total")}
-                        </Typography>
+                        <Typography variant="h6">{t("checkout.total")}</Typography>
 
-                        <Typography variant="h6">
-                            {currency(order.paid_price)}
+                        <Typography variant="h6" sx={{ whiteSpace: "nowrap" }}>
+                            {currency(order.paid_price)}{" "}
+                            <Typography component="span" variant="body2" color="text.secondary">
+                                {currencyLabel}
+                            </Typography>
                         </Typography>
                     </FlexBetween>
 
                     {order.coupon_code && (
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                        >
+                        <Typography variant="body2" color="text.secondary">
                             {t("checkout.discountCode")}: {order.coupon_code}
                         </Typography>
                     )}
@@ -110,9 +89,11 @@ export default function OrderSummery({ order }: Props) {
 function ListItem({
                       title,
                       value,
+                      currencyLabel,
                   }: {
     title: string;
     value: string;
+    currencyLabel: string;
 }) {
     return (
         <FlexBetween mb={1}>
@@ -120,8 +101,11 @@ function ListItem({
                 {title}
             </Typography>
 
-            <Typography variant="h6">
-                {value}
+            <Typography variant="h6" sx={{ whiteSpace: "nowrap" }}>
+                {value}{" "}
+                <Typography component="span" variant="body2" color="text.secondary">
+                    {currencyLabel}
+                </Typography>
             </Typography>
         </FlexBetween>
     );
