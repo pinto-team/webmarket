@@ -47,6 +47,9 @@ export default function AddressListItem({ address, onUpdate, onEdit }: Props) {
 
     const fullAddress = addressParts.join(t("addresses.separator"));
 
+    const mobileFa = address.mobile ? toPersianNumber(address.mobile) : "-";
+    const postalFa = address.postal ? toPersianNumber(address.postal) : "-";
+
     return (
         <StyledTableRow>
             <Box>
@@ -54,7 +57,7 @@ export default function AddressListItem({ address, onUpdate, onEdit }: Props) {
                     {t("addresses.fields.title")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    {address.title}
+                    {toPersianNumber(address.title)}
                 </Typography>
             </Box>
 
@@ -62,9 +65,7 @@ export default function AddressListItem({ address, onUpdate, onEdit }: Props) {
                 <Typography variant="body2" color="text.secondary" mb={0.5}>
                     {t("addresses.fields.mobile")}
                 </Typography>
-                <Typography variant="body1">
-                    {toPersianNumber(address.mobile)}
-                </Typography>
+                <Typography variant="body1">{mobileFa}</Typography>
             </Box>
 
             <Box>
@@ -72,7 +73,7 @@ export default function AddressListItem({ address, onUpdate, onEdit }: Props) {
                     {t("addresses.fields.address")}
                 </Typography>
                 <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
-                    {fullAddress}
+                    {toPersianNumber(fullAddress || "-")}
                 </Typography>
             </Box>
 
@@ -80,9 +81,7 @@ export default function AddressListItem({ address, onUpdate, onEdit }: Props) {
                 <Typography variant="body2" color="text.secondary" mb={0.5}>
                     {t("addresses.fields.postal")}
                 </Typography>
-                <Typography variant="body1">
-                    {toPersianNumber(address.postal)}
-                </Typography>
+                <Typography variant="body1">{postalFa}</Typography>
             </Box>
 
             <Box display="flex" gap={1} justifyContent="flex-end">

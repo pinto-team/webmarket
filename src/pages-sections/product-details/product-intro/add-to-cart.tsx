@@ -6,7 +6,6 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 import { SkuResource } from "@/types/product.types";
 import { useAddToCart } from "@/hooks/useAddToCart";
-import AddToCartDialog from "@/components/AddToCartDialog";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
 import { t } from "@/i18n/t";
@@ -76,8 +75,6 @@ export default function AddToCart({ selectedSku, productCode }: Props) {
                     {primaryLabel}
                 </Button>
             )}
-
-            <AddToCartDialog open={dialogOpen} onClose={closeDialog} />
         </>
     );
 }

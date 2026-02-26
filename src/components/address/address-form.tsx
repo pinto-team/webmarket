@@ -13,7 +13,7 @@ import { useSnackbar } from "notistack";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 import { t } from "@/i18n/t";
-import { toEnglishNumber } from "@/utils/persian";
+import { toEnglishNumber, toPersianNumber } from "@/utils/persian";
 
 interface AddressFormProps {
     address?: AddressResource;
@@ -34,7 +34,13 @@ type FormState = AddressRequest & {
 };
 
 function onlyDigits(value: string) {
+    // keep both latin + persian digits
     return value.replace(/[^\d۰-۹]/g, "");
+}
+
+// always show digits Persian in UI (even if user types latin)
+function digitsUi(value: string) {
+    return toPersianNumber(onlyDigits(value));
 }
 
 function toOptionalNumber(digitsOrPersianDigits?: string): number | undefined {
@@ -43,6 +49,35 @@ function toOptionalNumber(digitsOrPersianDigits?: string): number | undefined {
     if (!en) return undefined;
     const n = Number(en);
     return Number.isFinite(n) ? n : undefined;
+}
+
+// strings that may contain digits (title/label/district/street) → Persian digits for UI
+function textUi(value?: string | null) {
+    const s = value ?? "";
+    return s ? toPersianNumber(s) : "";
+}
+
+function buildInitialState(address?: AddressResource): FormState {
+    return {
+        region_id: address?.region?.id || 0,
+        province_id: 0,
+
+        label: textUi(address?.label),
+        title: textUi(address?.title),
+
+        // numeric-ish fields shown Persian in UI
+        mobile: address?.mobile ? toPersianNumber(address.mobile) : "",
+        postal: address?.postal ? toPersianNumber(address.postal) : "",
+
+        // text fields may include digits (مثل محله ۳ / آدرس ۴)
+        district: textUi(address?.district),
+        street: textUi(address?.street),
+
+        // optional numeric fields kept as strings in UI
+        codeStr: address?.code != null ? toPersianNumber(String(address.code)) : "",
+        floorStr: address?.floor != null ? toPersianNumber(String(address.floor)) : "",
+        roomStr: address?.room != null ? toPersianNumber(String(address.room)) : "",
+    };
 }
 
 export default function AddressForm({
@@ -59,21 +94,15 @@ export default function AddressForm({
     const [provinces, setProvinces] = useState<RegionResource[]>([]);
     const [cities, setCities] = useState<RegionResource[]>([]);
 
-    const [formData, setFormData] = useState<FormState>({
-        region_id: address?.region?.id || 0,
-        province_id: 0,
+    const [formData, setFormData] = useState<FormState>(() => buildInitialState(address));
 
-        label: address?.label || "",
-        title: address?.title || "",
-        mobile: address?.mobile || "",
-        district: address?.district || "",
-        street: address?.street || "",
-        postal: address?.postal || "",
-
-        codeStr: address?.code != null ? String(address.code) : "",
-        floorStr: address?.floor != null ? String(address.floor) : "",
-        roomStr: address?.room != null ? String(address.room) : "",
-    });
+    // ✅ Important: when modal switches between Add/Edit (address changes), re-init state
+    useEffect(() => {
+        setFormData(buildInitialState(address));
+        setCities([]); // will be re-fetched after province_id is inferred
+        setFieldErrors({});
+        clearErrors();
+    }, [address]); // intentionally only address
 
     useEffect(() => {
         regionService
@@ -109,6 +138,7 @@ export default function AddressForm({
         const errors: FieldErrors = {};
 
         if (!formData.title.trim()) errors.title = t("validation.required");
+
         if (!formData.mobile.trim()) errors.mobile = t("validation.required");
         else {
             const mobileDigits = toEnglishNumber(onlyDigits(formData.mobile));
@@ -144,13 +174,18 @@ export default function AddressForm({
 
             const submitData: AddressRequest = {
                 ...rest,
+
                 // normalize numeric text inputs into optional numbers
                 code: toOptionalNumber(codeStr),
                 floor: toOptionalNumber(floorStr),
                 room: toOptionalNumber(roomStr),
-                // normalize digit-only fields
+
+                // normalize digit-only fields for API
                 postal: toEnglishNumber(onlyDigits(rest.postal || "")),
                 mobile: toEnglishNumber(onlyDigits(rest.mobile || "")),
+
+                // keep text fields as-is (they may contain Persian digits; backend usually accepts)
+                // If backend requires latin digits for district/street too, we can normalize those here as well.
             };
 
             if (address) {
@@ -184,7 +219,7 @@ export default function AddressForm({
                         fullWidth
                         label={t("addresses.form.label")}
                         value={formData.label}
-                        onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, label: textUi(e.target.value) })}
                         placeholder={t("addresses.form.labelPlaceholder")}
                     />
                 </Grid>
@@ -194,7 +229,7 @@ export default function AddressForm({
                         fullWidth
                         label={t("addresses.fullName")}
                         value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, title: textUi(e.target.value) })}
                         error={!!fieldErrors.title}
                         helperText={fieldErrors.title}
                         required
@@ -206,10 +241,7 @@ export default function AddressForm({
                         fullWidth
                         label={t("addresses.phone")}
                         value={formData.mobile}
-                        onChange={(e) =>
-                            setFormData({ ...formData, mobile: toEnglishNumber(onlyDigits(e.target.value)) })
-                        }
-                        inputProps={{ inputMode: "numeric" }}
+                        onChange={(e) => setFormData({ ...formData, mobile: digitsUi(e.target.value) })}
                         error={!!fieldErrors.mobile}
                         helperText={fieldErrors.mobile}
                         required
@@ -222,9 +254,7 @@ export default function AddressForm({
                         fullWidth
                         label={t("addresses.province")}
                         value={formData.province_id}
-                        onChange={(e) =>
-                            setFormData({ ...formData, province_id: Number(e.target.value), region_id: 0 })
-                        }
+                        onChange={(e) => setFormData({ ...formData, province_id: Number(e.target.value), region_id: 0 })}
                         error={!!fieldErrors.province_id}
                         helperText={fieldErrors.province_id}
                         required
@@ -264,7 +294,7 @@ export default function AddressForm({
                         fullWidth
                         label={t("addresses.form.districtOptional")}
                         value={formData.district}
-                        onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, district: textUi(e.target.value) })}
                         error={!!fieldErrors.district}
                         helperText={fieldErrors.district}
                     />
@@ -277,7 +307,7 @@ export default function AddressForm({
                         rows={2}
                         label={t("addresses.address")}
                         value={formData.street}
-                        onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, street: textUi(e.target.value) })}
                         error={!!fieldErrors.street}
                         helperText={fieldErrors.street}
                         required
@@ -289,10 +319,7 @@ export default function AddressForm({
                         fullWidth
                         label={t("addresses.postalCode")}
                         value={formData.postal}
-                        onChange={(e) =>
-                            setFormData({ ...formData, postal: toEnglishNumber(onlyDigits(e.target.value)) })
-                        }
-                        inputProps={{ inputMode: "numeric", maxLength: 10 }}
+                        onChange={(e) => setFormData({ ...formData, postal: digitsUi(e.target.value) })}
                         error={!!fieldErrors.postal}
                         helperText={fieldErrors.postal}
                         required
@@ -304,10 +331,7 @@ export default function AddressForm({
                         fullWidth
                         label={t("addresses.form.plaque")}
                         value={formData.codeStr || ""}
-                        onChange={(e) =>
-                            setFormData({ ...formData, codeStr: toEnglishNumber(onlyDigits(e.target.value)) })
-                        }
-                        inputProps={{ inputMode: "numeric" }}
+                        onChange={(e) => setFormData({ ...formData, codeStr: digitsUi(e.target.value) })}
                     />
                 </Grid>
 
@@ -316,10 +340,7 @@ export default function AddressForm({
                         fullWidth
                         label={t("addresses.form.floor")}
                         value={formData.floorStr || ""}
-                        onChange={(e) =>
-                            setFormData({ ...formData, floorStr: toEnglishNumber(onlyDigits(e.target.value)) })
-                        }
-                        inputProps={{ inputMode: "numeric" }}
+                        onChange={(e) => setFormData({ ...formData, floorStr: digitsUi(e.target.value) })}
                     />
                 </Grid>
 
@@ -328,10 +349,7 @@ export default function AddressForm({
                         fullWidth
                         label={t("addresses.form.unit")}
                         value={formData.roomStr || ""}
-                        onChange={(e) =>
-                            setFormData({ ...formData, roomStr: toEnglishNumber(onlyDigits(e.target.value)) })
-                        }
-                        inputProps={{ inputMode: "numeric" }}
+                        onChange={(e) => setFormData({ ...formData, roomStr: digitsUi(e.target.value) })}
                     />
                 </Grid>
             </Grid>
@@ -339,7 +357,13 @@ export default function AddressForm({
             {showActions && (
                 <Box display="flex" gap={2} mt={3}>
                     <Button type="submit" variant="contained" disabled={loading} fullWidth>
-                        {loading ? <CircularProgress size={24} /> : address ? t("addresses.form.editSubmit") : t("addresses.form.addSubmit")}
+                        {loading ? (
+                            <CircularProgress size={24} />
+                        ) : address ? (
+                            t("addresses.form.editSubmit")
+                        ) : (
+                            t("addresses.form.addSubmit")
+                        )}
                     </Button>
 
                     <Button variant="outlined" onClick={onCancel} disabled={loading} fullWidth>

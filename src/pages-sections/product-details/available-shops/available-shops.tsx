@@ -10,7 +10,6 @@ import { groupSkusByShop } from "@/utils/product";
 import { currency } from "lib";
 
 import { useAddToCart } from "@/hooks/useAddToCart";
-import AddToCartDialog from "@/components/AddToCartDialog";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
 
@@ -124,7 +123,6 @@ export default function AvailableShops({ skus, productCode }: Props) {
                 })
             )}
 
-            <AddToCartDialog open={dialogOpen} onClose={closeDialog} />
         </Box>
     );
 }

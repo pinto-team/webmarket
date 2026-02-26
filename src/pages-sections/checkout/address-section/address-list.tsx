@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import { AddressResource } from "@/types/address.types";
 import { t } from "@/i18n/t";
-import { formatPersianNumber } from "@/utils/persian";
+import { toPersianNumber } from "@/utils/persian";
 
 interface AddressListProps {
     addresses: AddressResource[];
@@ -49,23 +49,20 @@ export default function AddressList({
                                 sx={{ cursor: "pointer" }}
                             >
                                 <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
-                                    {address.title}
+                                    {toPersianNumber(address.title)}
                                 </Typography>
 
                                 <Typography variant="body2" color="text.secondary" mb={0.5}>
-                                    {fullAddress}
+                                    {toPersianNumber(fullAddress)}
                                 </Typography>
 
                                 <Typography variant="caption" color="text.secondary">
-                                    {formatPersianNumber(address.mobile)}
+                                    {address.mobile ? toPersianNumber(address.mobile) : "-"}
                                 </Typography>
                             </Box>
 
                             <Box display="flex" gap={0.5}>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => onEdit(address)}
-                                >
+                                <IconButton size="small" onClick={() => onEdit(address)}>
                                     <EditIcon fontSize="small" />
                                 </IconButton>
 

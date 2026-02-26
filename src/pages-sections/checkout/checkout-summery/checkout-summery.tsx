@@ -12,6 +12,7 @@ import ListItem from "./list-item";
 import { currency } from "lib";
 import { useCart } from "@/contexts/CartContext";
 import { t } from "@/i18n/t";
+import { toPersianNumber } from "@/utils/persian";
 
 interface CheckoutSummaryProps {
     onProceed?: () => void;
@@ -39,15 +40,10 @@ export default function CheckoutSummary({ onProceed, loading }: CheckoutSummaryP
 
             <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6">{currency(total)}</Typography>
+            <Typography variant="h6">{toPersianNumber(currency(total))}</Typography>
 
             <Stack direction="row" spacing={2} mt={3}>
-                <TextField
-                    size="small"
-                    placeholder={t("checkout.discountCode")}
-                    variant="outlined"
-                    fullWidth
-                />
+                <TextField size="small" placeholder={t("checkout.discountCode")} variant="outlined" fullWidth />
 
                 <Button size="small" variant="outlined" color="primary">
                     {t("common.apply")}

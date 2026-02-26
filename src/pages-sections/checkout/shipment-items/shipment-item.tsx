@@ -17,8 +17,8 @@ interface ShipmentItemProps {
     item: CartItemResource;
 }
 
-const calculateDeliveryDate = (days: number): string => {
-    if (!days || days === 0) return t("common.unknown");
+const calculateDeliveryDate = (days: number): string | null => {
+    if (!days || days === 0) return null;
 
     const today = new Date();
     const deliveryDate = new Date(today);
@@ -107,12 +107,12 @@ export default function ShipmentItem({ item }: ShipmentItemProps) {
                     {href ? (
                         <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
                             <Typography variant="h6" fontSize={{ xs: 16, sm: 18 }} fontWeight={500} gutterBottom>
-                                {sku?.title}
+                                {toPersianNumber(sku?.title || "")}
                             </Typography>
                         </Link>
                     ) : (
                         <Typography variant="h6" fontSize={{ xs: 16, sm: 18 }} fontWeight={500} gutterBottom>
-                            {sku?.title}
+                            {toPersianNumber(sku?.title || "")}
                         </Typography>
                     )}
 

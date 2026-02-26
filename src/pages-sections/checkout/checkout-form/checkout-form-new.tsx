@@ -10,6 +10,12 @@ import type { OrderCreateRequest, CargoMethodSelection, OrderResource } from "@/
 import { OrderDraftSummary, PaymentFinalization } from "@/components/order";
 import { validateMobile, validateCustomerName, validateCargoSelections } from "@/utils/orderValidation";
 import { CardRoot } from "./styles";
+import { t } from "@/i18n/t";
+import { toEnglishNumber } from "@/utils/persian";
+
+function onlyDigits(value: string) {
+    return value.replace(/[^\d۰-۹]/g, "");
+}
 
 export default function CheckoutFormNew() {
     const router = useRouter();
@@ -32,7 +38,7 @@ export default function CheckoutFormNew() {
         if (!isLoading && !isAuthenticated) {
             router.replace("/");
         }
-    }, [isLoading, isAuthenticated]); // router لازم نیست
+    }, [isLoading, isAuthenticated, router]);
 
     // ✅ وقتی user بعداً لود شد، customerData را sync کن
     useEffect(() => {
@@ -40,7 +46,9 @@ export default function CheckoutFormNew() {
 
         setCustomerData((prev) => ({
             ...prev,
-            customer_name: user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : prev.customer_name,
+            customer_name:
+                user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : prev.customer_name,
+            // keep as-is for UI; we normalize on validate/submit
             customer_mobile: user.mobile || prev.customer_mobile,
             customer_email: user.email || prev.customer_email,
         }));
@@ -50,19 +58,23 @@ export default function CheckoutFormNew() {
     if (isLoading || !user) return null;
 
     const handleCreateOrder = async () => {
-        if (!validateCustomerName(customerData.customer_name)) {
-            alert("Name must be 1-60 characters");
+        const normalizedName = (customerData.customer_name || "").trim();
+        const normalizedMobile = toEnglishNumber(onlyDigits(customerData.customer_mobile || ""));
+        const normalizedEmail = (customerData.customer_email || "").trim();
+
+        if (!validateCustomerName(normalizedName)) {
+            alert(t("checkout.validation.nameLength")); // e.g. "نام باید بین ۱ تا ۶۰ کاراکتر باشد"
             return;
         }
-        if (!validateMobile(customerData.customer_mobile)) {
-            alert("Invalid mobile format (must be 9XXXXXXXXX)");
+        if (!validateMobile(normalizedMobile)) {
+            alert(t("checkout.validation.mobileFormat")); // e.g. "فرمت موبایل نامعتبر است"
             return;
         }
 
         const request: OrderCreateRequest = {
-            customer_name: customerData.customer_name,
-            customer_mobile: customerData.customer_mobile,
-            customer_email: customerData.customer_email || undefined,
+            customer_name: normalizedName,
+            customer_mobile: normalizedMobile,
+            customer_email: normalizedEmail || undefined,
         };
 
         const order = await createOrder(request);
@@ -88,7 +100,7 @@ export default function CheckoutFormNew() {
         if (!draftOrder) return;
 
         if (!validateCargoSelections(draftOrder.shipments, cargoSelections)) {
-            alert("Please select cargo method for all shipments");
+            alert(t("checkout.validation.selectCargoForAllShipments"));
             return;
         }
 
@@ -107,7 +119,7 @@ export default function CheckoutFormNew() {
         return (
             <CardRoot elevation={0}>
                 <Typography variant="h5" mb={2}>
-                    Customer Information
+                    {t("checkout.customerInformation")}
                 </Typography>
 
                 {createError && (
@@ -119,28 +131,39 @@ export default function CheckoutFormNew() {
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <input
                         type="text"
-                        placeholder="Full Name"
+                        placeholder={t("checkout.fullName")}
                         value={customerData.customer_name}
                         onChange={(e) => setCustomerData((prev) => ({ ...prev, customer_name: e.target.value }))}
                         style={{ padding: "12px", fontSize: "16px", border: "1px solid #ddd", borderRadius: "4px" }}
                     />
+
                     <input
                         type="text"
-                        placeholder="Mobile (9XXXXXXXXX)"
+                        placeholder={t("checkout.mobilePlaceholder")} // e.g. "موبایل (۰۹xxxxxxxxx)"
                         value={customerData.customer_mobile}
-                        onChange={(e) => setCustomerData((prev) => ({ ...prev, customer_mobile: e.target.value }))}
-                        style={{ padding: "12px", fontSize: "16px", border: "1px solid #ddd", borderRadius: "4px" }}
+                        onChange={(e) =>
+                            setCustomerData((prev) => ({ ...prev, customer_mobile: onlyDigits(e.target.value) }))
+                        }
+                        inputMode="numeric"
+                        style={{
+                            padding: "12px",
+                            fontSize: "16px",
+                            border: "1px solid #ddd",
+                            borderRadius: "4px",
+                            direction: "ltr",
+                        }}
                     />
+
                     <input
                         type="email"
-                        placeholder="Email (optional)"
+                        placeholder={t("checkout.emailOptional")}
                         value={customerData.customer_email}
                         onChange={(e) => setCustomerData((prev) => ({ ...prev, customer_email: e.target.value }))}
                         style={{ padding: "12px", fontSize: "16px", border: "1px solid #ddd", borderRadius: "4px" }}
                     />
 
                     <Button variant="contained" size="large" onClick={handleCreateOrder} disabled={creating}>
-                        {creating ? <CircularProgress size={24} /> : "Create Order"}
+                        {creating ? <CircularProgress size={24} /> : t("checkout.createOrder")}
                     </Button>
                 </Box>
             </CardRoot>
@@ -156,7 +179,11 @@ export default function CheckoutFormNew() {
                     </Alert>
                 )}
 
-                <OrderDraftSummary order={draftOrder} cargoSelections={cargoSelections} onCargoChange={handleCargoChange} />
+                <OrderDraftSummary
+                    order={draftOrder}
+                    cargoSelections={cargoSelections}
+                    onCargoChange={handleCargoChange}
+                />
 
                 <PaymentFinalization
                     orderCode={draftOrder.code}

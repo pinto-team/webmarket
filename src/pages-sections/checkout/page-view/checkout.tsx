@@ -17,6 +17,7 @@ import AddressDisplay from "../address-section/address-display";
 import AddressModal from "../address-section/address-modal";
 import ShipmentList from "../shipment-items/shipment-list";
 import CheckoutSummary from "../checkout-summery";
+import {toEnglishNumber} from "@/utils/persian";
 
 export default function CheckoutPageView() {
     const router = useRouter();
@@ -61,8 +62,7 @@ export default function CheckoutPageView() {
             const order = await orderService.createOrder({
                 address_id: selectedAddressId,
                 customer_name: selectedAddress?.title || "",
-                customer_mobile: selectedAddress?.mobile || "",
-            });
+                customer_mobile: selectedAddress?.mobile ? toEnglishNumber(selectedAddress.mobile) : "",            });
 
             if (order.gateways && order.gateways.length > 0) {
                 localStorage.setItem(
