@@ -26,8 +26,7 @@ type CartItem = CartItemResource;
 
 export default function MiniCart() {
     const router = useRouter();
-    const { cart, updateQuantity, removeItem } = useCart();
-
+    const { cart, updateQuantity, removeItem, closeMiniCart } = useCart();
     const cartLength = cart.length;
 
     const handleCartAmountChange = (amount: number, product: CartItem) => () => {
@@ -68,8 +67,10 @@ export default function MiniCart() {
                         color="primary"
                         variant="contained"
                         size="medium"
-                        component={Link}
-                        href="/checkout"
+                        onClick={() => {
+                            closeMiniCart();
+                            router.push("/checkout");
+                        }}
                         sx={{ mb: 1 }}
                     >
                         {t("cart.proceedToCheckout")}
@@ -80,8 +81,10 @@ export default function MiniCart() {
                         color="primary"
                         variant="outlined"
                         size="medium"
-                        component={Link}
-                        href="/cart"
+                        onClick={() => {
+                            closeMiniCart();
+                            router.push("/cart");
+                        }}
                     >
                         {t("cart.viewCart")}
                     </Button>
