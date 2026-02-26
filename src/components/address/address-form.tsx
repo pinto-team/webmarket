@@ -245,6 +245,12 @@ export default function AddressForm({
                         error={!!fieldErrors.mobile}
                         helperText={fieldErrors.mobile}
                         required
+                        slotProps={{
+                            htmlInput: {
+                                dir: "ltr",
+                                inputMode: "numeric",
+                            },
+                        }}
                     />
                 </Grid>
 
@@ -323,6 +329,13 @@ export default function AddressForm({
                         error={!!fieldErrors.postal}
                         helperText={fieldErrors.postal}
                         required
+                        slotProps={{
+                            htmlInput: {
+                                dir: "ltr",
+                                inputMode: "numeric",
+                                maxLength: 10,
+                            },
+                        }}
                     />
                 </Grid>
 
@@ -332,6 +345,12 @@ export default function AddressForm({
                         label={t("addresses.form.plaque")}
                         value={formData.codeStr || ""}
                         onChange={(e) => setFormData({ ...formData, codeStr: digitsUi(e.target.value) })}
+                        slotProps={{
+                            htmlInput: {
+                                dir: "ltr",
+                                inputMode: "numeric",
+                            },
+                        }}
                     />
                 </Grid>
 
@@ -341,6 +360,12 @@ export default function AddressForm({
                         label={t("addresses.form.floor")}
                         value={formData.floorStr || ""}
                         onChange={(e) => setFormData({ ...formData, floorStr: digitsUi(e.target.value) })}
+                        slotProps={{
+                            htmlInput: {
+                                dir: "ltr",
+                                inputMode: "numeric",
+                            },
+                        }}
                     />
                 </Grid>
 
@@ -350,6 +375,12 @@ export default function AddressForm({
                         label={t("addresses.form.unit")}
                         value={formData.roomStr || ""}
                         onChange={(e) => setFormData({ ...formData, roomStr: digitsUi(e.target.value) })}
+                        slotProps={{
+                            htmlInput: {
+                                dir: "ltr",
+                                inputMode: "numeric",
+                            },
+                        }}
                     />
                 </Grid>
             </Grid>
