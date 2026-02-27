@@ -3,7 +3,7 @@ import { RegionResource } from "@/types/region.types";
 export interface AddressResource {
   id: number;
   region: RegionResource;
-  label?: string;
+  label: string;
   title: string;
   mobile: string;
   district: string;

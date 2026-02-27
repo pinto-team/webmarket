@@ -44,7 +44,7 @@ export default function AddressDisplay({ address, onEdit }: AddressDisplayProps)
         `${address.region.title}${comma} ${address.district}${comma} ${address.street}` +
         `${floorPart}${unitPart}`;
 
-    const titleFa = address.title ? toPersianNumber(address.title) : "";
+    const titleFa = address.label ? toPersianNumber(address.label) : "";
     const fullAddressFa = toPersianNumber(fullAddressRaw);
 
     const postalFa = address.postal ? toPersianNumber(address.postal) : "";

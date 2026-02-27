@@ -57,19 +57,19 @@ export default function AddressListItem({ address, onUpdate, onEdit }: Props) {
                     {t("addresses.fields.title")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    {toPersianNumber(address.title)}
+                    {toPersianNumber(address.label)}
                 </Typography>
             </Box>
 
             <Box>
-                <Typography variant="body2" color="text.secondary" mb={0.5}>
+                <Typography fontWeight={500} variant="body1" mb={0.5}>
                     {t("addresses.fields.mobile")}
                 </Typography>
                 <Typography variant="body1">{mobileFa}</Typography>
             </Box>
 
             <Box>
-                <Typography variant="body2" color="text.secondary" mb={0.5}>
+                <Typography fontWeight={500} variant="body1" mb={0.5}>
                     {t("addresses.fields.address")}
                 </Typography>
                 <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
@@ -78,7 +78,7 @@ export default function AddressListItem({ address, onUpdate, onEdit }: Props) {
             </Box>
 
             <Box>
-                <Typography variant="body2" color="text.secondary" mb={0.5}>
+                <Typography fontWeight={500} variant="body1" mb={0.5}>
                     {t("addresses.fields.postal")}
                 </Typography>
                 <Typography variant="body1">{postalFa}</Typography>

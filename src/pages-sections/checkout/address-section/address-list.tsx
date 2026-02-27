@@ -33,6 +33,9 @@ export default function AddressList({
                 ]
                     .filter(Boolean)
                     .join(t("common.comma"));
+                const postalFa = address.postal ? toPersianNumber(address.postal) : "";
+                const mobileFa = address.mobile ? toPersianNumber(address.mobile) : "";
+                const pipe = t("common.pipe");
 
                 return (
                     <Box key={address.id}>
@@ -49,15 +52,15 @@ export default function AddressList({
                                 sx={{ cursor: "pointer" }}
                             >
                                 <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
-                                    {toPersianNumber(address.title)}
+                                    {toPersianNumber(address.label)}
                                 </Typography>
 
                                 <Typography variant="body2" color="text.secondary" mb={0.5}>
                                     {toPersianNumber(fullAddress)}
                                 </Typography>
 
-                                <Typography variant="caption" color="text.secondary">
-                                    {address.mobile ? toPersianNumber(address.mobile) : "-"}
+                                <Typography variant="body2" color="text.secondary">
+                                    {t("addresses.postalCode")}: {postalFa} {pipe} {t("addresses.phone")}: {mobileFa}
                                 </Typography>
                             </Box>
 
