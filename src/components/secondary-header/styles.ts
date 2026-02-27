@@ -51,6 +51,8 @@ export const StyledRoot = styled(Card, {
     height: CONTROL_HEIGHT, // ✅ 56
     display: "block",
     overflow: "unset",
+    paddingBlock: 48, // فاصله زیر ایتم ها
+
     borderRadius: "0px",
     position: "relative",
     ...(border && {
@@ -60,6 +62,7 @@ export const StyledRoot = styled(Card, {
 }));
 
 export const InnerContainer = styled(Container)(() => ({
+    height: "100%",
     gap: "1.5rem",
     display: "flex",
     alignItems: "center",

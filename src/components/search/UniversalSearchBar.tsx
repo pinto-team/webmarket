@@ -262,7 +262,6 @@ export default function UniversalSearchBar({ placeholder, size = "medium" }: Pro
             "& .MuiOutlinedInput-input": {
                 height: CONTROL_HEIGHT,
                 boxSizing: "border-box",
-                py: 0,
                 px: 4,
             },
 
