@@ -14,8 +14,6 @@ import type { UserResource } from "@/types/auth.types";
 import { t } from "@/i18n/t";
 import { formatPersianNumber, toPersianNumber } from "@/utils/persian";
 
-import ProductImage from "@/components/common/ProductImage";
-
 type Props = { user: UserResource };
 
 export default function UserAnalytics({ user }: Props) {
@@ -26,7 +24,6 @@ export default function UserAnalytics({ user }: Props) {
         `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
         user.username;
 
-    const fallbackAvatar = "/assets/images/avatars/001-man.svg";
     const balance = user.wallet?.balance || 0;
 
     const displayNameValue =
@@ -47,30 +44,16 @@ export default function UserAnalytics({ user }: Props) {
                         borderColor: "grey.100",
                     }}
                 >
-                    <Avatar variant="rounded" sx={{ height: 65, width: 65, bgcolor: "grey.100" }}>
-                        <ProductImage
-                            entity={user}
-                            alt={displayName || "user"}
-                            size="130x130"
-                            quality={75}
-                            fallback="placeholder"
-                            noWrapper
-                            style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                display: "block",
-                            }}
-                            // If proxy_url missing, ProductImage will go placeholder.
-                            // But for user avatar we prefer a deterministic local fallback:
-                            onError={(e) => {
-                                // allow ProductImage to handle first; if it still fails, set local fallback
-                                const img = e.currentTarget as HTMLImageElement;
-                                if (img.src.includes(fallbackAvatar)) return;
-                                img.src = fallbackAvatar;
-                            }}
-                        />
-                    </Avatar>
+
+                    <Avatar
+                        variant="circular"
+                        src="/assets/images/avatars/avatar.svg"
+                        alt={displayName || "user"}
+                        sx={{
+                            height: 56,
+                            width: 56,
+                        }}
+                    />
 
                     <FlexBetween flexWrap="wrap" flex={1}>
                         <div>
@@ -99,7 +82,6 @@ export default function UserAnalytics({ user }: Props) {
             </Grid>
 
             <Grid container spacing={3} size={{ md: 6, xs: 12 }}>
-                {/* بقیه فایل بدون تغییر */}
                 <Grid size={{ lg: 3, xs: 6 }}>
                     <Card
                         elevation={0}

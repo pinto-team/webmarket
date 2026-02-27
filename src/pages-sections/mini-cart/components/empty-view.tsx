@@ -1,16 +1,22 @@
 "use client";
 
 import { t } from "@/i18n/t";
-
-import Link from "next/link";
 import Image from "next/image";
-
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-
 import FlexBox from "components/flex-box/flex-box";
+import { useRouter } from "next/navigation";
+import { useCart } from "@/contexts/CartContext";
 
 export default function EmptyCartView() {
+    const router = useRouter();
+    const { closeMiniCart } = useCart();
+
+    const handleContinueShopping = () => {
+        closeMiniCart();
+        router.push("/products");
+    };
+
     return (
         <FlexBox
             alignItems="center"
@@ -29,20 +35,14 @@ export default function EmptyCartView() {
                 variant="body1"
                 fontSize={16}
                 color="text.secondary"
-                sx={{
-                    my: 2,
-                    maxWidth: 200,
-                    textAlign: "center",
-                }}
+                sx={{ my: 2, maxWidth: 200, textAlign: "center" }}
             >
                 {t("cart.emptyTitle")}
             </Typography>
 
-            <Link href="/products/search">
-                <Button variant="contained" color="primary">
-                    {t("cart.continueShopping")}
-                </Button>
-            </Link>
+            <Button variant="contained" color="primary" onClick={handleContinueShopping}>
+                {t("cart.continueShopping")}
+            </Button>
         </FlexBox>
     );
 }

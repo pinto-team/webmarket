@@ -1,35 +1,33 @@
-import { Fragment, useMemo } from "react";
+import { Fragment } from "react";
 
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
 
 import ProfileEditForm from "../edit-form";
-import ProfilePicUpload from "../profile-pic-upload";
 import PasswordChangeForm from "../password-change-form";
 import ProfileOptionsForm from "../profile-options-form";
 import DashboardHeader from "../../dashboard-header";
 
 import type { UserResource } from "@/types/auth.types";
 import { t } from "@/i18n/t";
-import { getServerImageUrl } from "@/utils/imageUtils";
 
 type Props = { user: UserResource };
 
 export function ProfileEditPageView({ user }: Props) {
-    const fallbackAvatar = "/assets/images/avatars/001-man.svg";
-
-    const avatarUrl = useMemo(() => {
-        // ✅ proxy-only; if missing -> fallback local svg
-        const url = getServerImageUrl(user, "200x200", 75);
-        return url && !url.includes("placeholder") ? url : fallbackAvatar;
-    }, [user]);
-
     return (
         <Fragment>
             <DashboardHeader href="/profile" title={t("profile.editProfile")} />
 
             <Card sx={{ padding: { xs: 3, sm: 4 }, mb: 3 }}>
-                <ProfilePicUpload image={avatarUrl} />
+                <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+                    <Avatar
+                        src="/assets/images/avatars/avatar.svg"
+                        alt="user"
+                        sx={{ width: 100, height: 100 }}
+                    />
+                </Box>
 
                 <Typography variant="h6" mb={2}>
                     {t("profile.personalInfo")}

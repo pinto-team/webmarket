@@ -78,7 +78,7 @@ export default function DashboardHeader({ title, href, Icon, buttonText, buttonI
           </IconButton>
         )}
 
-        <Typography noWrap variant="h2">
+        <Typography noWrap variant="h3">
           {title}
         </Typography>
 
