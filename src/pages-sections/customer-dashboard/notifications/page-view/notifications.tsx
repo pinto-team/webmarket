@@ -15,7 +15,6 @@ import Pagination from "../../pagination";
 
 import { getNotifications, updateNotification } from "@/services/notification.service";
 import type { NotificationResource } from "@/types/notification.types";
-import { format } from "date-fns/format";
 import { t } from "@/i18n/t";
 import {formatPersianDateTime} from "@/utils/persian";
 
@@ -44,13 +43,13 @@ export function NotificationsPageView() {
     }, [page]);
 
     useEffect(() => {
-        fetchNotifications();
+        void fetchNotifications();
     }, [fetchNotifications]);
 
     const handleMarkAsRead = async (id: number) => {
         try {
             await updateNotification(id, { status: 1 });
-            fetchNotifications();
+            void fetchNotifications();
         } catch {
             // silent
         }
@@ -107,8 +106,7 @@ export function NotificationsPageView() {
                         mb: 2,
                         border: "1px solid",
                         borderColor: "grey.100",
-                        bgcolor: notification.status === 0 ? "primary.50" : "transparent",
-                    }}
+                        bgcolor: notification.status === 0 ? "primary.50" : "background.paper",                    }}
                 >
                     <Box display="flex" justifyContent="space-between" alignItems="start">
                         <Box flex={1}>

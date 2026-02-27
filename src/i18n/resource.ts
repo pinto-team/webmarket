@@ -520,6 +520,7 @@ export const resources = {
                 yourReview: "نظر شما"
             },
             products: {
+                unitPrice: "قیمت واحد",
                 addToCart: "افزودن به سبد خرید",
                 addToWishlist: "افزودن به علاقه‌مندی‌ها",
                 bestSelling: "پرفروش‌ترین",
