@@ -8,17 +8,25 @@ import { currency } from "lib";
 
 import type { OrderResource } from "@/types/order.types";
 import { t } from "@/i18n/t";
+import {toPersianNumber} from "@/utils/persian";
 
 type Props = { order: OrderResource };
 
 export default function OrderSummery({ order }: Props) {
     const address = order.customer_address;
 
-    const addressText = address
-        ? [address.region?.title, address.district, address.street].filter(Boolean).join(" - ")
-        : t("common.unknown");
+    const fullAddress = [
+        address.region?.title,
+        address.district,
+        address.street,
+    ]
+        .filter(Boolean)
+        .join(t("common.comma"));
 
     const currencyLabel = t("products.currencyLabel"); // "تومان"
+    const postalFa = address.postal ? toPersianNumber(address.postal) : "";
+    const mobileFa = address.mobile ? toPersianNumber(address.mobile) : "";
+    const pipe = t("common.pipe");
 
     return (
         <Grid container spacing={3}>
@@ -35,11 +43,18 @@ export default function OrderSummery({ order }: Props) {
                         {t("checkout.shippingAddress")}
                     </Typography>
 
-                    <Typography variant="body1">{addressText}</Typography>
-
-                    <Typography variant="body2" color="text.secondary" mt={1}>
-                        {order.customer_name} - {order.customer_mobile}
+                    <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
+                        {toPersianNumber(address.label)}
                     </Typography>
+
+                    <Typography variant="body2" color="text.secondary" mb={0.5}>
+                        {toPersianNumber(fullAddress)}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary">
+                        {order.customer_name} {pipe}  {t("addresses.phone")}: {mobileFa}  {pipe} {t("addresses.postalCode")}: {postalFa}
+                    </Typography>
+
                 </Card>
             </Grid>
 

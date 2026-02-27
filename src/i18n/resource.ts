@@ -55,6 +55,8 @@ export const resources = {
                 title: "آدرس‌های من"
             },
             auth: {
+                mobilePlaceholder: "مثال: ۰۹۱۲۳۴۵۶۷۸۹",
+                verificationCodePlaceholder: "کد ارسال‌شده را وارد کنید",
                 nationalIdPlaceholder: "مثال: ۱۲۳۴۵۶۷۸۹۰",
                 passwordPlaceholder: "حداقل ۶ کاراکتر",
                 alreadyHaveAccount: "حساب کاربری دارید؟",
@@ -144,6 +146,7 @@ export const resources = {
                 subcategories: "زیردسته‌ها"
             },
             checkout: {
+                mobilePlaceholder: "مثال: ۰۹۱۲۳۴۵۶۷۸۹",
                 items: "عدد کالا",
                 billingAddress: "آدرس صورت‌حساب",
                 continueToPayment: "ادامه به پرداخت",

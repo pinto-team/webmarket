@@ -3,31 +3,45 @@
 import Typography from "@mui/material/Typography";
 import FlexRowCenter from "components/flex-box/flex-row-center";
 
-import { getServerImageUrl } from "@/utils/imageUtils";
 import { t } from "@/i18n/t";
-import {useShopData} from "@/contexts/ShopDataProvider";
+import { useShopData } from "@/contexts/ShopDataProvider";
+import { getLogoImageUrl } from "@/utils/imageUtils";
 
-export default function LogoWithTitle() {
+interface LogoWithTitleProps {
+    hideTitle?: boolean;
+    height?: number;
+    gap?: number;
+}
+
+export default function LogoWithTitle({
+                                          hideTitle = false,
+                                          height = 44,
+                                          gap = 4,
+                                      }: LogoWithTitleProps) {
     const { shopData } = useShopData();
 
     const fallbackLogo = "/assets/images/logo2.svg";
 
-    const logoUrl =
-        shopData?.header_logo
-            ? getServerImageUrl(shopData.header_logo, "90x90")
-            : fallbackLogo;
-
     const title = shopData?.title || t("common.welcome");
 
+    const logoUrl =
+        shopData?.header_logo
+            ? getLogoImageUrl(shopData.header_logo, "640x240", 90)
+            : fallbackLogo;
+
     return (
-        <FlexRowCenter flexDirection="column" gap={2} mb={4}>
+        <FlexRowCenter flexDirection="column" gap={gap} mb={4}>
             <img
-                width={90}
-                height={90}
                 src={logoUrl}
                 alt={title}
-                style={{ objectFit: "contain", display: "block" }}
                 loading="lazy"
+                style={{
+                    height,
+                    width: "auto",
+                    maxWidth: "100%",
+                    objectFit: "contain",
+                    display: "block",
+                }}
                 onError={(e) => {
                     const el = e.currentTarget as HTMLImageElement;
                     if (el.src.includes(fallbackLogo)) return;
@@ -35,9 +49,11 @@ export default function LogoWithTitle() {
                 }}
             />
 
-            <Typography fontWeight={600} variant="h5">
-                {title}
-            </Typography>
+            {!hideTitle && (
+                <Typography fontWeight={600} variant="h5">
+                    {title}
+                </Typography>
+            )}
         </FlexRowCenter>
     );
 }

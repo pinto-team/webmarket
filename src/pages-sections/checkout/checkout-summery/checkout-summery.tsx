@@ -34,7 +34,6 @@ export default function CheckoutSummary({ onProceed, loading }: CheckoutSummaryP
             })}
         >
             <ListItem title={t("checkout.subtotal")} value={total} currencyLabel={currencyLabel} />
-            <ListItem title={t("checkout.shipping")} value={0} currencyLabel={currencyLabel} />
             <ListItem title={t("checkout.tax")} value={0} currencyLabel={currencyLabel} />
             <ListItem title={t("checkout.discount")} value={0} currencyLabel={currencyLabel} />
 

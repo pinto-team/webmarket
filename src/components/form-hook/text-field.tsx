@@ -1,36 +1,43 @@
-import { useFormContext, Controller } from "react-hook-form";
-import MuiTextField, { TextFieldProps } from "@mui/material/TextField";
+"use client";
 
-// ==============================================================
-type Props = TextFieldProps & { name: string };
-// ==============================================================
+import * as React from "react";
+import MuiTextField, { TextFieldProps as MuiTextFieldProps } from "@mui/material/TextField";
+import { Controller, useFormContext } from "react-hook-form";
 
-export default function TextField({ name, helperText, type, ...other }: Props) {
-  const { control } = useFormContext();
+type RHFTextFieldProps = Omit<MuiTextFieldProps, "name"> & {
+    name: string;
+};
 
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState: { error } }) => (
-        <MuiTextField
-          {...field}
-          type={type}
-          value={field.value}
-          onChange={field.onChange}
-          //   value={type === "number" && field.value === 0 ? "" : field.value}
-          //   onChange={(event) => {
-          //     if (type === "number") {
-          //       field.onChange(Number(event.target.value));
-          //     } else {
-          //       field.onChange(event.target.value);
-          //     }
-          //   }}
-          error={Boolean(error)}
-          helperText={error?.message || helperText}
-          {...other}
+export default function TextField({ name, helperText, ...other }: RHFTextFieldProps) {
+    const { control } = useFormContext();
+
+    return (
+        <Controller
+            name={name}
+            control={control}
+            render={({ field, fieldState }) => {
+                const errorText = fieldState.error?.message;
+
+                return (
+                    <MuiTextField
+                        {...other}
+                        // ✅ اولویت: props.value (برای نمایش سفارشی مثل فارسی)
+                        value={other.value ?? field.value ?? ""}
+                        onChange={(e) => {
+                            // اگر خود صفحه onChange داده بود، همون اجرا بشه
+                            if (other.onChange) other.onChange(e as any);
+                            else field.onChange(e);
+                        }}
+                        onBlur={(e) => {
+                            if (other.onBlur) other.onBlur(e as any);
+                            field.onBlur();
+                        }}
+                        inputRef={field.ref}
+                        error={!!errorText || other.error}
+                        helperText={errorText ?? helperText}
+                    />
+                );
+            }}
         />
-      )}
-    />
-  );
+    );
 }
